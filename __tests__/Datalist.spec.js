@@ -4,19 +4,19 @@ import Datalist from '../components/Datalist'
 
 describe('Datalist', () => {
     const dlInfo = {
-                    label: "Organizations:",
-                    datalistId: "organizations",
-                    inputId: "organization",
-                    optionValues: ["Hogwarts", "Krusty Krab", "McDonalds"], // dummy
-                    labelTestId: "datalist-label-orgs",
-                    containerTestId: "datalist-container-orgs",
-                    datalistTestId: "datalist-datalist-orgs"
-                   }
+        label: "Organizations:",
+        datalistId: "organizations",
+        inputId: "organization",
+        optionValues: ["Hogwarts", "Krusty Krab", "McDonalds"], // dummy
+        labelTestId: "datalist-label-test",
+        containerTestId: "datalist-container-test",
+        datalistTestId: "datalist-datalist-test"
+    }
 
     render(<Datalist info={ dlInfo } />)
-    const datalist = screen.getByTestId("datalist-datalist-orgs")
-    const container = screen.getByTestId("datalist-container-orgs")
-    const label = screen.getByTestId("datalist-label-orgs")
+    const datalist = screen.getByTestId("datalist-datalist-test")
+    const container = screen.getByTestId("datalist-container-test")
+    const label = screen.getByTestId("datalist-label-test")
     const input = screen.getByLabelText("Organizations:")
 
     test('renders a div containing label, input, datalist', () => {
