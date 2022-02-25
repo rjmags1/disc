@@ -24,7 +24,7 @@ describe('TextInput', () => {
 
     test('input is required', () => {
         render(<TextInput info={ textInputInfo }/>)
-        expect(screen.getByLabelText("test-label")).toBeRequired()
+        expect(screen.getByRole("textbox")).toBeRequired()
     })
 
     test('handleChange callback on change', () => {
