@@ -3,32 +3,30 @@ import { render, screen } from '@testing-library/react'
 import Datalist from '../components/Datalist'
 
 describe('Datalist', () => {
-    const dlInfo = {
+    const datalistInfo = {
         label: "test-label",
         datalistId: "test",
         inputId: "test",
         optionValues: ["Hogwarts", "Krusty Krab", "McDonalds"],
-        labelTestId: "datalist-label-test",
         containerTestId: "datalist-container-test",
         datalistTestId: "datalist-datalist-test"
     }
 
-    render(<Datalist info={ dlInfo } />)
-    const datalist = screen.getByTestId("datalist-datalist-test")
-    const container = screen.getByTestId("datalist-container-test")
-    const label = screen.getByTestId("datalist-label-test")
-    const input = screen.getByLabelText("test-label")
-
     test('renders a div containing label, input, datalist', () => {
-        expect(container).toBeInTheDocument()
-        expect(container.children.length).toEqual(3) // label, input, datalist
-        expect(label).toBeInTheDocument()
-        expect(input).toBeInTheDocument()
-        expect(datalist).toBeInTheDocument()
+        render(<Datalist info={ datalistInfo } />)
+        expect(screen.getByTestId("datalist-container-test")).toBeInTheDocument()
+        expect(screen.getByLabelText("test-label")).toBeInTheDocument()
+        expect(screen.getByTestId("datalist-datalist-test")).toBeInTheDocument()
     })
 
-    test('datalist renders all options and displays empty str on load', () => {
-        expect(datalist.children.length).toEqual(dlInfo.optionValues.length)
-        expect(input.value).toEqual("")
+    test('renders all options and displays empty str on load', () => {
+        render(<Datalist info={ datalistInfo } />)
+        expect(screen.getByTestId("datalist-datalist-test").)
+    })
+
+    test('required input', () => {
+    })
+
+    test('handleChange callback on change or option select;', () => {
     })
 })
