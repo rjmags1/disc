@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react'
 import Datalist from '../components/Datalist'
 
 describe('Datalist', () => {
-    const mockHandleChange = jest.fn()
     const dlInfo = {
                     label: "Organizations:",
                     datalistId: "organizations",
@@ -14,7 +13,7 @@ describe('Datalist', () => {
                     datalistTestId: "datalist-datalist-orgs"
                    }
 
-    render(<Datalist info={ dlInfo } handleChange={ mockHandleChange } />)
+    render(<Datalist info={ dlInfo } />)
     const datalist = screen.getByTestId("datalist-datalist-orgs")
     const container = screen.getByTestId("datalist-container-orgs")
     const label = screen.getByTestId("datalist-label-orgs")
