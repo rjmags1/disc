@@ -1,17 +1,19 @@
 function Datalist({ handleChange, info }) {
-    const options = info.optionValues.map(val => 
-        <option value={ val } key={ val }>{ val }</option>
+    const { optionValues, containerTestId, inputId,
+            labelTestId, label, datalistId, datalistTestId } = info
+    const options = optionValues.map((val, i) => 
+        <option value={ val } key={ `${val}-${i}` }>{ val }</option>
     )
     
     return (
-        <div data-testid={ info.containerTestId }>
-            <label htmlFor={ info.inputId } data-testid={ info.labelTestId }>
-                { info.label } 
+        <div data-testid={ containerTestId }>
+            <label htmlFor={ inputId } data-testid={ labelTestId }>
+                { label } 
             </label>
-            <input list={ info.datalistId } id={ info.inputId }
-                name={ info.inputId } onChange={ handleChange } />
-            <datalist id={ info.datalistId } 
-                data-testid={ info.datalistTestId }>
+            <input list={ datalistId } id={ inputId }
+                name={ inputId } onChange={ handleChange } />
+            <datalist id={ datalistId } 
+                data-testid={ datalistTestId }>
                 { options }
             </datalist>
         </div>
