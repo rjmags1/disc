@@ -1,34 +1,36 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 
 import TextInput from '../components/TextInput'
 
 describe('TextInput', () => {
     const textInputInfo = {
         label: "test-label",
-        placeholderText: "test",
         inputId: "test-id",
-        required: false,
-        labelTestId: "text-input-label-test",
         containerTestId: "text-input-container-test",
     }
 
-    render(<TextInput info={ textInputInfo }/>)
-    const container = screen.getByTestId("text-input-container-test")
-    const label = screen.getByTestId("text-input-label-test")
-    const input = screen.getByLabelText("test-label")
-
     test('renders a div containing label and text input', () => {
-        expect(container).toBeInTheDocument()
-        expect(container.children.length).toEqual(2) // label, input
-        expect(label).toBeInTheDocument()
-        expect(input).toBeInTheDocument()
+        render(<TextInput info={ textInputInfo }/>)
+        expect(screen.getByLabelText("test-label")).toBeInTheDocument()
+        expect(screen.getByRole("textbox")).toBeInTheDocument()
+        expect(screen.getByTestId("text-input-container-test").children.length).toEqual(2)
     })
 
-    test('input renders with default text', () => {
-        expect(input.placeholder).toEqual("test")
+    test('input renders with empty string default value', () => {
+        render(<TextInput info={ textInputInfo }/>)
+        expect(screen.getByRole("textbox")).toHaveValue("")
     })
 
     test('input is required', () => {
-        expect(input.required).toEqual(textInputInfo.required)
+        render(<TextInput info={ textInputInfo }/>)
+        expect(screen.getByLabelText("test-label")).toBeRequired()
+    })
+
+    test('handleChange callback on change', () => {
+        const mockCallback = jest.fn()
+        render(<TextInput info={ textInputInfo } handleChange={ mockCallback }/>)
+        userEvent.type(screen.getByRole("textbox"), "four")
+        expect(mockCallback).toHaveBeenCalledTimes(4)
     })
 })
