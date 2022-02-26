@@ -7,9 +7,7 @@ function Datalist({ handleChange, info }) {
     )
     return (
         <div data-testid={ containerTestId }>
-            <label htmlFor={ inputId }>
-                { label } 
-            </label>
+            <label htmlFor={ inputId }>{ label } </label>
             <input list={ datalistId } id={ inputId }
                 name={ inputId } onChange={ handleChange } required />
             <datalist id={ datalistId } 
