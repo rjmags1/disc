@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import TextInput from '../components/TextInput'
+import LoginTextInput from '../components/LoginTextInput'
 
-describe('TextInput', () => {
+describe('LoginTextInput', () => {
     const textInputInfo = {
         label: "test-label",
         inputId: "test-id",
@@ -11,25 +11,25 @@ describe('TextInput', () => {
     }
 
     test('renders a div containing label and text input', () => {
-        render(<TextInput info={ textInputInfo }/>)
+        render(<LoginTextInput info={ textInputInfo }/>)
         expect(screen.getByLabelText("test-label")).toBeInTheDocument()
         expect(screen.getByRole("textbox")).toBeInTheDocument()
         expect(screen.getByTestId("text-input-container-test").children.length).toEqual(2)
     })
 
     test('input renders with empty string default value', () => {
-        render(<TextInput info={ textInputInfo }/>)
+        render(<LoginTextInput info={ textInputInfo }/>)
         expect(screen.getByRole("textbox")).toHaveValue("")
     })
 
     test('input is required', () => {
-        render(<TextInput info={ textInputInfo }/>)
+        render(<LoginTextInput info={ textInputInfo }/>)
         expect(screen.getByRole("textbox")).toBeRequired()
     })
 
     test('handleChange callback on change', () => {
         const mockCallback = jest.fn()
-        render(<TextInput info={ textInputInfo } handleChange={ mockCallback }/>)
+        render(<LoginTextInput info={ textInputInfo } handleChange={ mockCallback }/>)
         userEvent.type(screen.getByRole("textbox"), "four")
         expect(mockCallback).toHaveBeenCalledTimes(4)
     })

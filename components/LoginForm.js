@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import Datalist from './Datalist'
-import TextInput from './TextInput'
+import LoginDatalist from './LoginDatalist'
+import LoginTextInput from './LoginTextInput'
 
 function LoginForm({ validate }) {
     const [org, setOrg] = useState("")
@@ -45,14 +45,15 @@ function LoginForm({ validate }) {
     }
 
     return (
-        <form onSubmit={ handleSubmit } name="login-form">
-            <Datalist info={ orgsDlInfo }
+        <form onSubmit={ handleSubmit } name="login-form" className="mt-6">
+            <LoginDatalist info={ orgsDlInfo }
                 handleChange={ e => setOrg(e.target.value) } />
-            <TextInput info={ emailTextInputInfo } 
+            <LoginTextInput info={ emailTextInputInfo } 
                 handleChange={ e => setEmail(e.target.value) } />
-            <TextInput info={ passTextInputInfo } 
+            <LoginTextInput info={ passTextInputInfo } 
                 handleChange={ e => setPassword(e.target.value) } />
-            <input type="submit" value="Submit" />
+            <input type="submit" value="Submit" 
+                className="w-full bg-bright-blue rounded-md h-12 mt-4 hover:bg-sky-700"/>
         </form>
     )
 }
