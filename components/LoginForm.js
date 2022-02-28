@@ -45,7 +45,7 @@ function LoginForm({ validate }) {
     }
 
     return (
-        <form onSubmit={ handleSubmit } name="login-form" className="mt-6">
+        <form onSubmit={ handleSubmit } name="login-form" className="mt-3">
             <LoginDatalist info={ orgsDlInfo }
                 handleChange={ e => setOrg(e.target.value) } />
             <LoginTextInput info={ emailTextInputInfo } 
