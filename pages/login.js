@@ -1,4 +1,4 @@
-import LoginFormWithValidation from "../components/LoginFormWithValidation"
+import LoginFormWithValidation from "../components/login/LoginFormWithValidation"
 import Image from 'next/image'
 
 function Login() {

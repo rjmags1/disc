@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 
-import InvalidLoginMessage from '../components/InvalidLoginMessage'
+import InvalidLoginMessage from '../../components/login/InvalidLoginMessage'
 
 describe('InvalidLoginMessage', () => {
     test('renders div with invalid login fields message', () => {

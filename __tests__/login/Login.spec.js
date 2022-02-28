@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react"
-import Login from "../pages/login.js"
+import Login from "../../pages/login.js"
 
 describe('Login', () => {
     test('renders div containing logo and LoginFormWithValidation', () => {

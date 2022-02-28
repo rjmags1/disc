@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import LoginFormWithValidation from '../components/LoginFormWithValidation'
+import LoginFormWithValidation from '../../components/login/LoginFormWithValidation'
 
 const MAX_EMAIL_SUFFIX_LENGTH = 255
 const MAX_EMAIL_PREFIX_LENGTH = 64

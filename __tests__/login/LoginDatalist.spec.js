@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import LoginDatalist from '../components/LoginDatalist'
+import LoginDatalist from '../../components/login/LoginDatalist'
 
 describe('LoginDatalist', () => {
     const datalistInfo = {
