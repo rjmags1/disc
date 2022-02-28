@@ -25,7 +25,7 @@ function LoginFormWithValidation() {
     }
 
     return (
-        <div data-testid="login-form-val-container" className="max-w-sm">
+        <div data-testid="login-form-val-container" className="w-60 sm:w-80">
             { showInvalidMessage && <InvalidLoginMessage />}
             <LoginForm validate={ emailPasswordValidator }/>
         </div>
