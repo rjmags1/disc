@@ -11,6 +11,5 @@ describe('Navbar', () => {
         expect(screen.getByTestId("notifications-button-container")).toBeInTheDocument()
         expect(screen.getByTestId("logo-link-container")).toBeInTheDocument()
         expect(screen.getByTestId("home-button-container")).toBeInTheDocument()
-        screen.debug()
     })
 })

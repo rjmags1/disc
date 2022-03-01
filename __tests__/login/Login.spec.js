@@ -9,4 +9,9 @@ describe('Login', () => {
         expect(screen.getByTestId("login-form-val-container")).toBeInTheDocument()
         expect(screen.getByRole("img")).toBeInTheDocument()
     })
+
+    test('login page does not render navbar', () => {
+        render(<Login />)
+        expect(screen.queryByRole("navigation")).toBeNull()
+    })
 })
