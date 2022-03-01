@@ -5,10 +5,11 @@ import NotificationsButton from './NotificationsButton'
 import ProfileButton from './ProfileButton'
 
 function Navbar({ pageName }) {
+    console.log(pageName)
     return (
-        <nav>
+        <nav className='h-9 sm:h-12 flex flex-row bg-purple items-center px-2'>
             <LogoLink/>
-            <PageHeader page={ pageName }/>
+            <PageHeader pageName={ pageName }/>
             <HomeButton />
             <NotificationsButton />
             <ProfileButton />

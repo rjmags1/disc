@@ -1,10 +1,11 @@
 import Navbar from './Navbar'
 
-function Layout({ children }) {
+function Layout({ children, pageName }) {
+    console.log(pageName)
     return (
         <>
-            <Navbar />
-            <main>{ children }</main>
+            <Navbar pageName={ pageName }/>
+            <main >{ children }</main>
         </>
     )
 }

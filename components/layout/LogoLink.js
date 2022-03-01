@@ -3,9 +3,11 @@ import Link from 'next/link'
 
 function LogoLink() {
     return (
-        <div data-testid="logo-link-container">
+        <div data-testid="logo-link-container" className="p-1 sm:p-3">
             <Link href="/">
-                <a><Image src="/logo.png" width="30" height="30"/></a>
+                <a className='text-white text-lg font-mono'>
+                    <em><strong>disc</strong></em>
+                </a>
             </Link>
         </div>
     )
