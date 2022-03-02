@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import ProfileButton from '../../components/layout/ProfileButton'
+import Navbar from '../../components/layout/Navbar'
 
 describe('ProfileButton', () => {
     test('renders div containing profile image and dropdown arrow', () => {
@@ -29,5 +30,10 @@ describe('ProfileButton', () => {
     })
 
     test('if dropdown showing, click outside removes dropdown', () => {
+        render(<Navbar />)
+        userEvent.click(screen.getByTestId("profile-button-container"))
+        expect(screen.getByTestId("profile-dropdown-container")).toBeInTheDocument()
+        userEvent.click(screen.getByTestId("logo-link-container")) // click outside dropdown
+        expect(screen.queryByTestId("profile-dropdown-container")).toBeNull()
     })
 })
