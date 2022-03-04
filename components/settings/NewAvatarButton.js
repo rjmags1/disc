@@ -1,6 +1,6 @@
 import useState from 'react'
 
-import FailedUploadMessage from './FailedUploadMessage'
+import ImageFailedUploadMessage from './ImageFailedUploadMessage'
 
 function NewAvatarButton({ handleNewSrc }) {
     //const [showFailedUploadMessage, setShowFailedUploadMessage] = useState(false)

@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react'
 
-import FailedUploadMessage from '../../components/settings/FailedUploadMessage'
+import ImageFailedUploadMessage from '../../components/settings/ImageFailedUploadMessage'
 
 describe('failed upload message', () => {
     test('renders a div containing fail upload alert text', () => {
-        render(<FailedUploadMessage />)
+        render(<ImageFailedUploadMessage />)
         expect(screen.getByTestId("failed-upload-message-container")).toBeInTheDocument()
         expect(screen.getByText(/upload/gi)).toBeInTheDocument()
         expect(screen.getByText(/failed/gi)).toBeInTheDocument()
