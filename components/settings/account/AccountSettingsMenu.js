@@ -9,7 +9,7 @@ function AccountSettingsMenu() {
     const [primaryEmail, setPrimaryEmail] = useState("")
     const [avatarSrc, setAvatarSrc] = useState("/profile-button-img.png")
 
-    let name;
+    let name
     useEffect(() => {
         // client side (useEffect) fetch user account settings
         // then rel. setState calls in useEffect after fetch
