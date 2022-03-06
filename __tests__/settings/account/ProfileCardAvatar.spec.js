@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 
-import ProfileCardAvatar from '../../components/settings/ProfileCardAvatar'
+import ProfileCardAvatar from '../../../components/settings/account/ProfileCardAvatar'
 
 describe('ProfileCardAvatar', () => {
     test('renders div containing avatar and new pic button', () => {

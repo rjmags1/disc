@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 
-import NewAvatarButton from '../../components/settings/NewAvatarButton'
+import NewAvatarButton from '../../../components/settings/account/NewAvatarButton'
 
 describe('NewAvatarButton', () => {
     test('renders div containing file input', () => {

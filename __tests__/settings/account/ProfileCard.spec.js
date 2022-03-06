@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 
-import ProfileCard from '../../components/settings/ProfileCard'
+import ProfileCard from '../../../components/settings/account/ProfileCard'
 
 describe('ProfileCard', () => {
     test('renders a div containing prof. card. avatar and 2 headers', () => {
