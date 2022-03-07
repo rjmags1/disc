@@ -25,7 +25,8 @@ function AccountSettingsMenu() {
     }
 
     return  (
-        <div data-testid="account-menu-container">
+        <div data-testid="account-menu-container"
+            className="flex-auto min-w-fit">
             <ProfileCard name={ name } email={ primaryEmail } avatarSrc={ avatarSrc } handleNewSrc={ setAvatarSrc }/>
             <AccountEmailSection primary={ primaryEmail } emails={ emails } updateDisplayedEmails={ showNewEmail } />
             <AccountPasswordSection />

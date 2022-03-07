@@ -5,6 +5,15 @@
         @apply p-0;
         @apply box-border;
     }
+
+    body {
+        @apply h-screen;
+        @apply overflow-hidden;
+    }
+
+    #__next {
+        @apply h-full;
+    }
 }
 @tailwind components;
 @tailwind utilities;

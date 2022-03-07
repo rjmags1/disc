@@ -9,8 +9,9 @@ function Page() {
 Page.getLayout = function getLayout(page) {
     return (
         <Layout>
-            <SettingsLayout />
-            { page }
+            <SettingsLayout>
+                { page }
+            </SettingsLayout> 
         </Layout>
     )
 }

@@ -4,7 +4,8 @@ function Layout({ children }) {
     return (
         <>
             <Navbar />
-            <main >{ children }</main>
+            <div className="h-9 sm:h-12"></div>
+            <main className="h-full top-9">{ children }</main>
         </>
     )
 }

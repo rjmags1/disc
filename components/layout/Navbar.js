@@ -6,7 +6,8 @@ import ProfileButton from './ProfileButton'
 
 function Navbar({ pageName }) {
     return (
-        <nav className='h-9 sm:h-12 flex flex-row bg-purple items-center px-2'>
+        <nav className='h-9 sm:h-12 flex flex-row 
+            bg-purple items-center px-2 fixed w-full'>
             <LogoLink/>
             <PageHeader pageName={ pageName }/>
             <HomeButton />
