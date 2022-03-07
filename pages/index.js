@@ -1,11 +1,13 @@
-import Navbar from "../components/layout/Navbar"
+import Layout from '../components/layout/Layout'
 
-function Dashboard() {
+function Page() {
     return <div>Dashboard</div>
 }
 
 Page.getLayout = function getLayout(page) {
-    return <Navbar>{ page }</Navbar>
+    return (
+        <Layout>{ page }</Layout>
+    )
 }
 
-export default Dashboard
+export default Page

@@ -1,7 +1,7 @@
 import LoginFormWithValidation from "../components/login/LoginFormWithValidation"
 import Image from 'next/image'
 
-function Login() {
+function Page() {
     return (
         <div data-testid="login-page-container" 
             className="w-screen h-screen flex justify-center
@@ -12,4 +12,4 @@ function Login() {
     )
 }
 
-export default Login
+export default Page
