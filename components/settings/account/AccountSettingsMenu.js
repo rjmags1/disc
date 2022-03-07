@@ -15,7 +15,7 @@ function AccountSettingsMenu() {
         // then rel. setState calls in useEffect after fetch
         // dummy for now
         name = "dummy-name"
-        setAvatarSrc("/dummy-src")
+        //setAvatarSrc("/dummy-src")
         setPrimaryEmail("dummy-email-0")
         setEmails(["dummy-email-0", "dummy-email-1", "dummy-email-2"])
     }, [])
