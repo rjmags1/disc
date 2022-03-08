@@ -4,9 +4,16 @@ function AccountPasswordSection() {
     }
 
     return (
-        <div data-testid="account-password-section-container">
-            <h2>Password</h2>
-            <button onClick={ handleClick }>Reset Password</button>
+        <div data-testid="account-password-section-container"
+            className="mt-10">
+            <div className="ml-4">
+                <h2 className="text-2xl">Password</h2>
+                <button onClick={ handleClick }
+                    className="mt-2 bg-red-600 border border-white rounded
+                        p-1 hover:cursor-pointer hover:bg-black px-4">
+                    Reset Password
+                </button>
+            </div>
         </div>
     )
 }
