@@ -50,23 +50,35 @@ function NotificationsMenu() {
     }
 
     return (
-        <div data-testid="notifications-menu-container">
-            <h2>Manage Notification Emails</h2>
-            <EmailSetting label="Email me when there is activity in a thread I'm watching"
-                status={ watchedThreadActivity } 
-                handleChange={ () => setWatchedThreadActivity(!watchedThreadActivity) } />
-            <EmailSetting label="Email me when someone replies to my thread"
-                status={ myThreadReply } 
-                handleChange={ () => setMyThreadReply(!myThreadReply) } />
-            <EmailSetting label="Email me when someone replies to my comment"
-                status={ myCommentReply } 
-                handleChange={ () => setMyCommentReply(!myCommentReply) } />
-            <EmailSetting label="Email me when someone mentions me"
-                status={ mention } 
-                handleChange={ () => setMention(!mention) } />
-            <button onClick={ handleSave }>Save</button>
-            { showSavedAlert && <span>Saved!</span>}
-            { showSaveFailedAlert && <span>Couldn't save your settings. Please check your connection.</span>}
+        <div data-testid="notifications-menu-container"
+            className="bg-zinc-900 text-white h-full p-6 flex-auto w-3/4">
+            <h2 className="text-2xl mb-3 ml-4">Manage Notifications</h2>
+            <div className="min-w-max w-[700px] border-2 border-light-gray rounded p-4 pr-8">
+                <EmailSetting
+                    label="Email me when there is activity in a thread I'm watching"
+                    status={ watchedThreadActivity } 
+                    handleChange={ () => setWatchedThreadActivity(!watchedThreadActivity) } />
+                <EmailSetting
+                    label="Email me when someone replies to my thread"
+                    status={ myThreadReply } 
+                    handleChange={ () => setMyThreadReply(!myThreadReply) } />
+                <EmailSetting
+                    label="Email me when someone replies to my comment"
+                    status={ myCommentReply } 
+                    handleChange={ () => setMyCommentReply(!myCommentReply) } />
+                <EmailSetting
+                    label="Email me when someone mentions me"
+                    status={ mention } 
+                    handleChange={ () => setMention(!mention) } />
+                <button onClick={ handleSave }
+                    className="border border-white rounded bg-purple py-3 w-full
+                        mt-6 hover:bg-violet-800">
+                    Save
+                </button>
+                { showSavedAlert && <span>Saved!</span>}
+                { showSaveFailedAlert && 
+                <span> Couldn't save your settings. Please check your connection. </span>}
+            </div>
         </div>
     )
 }
