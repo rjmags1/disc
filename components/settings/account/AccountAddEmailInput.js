@@ -42,18 +42,21 @@ function AccountAddEmailInput({ updateDisplayedEmails, emails }) {
     }
 
     return (
-        <div data-testid="add-email-container">
-            <form onSubmit={ handleSubmit }>
+        <div data-testid="add-email-container" className="mt-12 mb-1">
+            <form onSubmit={ handleSubmit } >
                 <label htmlFor="new-email">
-                    Add email address
+                    <span className="block text-lg">Add email address</span>
                     <input type="text" value={ newEmail } id="new-email" name="new-email"
-                        onChange={ e => setNewEmail(e.target.value) }>
+                        onChange={ e => setNewEmail(e.target.value) }
+                        className="bg-light-gray border rounded border-white p-0.5 px-1
+                            w-72">
                     </input>
                 </label>
-                <input type="submit" value="Add" />
+                <input type="submit" value="Add" 
+                    className="mx-2 bg-purple border rounded border-white p-0.5 px-4" />
             </form>
             { submitFailed && 
-            <NewEmailSubmitFailedMessage dueToInvalidEmail={ invalidEmail }/>}
+            <NewEmailSubmitFailedMessage dueToInvalidEmail={ invalidEmail } />}
         </div>
     )
 }
