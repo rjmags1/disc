@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 
-import NewEmailSubmitFailedMessage from '../../components/settings/NewEmailSubmitFailedMessage'
+import NewEmailSubmitFailedMessage from '../../../components/settings/account/NewEmailSubmitFailedMessage'
 
 describe('NewEmailSubmitFailedMessage', () => {
     test('renders div w text indicating new email', () => {
