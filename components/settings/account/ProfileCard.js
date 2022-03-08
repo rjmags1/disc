@@ -3,9 +3,15 @@ import ProfileCardAvatar from './ProfileCardAvatar'
 function ProfileCard({ name, email, avatarSrc, handleNewSrc }) {
     return (
         <div data-testid="profile-card-container">
-            <ProfileCardAvatar src={ avatarSrc } handleNewSrc={ handleNewSrc }/>
-            <h2>{ name }</h2>
-            <h4>{ email }</h4>
+            <h2 className="text-2xl ml-4">Profile</h2>
+            <div className="flex border-2 border-light-gray rounded-md
+                mt-3 p-4">
+                <ProfileCardAvatar src={ avatarSrc } handleNewSrc={ handleNewSrc }/>
+                <div className="ml-8 flex flex-col justify-center">
+                    <h3 className="text-xl my-1">{ name }</h3>
+                    <h4 className="text-xs my-1">{ email }</h4>
+                </div>
+            </div>
         </div>
     )
 }
