@@ -9,7 +9,7 @@ describe('AccountPasswordSection', () => {
         expect(screen.getByRole("heading")).toBeInTheDocument()
         expect(screen.getByRole("button")).toBeInTheDocument()
         expect(screen.getByText("Password")).toBeInTheDocument()
-        expect(screen.getByText(/reset password/gi)).toBeInTheDocument()
+        expect(screen.getAllByText(/reset password/gi).length).toBeGreaterThan(0)
     })
 
     //test('button click causes reset password via email api call')
