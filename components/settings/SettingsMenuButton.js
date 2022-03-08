@@ -12,8 +12,9 @@ function SettingsMenuButton({ label, href }) {
     return (
         <div data-testid="settings-menu-button-container"
             onClick={ handleDivClick }
-            className="border rounded flex justify-center items-center
-                mb-4 bg-neutral-900 hover:cursor-pointer">
+            className="text-white w-48 flex items-center justify-center 
+                rounded-md border-2 p-1 mb-3 bg-purple hover:bg-black
+                hover:cursor-pointer">
             <Link href={ href }>
                 <a>{ label }</a>
             </Link>
