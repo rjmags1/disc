@@ -8,7 +8,7 @@ describe('NotificationsMenu', () => {
         render(<NotificationsMenu />)
         expect(screen.getByTestId("notifications-menu-container")).toBeInTheDocument()
         expect(screen.getAllByRole("heading").length).toBeGreaterThan(0)
-        expect(screen.getByText(/manage notification emails/gi)).toBeInTheDocument()
+        expect(screen.getByText(/manage notifications/gi)).toBeInTheDocument()
         expect(screen.getAllByTestId("notifications-setting-container").length).toBeGreaterThan(0)
         expect(screen.getAllByRole("button").length).toBeGreaterThan(0)
         expect(screen.getByText(/save/gi)).toBeInTheDocument()
