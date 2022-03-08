@@ -14,7 +14,7 @@ describe('SettingToggler', () => {
     test('render isOn status, callback on click', () => {
         const mockCb = jest.fn()
         render(<SettingToggler isOn={ false } handleClick={ mockCb } />)
-        expect(screen.getByText("OFF")).toBeInTheDocument()
+        expect(screen.getByText(/enable/gi)).toBeInTheDocument()
         userEvent.click(screen.getByRole("button"))
         expect(mockCb).toHaveBeenCalled()
     })
