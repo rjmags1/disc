@@ -10,7 +10,7 @@ function ProfileButton() {
     return (
         <OutsideClickHandler onOutsideClick={ () => setDisplayDropdown(false) }>
             <div data-testid="profile-button-container" 
-                className="px-1 sm:p-3 flex flex-col items-center"
+                className="mx-1 sm:m-3 flex flex-col items-center hover:cursor-pointer"
                 onClick={() => { setDisplayDropdown(!displayDropdown) }}>
                 <Image src="/profile-button-img.png" height="25" width="25" layout="fixed"
                     className="py-1 rounded-full"/>
