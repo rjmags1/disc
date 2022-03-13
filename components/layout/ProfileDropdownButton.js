@@ -1,7 +1,9 @@
-function ProfileDropdownButton({ label }) {
+function ProfileDropdownButton({ label, last }) {
+    const baseStyles = "p-1 hover:bg-violet-500"
+    const styles = last ? baseStyles + " rounded-b-md" : baseStyles
     return (
         <div data-testid="profile-dropdown-button-container"
-            className="p-1">
+            className={ styles }>
             <button>{ label }</button>
         </div>
     )
