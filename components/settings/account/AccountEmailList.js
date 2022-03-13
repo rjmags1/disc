@@ -5,8 +5,7 @@ function AccountEmailList({ primary, emails }) {
                 p-2 pl-4 mb-2 flex items-center justify-between">
             { email }
             { email === primary && 
-                <span 
-                    className="text-xs bg-zinc-900 border rounded py-0.5 px-4 mr-4">
+                <span className="text-xs bg-zinc-900 border rounded py-0.5 px-4 mr-4">
                     PRIMARY
                 </span> }
         </li>

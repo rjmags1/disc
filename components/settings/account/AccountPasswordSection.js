@@ -1,6 +1,7 @@
 function AccountPasswordSection() {
     const handleClick = function() {
         // api call telling server to send reset password email to user
+        // be sure to throttle
     }
 
     return (
