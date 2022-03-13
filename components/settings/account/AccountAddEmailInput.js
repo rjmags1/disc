@@ -53,7 +53,8 @@ function AccountAddEmailInput({ updateDisplayedEmails, emails }) {
                     </input>
                 </label>
                 <input type="submit" value="Add" 
-                    className="mx-2 bg-purple border rounded border-white p-0.5 px-4" />
+                    className="mx-2 bg-purple border rounded border-white p-0.5 px-4
+                        hover:cursor-pointer hover:bg-black" />
             </form>
             { submitFailed && 
             <NewEmailSubmitFailedMessage dueToInvalidEmail={ invalidEmail } />}
