@@ -3,10 +3,16 @@ import { useEffect, useState } from 'react'
 import EmailSetting from './EmailSetting'
 
 function NotificationsMenu() {
-    const [watchedThreadActivity, setWatchedThreadActivity] = useState(false)
-    const [myThreadReply, setMyThreadReply] = useState(false)
-    const [myCommentReply, setMyCommentReply] = useState(false)
+    const [threadActivity, setThreadActivity] = useState(false)
+    const [threadReply, setThreadReply] = useState(false)
+    const [commentReply, setCommentReply] = useState(false)
     const [mention, setMention] = useState(false)
+
+    const [dThreadActivity, setDThreadActivity] = useState(false)
+    const [dThreadReply, setDThreadReply] = useState(false)
+    const [dCommentReply, setDCommentReply] = useState(false)
+    const [dMention, setDMention] = useState(false)
+
     const [showSavedAlert, setShowSavedAlert] = useState(false)
     const [showSaveFailedAlert, setSaveFailedAlert] = useState(false)
 
@@ -25,10 +31,15 @@ function NotificationsMenu() {
             myCommentReply,
             mention } = fetched
 
-        setWatchedThreadActivity(watchedThreadActivity)
-        setMyThreadReply(myThreadReply)
-        setMyCommentReply(myCommentReply)
+        setThreadActivity(watchedThreadActivity)
+        setThreadReply(myThreadReply)
+        setCommentReply(myCommentReply)
         setMention(mention)
+
+        setDThreadActivity(watchedThreadActivity)
+        setDThreadReply(myThreadReply)
+        setDCommentReply(myCommentReply)
+        setDMention(mention)
     }, [])
 
     const alertSaveSuccess = function() {
@@ -45,7 +56,12 @@ function NotificationsMenu() {
         // collect settings
         // api call to write new settings to database
 
-        // if api call failed alertSaveFailed()
+        // if api call failed alertSaveFailed() and return. otherwise:
+        setThreadActivity(dThreadActivity)
+        setCommentReply(dCommentReply)
+        setMention(dMention)
+        setThreadReply(dThreadReply)
+
         alertSaveSuccess()
     }
 
@@ -53,23 +69,27 @@ function NotificationsMenu() {
         <div data-testid="notifications-menu-container"
             className="bg-zinc-900 text-white h-full p-6 flex-auto w-3/4">
             <h2 className="text-2xl mb-3 ml-4">Manage Notifications</h2>
-            <div className="min-w-max w-[700px] border-2 border-light-gray rounded p-4 pr-8">
+            <div className="min-w-max w-[850px] border-2 border-light-gray rounded p-4 pr-8">
                 <EmailSetting
                     label="Email me when there is activity in a thread I'm watching"
-                    status={ watchedThreadActivity } 
-                    handleChange={ () => setWatchedThreadActivity(!watchedThreadActivity) } />
+                    status={ threadActivity }
+                    dStatus={ dThreadActivity }
+                    handleChange={ () => setDThreadActivity(!dThreadActivity) } />
                 <EmailSetting
                     label="Email me when someone replies to my thread"
-                    status={ myThreadReply } 
-                    handleChange={ () => setMyThreadReply(!myThreadReply) } />
+                    status={ threadReply }
+                    dStatus={ dThreadReply }
+                    handleChange={ () => setDThreadReply(!dThreadReply) } />
                 <EmailSetting
                     label="Email me when someone replies to my comment"
-                    status={ myCommentReply } 
-                    handleChange={ () => setMyCommentReply(!myCommentReply) } />
+                    status={ commentReply }
+                    dStatus={ dCommentReply }
+                    handleChange={ () => setDCommentReply(!dCommentReply) } />
                 <EmailSetting
                     label="Email me when someone mentions me"
-                    status={ mention } 
-                    handleChange={ () => setMention(!mention) } />
+                    status={ mention }
+                    dStatus={ dMention }
+                    handleChange={ () => setDMention(!dMention) } />
                 <button onClick={ handleSave }
                     className="border border-white rounded bg-purple py-3 w-full
                         mt-6 hover:bg-violet-800">

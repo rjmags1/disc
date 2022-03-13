@@ -29,4 +29,12 @@ describe('NotificationsMenu', () => {
         expect(screen.getByText("Saved!")).toBeInTheDocument()
         await waitFor(() => expect(screen.queryByText("Saved!")).toBeNull(), { timeout: 2500 })
     })
+
+    test('change setting and save click causes label flip on save successa', () => {
+        render(<NotificationsMenu />)
+        const numOriginallyEnabledSettings = screen.getAllByText(/enabled/gi).length
+        userEvent.click(screen.getAllByRole("button")[0])
+        userEvent.click(screen.getByText(/save/gi))
+        expect(screen.getAllByText(/enabled/gi).length).toEqual(numOriginallyEnabledSettings - 1)
+    })
 })
