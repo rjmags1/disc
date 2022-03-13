@@ -12,9 +12,9 @@ function ProfileButton() {
             <div data-testid="profile-button-container" 
                 className="px-1 sm:p-3 flex flex-col items-center"
                 onClick={() => { setDisplayDropdown(!displayDropdown) }}>
-                <Image src="/profile-button-img.png" height="25" width="25"
+                <Image src="/profile-button-img.png" height="25" width="25" layout="fixed"
                     className="py-1 rounded-full"/>
-                <Image src="/sort-down.png" height="10" width="10"
+                <Image src="/sort-down.png" height="10" width="10" layout="fixed"
                     data-testid="profile-button-arrow"
                     className={ displayDropdown ? "rotate-180" : "" }/>
                 { displayDropdown && <ProfileDropdownMenu /> }
