@@ -11,12 +11,12 @@ const pool = new Pool({
 export const query = async function (text, params) {
     try {
         const result = await pool.query(text, params)
-        console.log(`db query: ${text},\n
+        console.log(`/db/index QUERY SUCCESS: query: ${text},\n
             result first row: ${result.rows ? result.rows[0] : result.rows}`)
         return result
     }
     catch (error) {
-        console.error(`error exec query ${text}`, error.stack)
+        console.error(`/db/index QUERY ERROR: query: ${text}`, error.stack)
         throw new Error("query failed", { cause: error })
     }
 }
