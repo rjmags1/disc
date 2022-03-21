@@ -20,7 +20,7 @@ export async function createUserRoute(req, resp) {
 
     const {
         fname, lname, email, avatarUrl, password, isAdmin, org
-    } = req.body.newUser
+    } = req.body?.newUser
     if (!fname || !lname || !email || !avatarUrl || !org
         || !password || !(isAdmin === true || isAdmin === false)) {
         resp.status(400).json({ 
