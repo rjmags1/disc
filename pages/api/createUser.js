@@ -1,30 +1,34 @@
 import { withIronSessionApiRoute } from "iron-session/next"
-import { sessionOptions } from "lib/session"
+import { sessionOptions } from "../../lib/session"
 import { query } from "../../db/index"
 import { hash } from "bcrypt"
 import { validEmail, validPassword } from "../../lib/validation"
 
-export async function createUserRoute(req, resp) {
+export default withIronSessionApiRoute(async function(req, resp) {
     if (req.method !== 'POST') {
         resp.status(405).json({ message: "invalid method" })
         return
     }
-    if (!req.session) {
-        resp.status(400).json({ message: "not authenticated" })
+    if (!req.session.user) {
+        resp.status(400).json({ message: "not signed in" })
         return
     }
-    if (!req.session.user.isAdmin) {
+    if (!req.session.user.isadmin) {
         resp.status(401).json({ message: "not authorized" })
+        return
+    }
+    if (!req.body.newUser) {
+        resp.status(400).json({ message: "must specify new user data" })
         return
     }
 
     const {
-        fname, lname, email, avatarUrl, password, isAdmin, org
+        fname, lname, email, avatarurl, password, isadmin, org
     } = req.body?.newUser
-    if (!fname || !lname || !email || !avatarUrl || !org
-        || !password || !(isAdmin === true || isAdmin === false)) {
+    if (!fname || !lname || !email || !avatarurl || !org
+        || !password || !(isadmin === true || isadmin === false)) {
         resp.status(400).json({ 
-            message: "please specify org, fname, lname, email, avatarUrl, password, admin status for new user."
+            message: "please specify valid org, fname, lname, email, avatarUrl, password, admin status for new user."
         })
         return
     }
@@ -55,25 +59,24 @@ export async function createUserRoute(req, resp) {
         const hashed = await hash(password, 12)
         const queryText = `INSERT INTO person(fname, lname, email, avatarurl, passwordhash, isadmin) 
                             VALUES($1, $2, $3, $4, $5, $6) RETURNING *`
-        const params = [fname, lname, email, avatarUrl, hashed, isAdmin]
+        const params = [fname, lname, email, avatarurl, hashed, isadmin]
         const result = await query(queryText, params)
         const rows = result.rows
 
         const userId = rows[0].userid
         const newUserInfo = {
             userId: userId,
-            isAdmin: isAdmin,
+            isAdmin: isadmin,
             fname: fname,
             lname: lname,
             email: email,
-            avatarUrl: avatarUrl,
+            avatarUrl: avatarurl,
             org: org
         }
         resp.status(200).json(newUserInfo)
     }
     catch (error) {
-        resp.status(400).json({ message: "problem adding new user. consider specifying alt email" })
+        console.error(error)
+        resp.status(400).json({ message: "problem adding new user. consider specifying alternate email" })
     }
-}
-
-export default withIronSessionApiRoute(createUserRoute, sessionOptions)
+}, sessionOptions)
