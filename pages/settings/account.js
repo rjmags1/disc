@@ -1,12 +1,15 @@
 import Layout from "../../components/layout/Layout";
 import SettingsLayout from '../../components/layout/SettingsLayout'
 import AccountSettingsMenu from '../../components/settings/account/AccountSettingsMenu'
+import { useUser } from '../../lib/hooks'
 
-function Page() {
+function Account() {
+    const { user } = useUser({ redirectTo: '/login' })
+
     return <AccountSettingsMenu />
 }
 
-Page.getLayout = function getLayout(page) {
+Account.getLayout = function getLayout(page) {
     return (
         <Layout>
             <SettingsLayout>
@@ -16,4 +19,4 @@ Page.getLayout = function getLayout(page) {
     )
 }
 
-export default Page
+export default Account

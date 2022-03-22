@@ -1,12 +1,15 @@
 import Layout from "../../components/layout/Layout";
 import SettingsLayout from '../../components/layout/SettingsLayout'
 import NotificationsMenu from '../../components/settings/notifications/NotificationsMenu'
+import { useUser } from '../../lib/hooks'
 
-function Page() {
+function Notifications() {
+    const { user } = useUser({ redirectTo: '/login' })
+
     return <NotificationsMenu />
 }
 
-Page.getLayout = function getLayout(page) {
+Notifications.getLayout = function getLayout(page) {
     return (
         <Layout>
             <SettingsLayout>
@@ -16,4 +19,4 @@ Page.getLayout = function getLayout(page) {
     )
 }
 
-export default Page
+export default Notifications

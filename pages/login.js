@@ -1,7 +1,10 @@
 import LoginFormWithValidation from "../components/login/LoginFormWithValidation"
 import Image from 'next/image'
+import { useUser } from '../lib/hooks'
 
-function Page() {
+function Login() {
+    const { user } = useUser({ redirectTo: '/', redirectIfFound: true })
+
     return (
         <div data-testid="login-page-container" 
             className="w-screen h-screen flex justify-center
@@ -12,4 +15,4 @@ function Page() {
     )
 }
 
-export default Page
+export default Login

@@ -1,13 +1,16 @@
 import Layout from '../components/layout/Layout'
+import { useUser } from '../lib/hooks'
 
-function Page() {
+function Index() {
+    const { user } = useUser({ redirectTo: '/login' })
+
     return <div>Dashboard</div>
 }
 
-Page.getLayout = function getLayout(page) {
+Index.getLayout = function getLayout(page) {
     return (
         <Layout>{ page }</Layout>
     )
 }
 
-export default Page
+export default Index
