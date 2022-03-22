@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useOrgs } from '../../lib/hooks'
 
 import LoginDatalist from './LoginDatalist'
 import LoginTextInput from './LoginTextInput'
@@ -8,25 +9,16 @@ function LoginForm({ validate }) {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
 
-    // TODO: ssg optionsValues
+    const { orgs } = useOrgs()
+
     const handleSubmit = e => {
         e.preventDefault()
-        // TODO: decide if html required feedback is sufficient for empty field
         if (org === "" || email === "" || password === "") return
-        // check that org is in optionsValues
         const passesClientSideValidation = validate(email, password)
-        // if (passesClientSideValidation) {
-            // const passesServerSideValidation = authApiCall()
-            // if (passesServerSideValidation) doRedirect()
-            // else notifyUnauthorizedCredentials()
-        // }
-        // else {
-            // notifyInvalidInput()
-        // }
     }
 
+    const orgNames = orgs ? Object.entries(orgs).map(([k, v]) => v.name) : []
     const orgsDlInfo = {
-        optionValues: [],
         containerTestId: "datalist-container-test",
         inputId: "organization",
         label: "Organization:",
@@ -46,7 +38,7 @@ function LoginForm({ validate }) {
 
     return (
         <form onSubmit={ handleSubmit } name="login-form" className="mt-3">
-            <LoginDatalist info={ orgsDlInfo }
+            <LoginDatalist info={ orgsDlInfo } optionValues={ orgNames }
                 handleChange={ e => setOrg(e.target.value) } />
             <LoginTextInput info={ emailTextInputInfo } 
                 handleChange={ e => setEmail(e.target.value) } />

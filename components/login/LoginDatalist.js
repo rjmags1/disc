@@ -1,5 +1,5 @@
-function Datalist({ handleChange, info }) {
-    const { optionValues, containerTestId, inputId,
+function Datalist({ handleChange, info, optionValues }) {
+    const { containerTestId, inputId,
             label, datalistId, datalistTestId } = info
 
     const options = optionValues.map((val, i) => 
