@@ -38,7 +38,10 @@ export default withIronSessionApiRoute(async function(req, resp) {
         const userId = rows[0].userid
         const seal = await sealData(
             { userId: userId },
-            { password: process.env.SECRET_COOKIE_PASSWORD }
+            { 
+                password: process.env.SECRET_COOKIE_PASSWORD,
+                ttl: 5 * 60 // 5 minutes in seconds
+            }
         )
         const message = `
             <h1>Hello from disc!</h1>
