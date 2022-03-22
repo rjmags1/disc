@@ -16,7 +16,7 @@ function ProfileButton() {
                     className="py-1 rounded-full"/>
                 <Image src="/sort-down.png" height="10" width="10" layout="fixed"
                     data-testid="profile-button-arrow"
-                    className={ displayDropdown && "rotate-180" }/>
+                    className={ displayDropdown ? "rotate-180" : "" }/>
                 { displayDropdown && <ProfileDropdownMenu /> }
             </div>
         </OutsideClickHandler>
