@@ -42,7 +42,7 @@ function LoginForm({ validate }) {
                 handleChange={ e => setOrg(e.target.value) } />
             <LoginTextInput info={ emailTextInputInfo } 
                 handleChange={ e => setEmail(e.target.value) } />
-            <LoginTextInput info={ passTextInputInfo } 
+            <LoginTextInput info={ passTextInputInfo } blur
                 handleChange={ e => setPassword(e.target.value) } />
             <input type="submit" value="Submit" 
                 className="w-full bg-bright-blue rounded-md h-12 mt-4 hover:bg-sky-700"/>
