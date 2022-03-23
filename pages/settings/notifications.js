@@ -3,12 +3,20 @@ import SettingsLayout from '../../components/layout/SettingsLayout'
 import NotificationsMenu from '../../components/settings/notifications/NotificationsMenu'
 import { useUser } from '../../lib/hooks'
 import Loading from '../../components/lib/Loading'
+import Head from 'next/head'
 
 function Notifications() {
     const { loadingUserFromCache, user } = useUser({ redirectTo: "/login" })
 
     if (loadingUserFromCache || !user.authenticated) return <Loading />
-    return <NotificationsMenu />
+    return (
+        <>
+            <Head>
+                <title>Notifications | disc</title>
+            </Head>
+            <NotificationsMenu />
+        </>
+    )
 }
 
 Notifications.getLayout = function getLayout(page) {
