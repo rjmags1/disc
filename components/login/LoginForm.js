@@ -65,7 +65,7 @@ function LoginForm() {
     }
 
     return (
-        <div data-testid="login-form-container" className="w-60 sm:w-80">
+        <div data-testid="login-form-container" className="w-60 sm:w-96">
             { showInvalidMessage && <InvalidLoginMessage />}
             <form onSubmit={ handleSubmit } name="login-form" className="mt-3">
                 <LoginDatalist info={ orgsDlInfo } optionValues={ orgNames }
@@ -75,8 +75,18 @@ function LoginForm() {
                 <LoginTextInput info={ passTextInputInfo } blur
                     handleChange={ e => setPassword(e.target.value) } />
                 <input type="submit" value="Submit" 
-                    className="w-full bg-purple rounded-md h-12 mt-4 hover:bg-violet-600"/>
+                    className="w-full bg-purple rounded-md h-12 mt-7 
+                    hover:bg-violet-600 hover:cursor-pointer"/>
             </form>
+            <div>
+                <button type="button" className="mt-7 p-3 bg-slate-600 rounded-md hover:bg-slate-400
+                    h-12 w-full">
+                    Email Me Login Link
+                </button>
+                <p className="text-xs mt-1">
+                    <i>Forgot password? Just enter org and email click the gray button for email sign-in. Login links expire after 5 minutes.</i>
+                </p>
+            </div>
         </div>
     )
 }
