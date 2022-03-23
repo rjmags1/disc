@@ -75,7 +75,7 @@ function LoginForm() {
                 <LoginTextInput info={ passTextInputInfo } blur
                     handleChange={ e => setPassword(e.target.value) } />
                 <input type="submit" value="Submit" 
-                    className="w-full bg-bright-blue rounded-md h-12 mt-4 hover:bg-sky-700"/>
+                    className="w-full bg-purple rounded-md h-12 mt-4 hover:bg-violet-600"/>
             </form>
         </div>
     )

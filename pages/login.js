@@ -1,5 +1,4 @@
 import LoginForm from "../components/login/LoginForm"
-import Image from 'next/image'
 import { useUser } from '../lib/hooks'
 import Loading from '../components/lib/Loading'
 import Head from 'next/head'
@@ -11,11 +10,11 @@ function Login() {
     return (
         <div data-testid="login-page-container"
             className="w-screen h-screen flex justify-center
-                items-center flex-col bg-bluish-gray text-white">
+                items-center flex-col bg-zinc-900 text-white">
             <Head>
                 <title>Login</title>
             </Head>
-            <Image src="/logo.png" alt="disc-logo" width="110" height="110"/>
+            <h1 className="text-white font-mono text-7xl mb-8"><em><b>disc</b></em></h1>
             <LoginForm />
         </div>
     )
