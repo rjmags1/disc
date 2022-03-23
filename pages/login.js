@@ -1,10 +1,12 @@
 import LoginForm from "../components/login/LoginForm"
 import Image from 'next/image'
 import { useUser } from '../lib/hooks'
+import Loading from '../components/lib/Loading'
 
 function Login() {
-    const { user } = useUser({ redirectTo: '/', redirectIfFound: true })
+    const { loadingUserFromCache, user } = useUser({ redirectTo: "/", redirectIfFound: true })
 
+    if (loadingUserFromCache || user.authenticated) return <Loading />
     return (
         <div data-testid="login-page-container" 
             className="w-screen h-screen flex justify-center

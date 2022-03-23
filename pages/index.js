@@ -1,9 +1,11 @@
 import Layout from '../components/layout/Layout'
 import { useUser } from '../lib/hooks'
+import Loading from '../components/lib/Loading'
 
 function Index() {
-    const { user } = useUser({ redirectTo: '/login' })
+    const { loadingUserFromCache, user } = useUser({ redirectTo: "/login" })
 
+    if (loadingUserFromCache || !user.authenticated) return <Loading />
     return <div>Dashboard</div>
 }
 
