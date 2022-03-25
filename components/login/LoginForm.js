@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useOrgs, useUser } from '../../lib/hooks'
-import { clientSideLoginValidator } from '../../lib/validation'
+import { clientSideLoginValidator, validEmail } from '../../lib/validation'
 
 import LoginDatalist from './LoginDatalist'
 import LoginTextInput from './LoginTextInput'
@@ -45,6 +45,33 @@ function LoginForm() {
         }
     }
 
+    const handleEmailLogin = async function() {
+        // validate email
+        if (!validEmail(email) || !org) {
+            setInvalidMessage(true)
+            return
+        }
+
+        try {
+            const resp = await fetch("/api/sendMagicLink", {
+                method: 'POST',
+                headers: { "Content-Type" : "application/json" },
+                body: JSON.stringify({ email: email })
+            })
+            if (resp.status !== 200) {
+                setInvalidMessage(true)
+                return
+            }
+            setInvalidMessage(false)
+            alert("check your email!")
+        }
+        catch (error) {
+            console.error(error)
+            setInvalidMessage(true)
+        }
+        
+    }
+
     const orgNames = orgs ? Object.entries(orgs).map(([k, v]) => v.name) : []
     const orgsDlInfo = {
         containerTestId: "datalist-container-test",
@@ -80,7 +107,7 @@ function LoginForm() {
             </form>
             <div>
                 <button type="button" className="mt-7 p-3 bg-slate-600 
-                    rounded-md hover:bg-gray-700 h-12 w-full">
+                    rounded-md hover:bg-gray-700 h-12 w-full" onClick={ handleEmailLogin }>
                     Email Me Login Link
                 </button>
                 <p className="text-xs mt-1">
