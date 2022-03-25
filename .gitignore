@@ -3,3 +3,4 @@ node_modules/
 .next/
 .env*
 makeHashFromPassword.js
+e2e/results
