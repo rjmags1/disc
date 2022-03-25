@@ -79,8 +79,8 @@ function LoginForm() {
                     hover:bg-violet-600 hover:cursor-pointer"/>
             </form>
             <div>
-                <button type="button" className="mt-7 p-3 bg-slate-600 rounded-md hover:bg-slate-400
-                    h-12 w-full">
+                <button type="button" className="mt-7 p-3 bg-slate-600 
+                    rounded-md hover:bg-gray-700 h-12 w-full">
                     Email Me Login Link
                 </button>
                 <p className="text-xs mt-1">
