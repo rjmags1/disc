@@ -2,8 +2,6 @@ import { validEmail, validPassword } from "../../lib/validation"
 
 const MAX_EMAIL_SUFFIX_LENGTH = 255
 const MAX_EMAIL_PREFIX_LENGTH = 64
-const MIN_PASSWORD_LENGTH = 8
-const MAX_PASSWORD_LENGTH = 64
 
 describe('email validation', () => {
     test('reject @ in server name', () => {
