@@ -1,4 +1,4 @@
-import { validEmail, validPassword } from "../../lib/validation"
+import { validEmail, validPassword, validOrg } from "../../lib/validation"
 
 const MAX_EMAIL_SUFFIX_LENGTH = 255
 const MAX_EMAIL_PREFIX_LENGTH = 64
@@ -46,5 +46,15 @@ describe('password validation', () => {
 
     test('dont reject valid password', () => {
         expect(validPassword("longenuff")).toEqual(true)
+    })
+})
+
+describe('org validation', () => {
+    test('reject non alpha org input', () => {
+        expect(validOrg("asdf1234!@#$")).toEqual(false)
+    })
+
+    test('accept alpha org input', () => {
+        expect(validOrg("asdfASDF")).toEqual(true)
     })
 })
