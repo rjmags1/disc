@@ -6,7 +6,17 @@ import Head from 'next/head'
 function Index() {
     const { loadingUserFromCache, user } = useUser({ redirectTo: "/login" })
 
-    if (loadingUserFromCache || !user.authenticated) return <Loading />
+    if (loadingUserFromCache || !user.authenticated) {
+        return (
+            <>
+                <Head>
+                    <title>Dashboard | disc</title>
+                </Head>
+                <Loading />
+            </>
+        )
+    }
+
     return (
         <>
             <Head>

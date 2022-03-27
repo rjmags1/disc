@@ -1,5 +1,5 @@
 import { sendEmail } from '../../lib/email'
-import { validEmail } from '../../lib/validation'
+import { validEmail, formatOrgForDb, validOrg } from '../../lib/validation'
 import { query } from '../../db/index'
 import { withIronSessionApiRoute } from 'iron-session/next'
 import { sealData } from 'iron-session'
@@ -18,20 +18,28 @@ export default withIronSessionApiRoute(async function(req, resp) {
         resp.status(400).json({ message: "must specify email to send magic link to"})
         return
     }
-    const email = req.body.email
-    if (!validEmail(email)) {
-        resp.status(400).json({ message: "malformed email" })
+    const { org, email } = req.body
+    if (!validEmail(email) || !validOrg(org)) {
+        resp.status(400).json({ message: "invalid credentials" })
         return
     }
     
 
     try {
-        const queryText = "SELECT userid from person where email = $1"
-        const params = [email]
+        let queryText = "SELECT userid from person where email = $1"
+        let params = [email]
         const result = await query(queryText, params)
         const rows = result.rows
         if (rows.length === 0) {
-            resp.status(400).json({ message: "unregistered email" })
+            resp.status(400).json({ message: "invalid credentials" })
+            return
+        }
+
+        queryText = `SELECT * FROM orgs WHERE name = $1`
+        params = [formatOrgForDb(org)]
+        const checkForRow = await query(queryText, params)
+        if (checkForRow.rows.length === 0) {
+            resp.status(400).json({ message: "invalid credentials" })
             return
         }
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useOrgs, useUser } from '../../lib/hooks'
-import { clientSideLoginValidator, validEmail } from '../../lib/validation'
+import { loginValidator, validEmail, validOrg } from '../../lib/validation'
 
 import LoginDatalist from './LoginDatalist'
 import LoginTextInput from './LoginTextInput'
@@ -17,26 +17,29 @@ function LoginForm() {
 
     const handleSubmit = async function(event) {
         event.preventDefault()
-        const valid = clientSideLoginValidator(email, password)
+        const valid = loginValidator(email, password, org)
         if (!valid) {
             setInvalidMessage(true)
             return
         }
 
-        setInvalidMessage(false)
         const body = {
             credentials: {
                 email: email,
-                password: password
+                password: password,
+                org: org
             }
         }
         try {
             mutateUser(async () => {
-                await fetch("/api/login", {
+                const resp = await fetch("/api/login", {
                     method: 'POST',
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(body)
                 })
+                if (!resp.ok) setInvalidMessage(true)
+                else setInvalidMessage(false)
+                return resp
             })
         }
         catch (error) {
@@ -46,17 +49,20 @@ function LoginForm() {
     }
 
     const handleEmailLogin = async function() {
-        // validate email
-        if (!validEmail(email) || !org) {
+        if (!validEmail(email) || !validOrg(org)) {
             setInvalidMessage(true)
             return
         }
-
+        
+        const body = {
+            email: email,
+            org: org
+        }
         try {
             const resp = await fetch("/api/sendMagicLink", {
                 method: 'POST',
                 headers: { "Content-Type" : "application/json" },
-                body: JSON.stringify({ email: email })
+                body: JSON.stringify(body)
             })
             if (resp.status !== 200) {
                 setInvalidMessage(true)
@@ -75,9 +81,9 @@ function LoginForm() {
     const orgNames = orgs ? Object.entries(orgs).map(([k, v]) => v.name) : []
     const orgsDlInfo = {
         containerTestId: "datalist-container-test",
-        inputId: "organization",
+        inputId: "organization-input",
         label: "Organization:",
-        datalistId: "organizations",
+        datalistId: "organizations-datalist",
         datalistTestId: "datalist-datalist-test"
     }
     const emailTextInputInfo = {
@@ -107,7 +113,8 @@ function LoginForm() {
             </form>
             <div>
                 <button type="button" className="mt-7 p-3 bg-slate-600 
-                    rounded-md hover:bg-gray-700 h-12 w-full" onClick={ handleEmailLogin }>
+                    rounded-md hover:bg-gray-700 h-12 w-full" 
+                    id="full-login-submit-input" onClick={ handleEmailLogin }>
                     Email Me Login Link
                 </button>
                 <p className="text-xs mt-1">

@@ -2,7 +2,7 @@ import { withIronSessionApiRoute } from "iron-session/next"
 import { sessionOptions } from "../../lib/session"
 import { query } from "../../db/index"
 import { compare } from "bcrypt"
-import { validEmail, validPassword } from "../../lib/validation"
+import { loginValidator, formatOrgForDb } from "../../lib/validation"
 
 export default withIronSessionApiRoute(async function(req, resp) {
     if (req.method !== 'POST') {
@@ -17,20 +17,28 @@ export default withIronSessionApiRoute(async function(req, resp) {
         resp.status(400).json({ message: "need to supply credentials to login" })
         return
     }
-    const { email, password } = await req.body.credentials
-    if (!email || !password || !validEmail(email) || !validPassword(password)) {
-        resp.status(400).json({ message: "invalid email or password" })
+    const { email, password, org } = await req.body.credentials
+    if (!email || !password || !loginValidator(email, password, org)) {
+        resp.status(400).json({ message: "invalid credentials" })
         return
     }
 
     let result
     try {
-        const queryText = `SELECT
+        let queryText = `SELECT
                             userId, fname, lname, email, avatarurl, passwordhash, isadmin
                             FROM person
                             WHERE email = $1 LIMIT 1`
-        const params = [email]
+        let params = [email]
         result = await query(queryText, params)
+
+        queryText = `SELECT * FROM orgs WHERE name = $1`
+        params = [formatOrgForDb(org)]
+        const checkForRow = await query(queryText, params)
+        if (checkForRow.rows.length === 0) {
+            resp.status(400).json({ message: "invalid credentials" })
+            return
+        }
     }
     catch (err) {
         console.log(err)
@@ -38,14 +46,14 @@ export default withIronSessionApiRoute(async function(req, resp) {
         return
     }
     if (result.rows.length === 0) {
-        resp.status(400).json({ message: "invalid email or password" })
+        resp.status(400).json({ message: "invalid credentials" })
         return
     }
     
     const hashed = result.rows[0].passwordhash
     const match = await compare(password, hashed)
     if (!match) {
-        resp.status(400).json({ message: "invalid email or password" })
+        resp.status(400).json({ message: "invalid credentials" })
         return
     }
     const userInfo = Object.fromEntries(Object.entries(result.rows[0]).
