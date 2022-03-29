@@ -1,14 +1,24 @@
 import { useRouter } from 'next/router'
+import { useUser } from '../../lib/hooks'
 
 function ProfileDropdownButton({ label, last, href }) {
-    // TODO: impl custom fxn for logout dropdown button
     const router = useRouter()
-    const handleClick = function(e) {
-        e.preventDefault()
-        router.push(href)
+    const { mutateUser } = useUser({ redirectTo: '/login' })
+
+    const handleClick = function(event) {
+        event.preventDefault()
+        if (/logout/gi.test(href)) {
+            mutateUser(async () => {
+                await fetch("api/logout", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                })
+            })
+        }
+        else router.push(href)
     }
 
-    const baseStyles = "p-1 hover:bg-violet-500"
+    const baseStyles = "w-full hover:bg-violet-500 px-4 py-1"
     const styles = last ? baseStyles + " rounded-b-md" : baseStyles
     return (
         <div data-testid="profile-dropdown-button-container"
