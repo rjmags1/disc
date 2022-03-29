@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test')
 const { login, TESTUSER_REGISTERED } = require('../lib/auth')
 
-test.describe('auth redirects', async () => {
+test.describe('auth protected pages redirect to login page when logged in', async () => {
     test('index redirects to login if user not authenticated', async ({ page }) => {
         await page.goto('/')
         await page.waitForURL('/login')
