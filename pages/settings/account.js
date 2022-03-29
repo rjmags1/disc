@@ -23,7 +23,7 @@ function Account() {
 
 Account.getLayout = function getLayout(page) {
     return (
-        <Layout>
+        <Layout pageName="Settings - Account">
             <SettingsLayout>
                 { page }
             </SettingsLayout>

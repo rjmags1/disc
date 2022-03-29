@@ -21,7 +21,7 @@ function Notifications() {
 
 Notifications.getLayout = function getLayout(page) {
     return (
-        <Layout>
+        <Layout pageName="Settings - Notifications">
             <SettingsLayout>
                 { page }
             </SettingsLayout> 

@@ -29,7 +29,7 @@ function Index() {
 
 Index.getLayout = function getLayout(page) {
     return (
-        <Layout>{ page }</Layout>
+        <Layout pageName="Dashboard">{ page }</Layout>
     )
 }
 
