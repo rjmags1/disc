@@ -4,7 +4,14 @@ import InvalidLoginMessage from '../../components/login/InvalidLoginMessage'
 
 describe('InvalidLoginMessage', () => {
     test('renders div with invalid login fields message', () => {
+
         render(<InvalidLoginMessage />)
-        expect(screen.getByTestId("invalid-message-container")).toBeInTheDocument()
+
+        expect(screen.getByTestId("invalid-message-container")).
+            toBeInTheDocument()
+
+        expect(screen.getByText(/invalid/gi)).toBeInTheDocument()
+
+        expect(screen.getByText(/account information/gi)).toBeInTheDocument()
     })
 })

@@ -15,7 +15,7 @@ function LoginForm() {
     const { orgs } = useOrgs()
     const { mutateUser } = useUser({ redirectTo: '/', redirectIfFound: true })
 
-    const handleSubmit = async function(event) {
+    const handleNormalLogin = async function(event) {
         event.preventDefault()
         const valid = loginValidator(email, password, org)
         if (!valid) {
@@ -44,7 +44,7 @@ function LoginForm() {
         }
         catch (error) {
             console.error(error)
-            alert("we had a problem verifying your credentials. check the console/your connection")
+            alert("there was a problem verifying your credentials. try again")
         }
     }
 
@@ -75,37 +75,35 @@ function LoginForm() {
             console.error(error)
             setInvalidMessage(true)
         }
-        
     }
 
-    const orgNames = orgs ? Object.entries(orgs).map(([k, v]) => v.name) : []
-    const orgsDlInfo = {
-        containerTestId: "datalist-container-test",
-        inputId: "organization-input",
-        label: "Organization:",
-        datalistId: "organizations-datalist",
-        datalistTestId: "datalist-datalist-test"
-    }
-    const emailTextInputInfo = {
+    const orgNames = orgs ? Object.entries(orgs).map(([_, v]) => v.name) : []
+    const emailInputAttributes = {
         label: "Email:",
         inputId: "email-input",
         containerTestId: "text-input-container-test-email"
     }
-    const passTextInputInfo = {
+    const passwordInputAttributes = {
         label: "Password:",
         inputId: "password-input",
         containerTestId: "text-input-container-test-password"
     }
+    const forgotPasswordText = `
+        Forgot password? Just enter org + email
+        and click the gray button for email sign-in.
+        Login links expire after 5 minutes.
+        `
 
     return (
         <div data-testid="login-form-container" className="w-60 sm:w-96">
             { showInvalidMessage && <InvalidLoginMessage />}
-            <form onSubmit={ handleSubmit } name="login-form" className="mt-3">
-                <LoginDatalist info={ orgsDlInfo } optionValues={ orgNames }
+            <form onSubmit={ handleNormalLogin }
+                name="login-form" className="mt-3">
+                <LoginDatalist label="Organization:" optionValues={ orgNames }
                     handleChange={ e => setOrg(e.target.value) } />
-                <LoginTextInput info={ emailTextInputInfo } 
+                <LoginTextInput attributes={ emailInputAttributes } 
                     handleChange={ e => setEmail(e.target.value) } />
-                <LoginTextInput info={ passTextInputInfo } blur
+                <LoginTextInput attributes={ passwordInputAttributes } blur
                     handleChange={ e => setPassword(e.target.value) } />
                 <input type="submit" value="Submit" 
                     className="w-full bg-purple rounded-md h-12 mt-7 
@@ -118,7 +116,7 @@ function LoginForm() {
                     Email Me Login Link
                 </button>
                 <p className="text-xs mt-1">
-                    <i>Forgot password? Just enter org and email click the gray button for email sign-in. Login links expire after 5 minutes.</i>
+                    <i>{ forgotPasswordText }</i>
                 </p>
             </div>
         </div>

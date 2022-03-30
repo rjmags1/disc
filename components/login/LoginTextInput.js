@@ -1,5 +1,5 @@
-function LoginTextInput({ handleChange, info, blur }) {
-    const { label, inputId, containerTestId } = info
+function LoginTextInput({ handleChange, attributes, blur }) {
+    const { label, inputId, containerTestId } = attributes
 
     return (
         <div data-testid={ containerTestId } className="py-2">
