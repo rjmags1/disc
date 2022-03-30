@@ -2,7 +2,7 @@ const { devices } =  require('@playwright/test')
 const path = require('path')
 
 const config = {
-    timeout: 15 * 1000,
+    timeout: 5 * 1000,
     retries: 0,
     testDir: './e2e',
     outputDir: './e2e/results/',
