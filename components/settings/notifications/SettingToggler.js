@@ -1,5 +1,8 @@
 function SettingToggler({ isOn, handleClick }) {
-    const baseStyle = "border border-white rounded px-4 py-0.5 min-w-max w-24 hover:cursor-pointer "
+    const baseStyle = `
+        border border-white rounded px-4 py-0.5
+        min-w-max w-24 hover:cursor-pointer `
+
     return (
         <div data-testid="notifications-setting-toggler"
             className="mr-1">

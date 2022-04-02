@@ -57,47 +57,55 @@ function NotificationsMenu() {
         // api call to write new settings to database
 
         // if api call failed alertSaveFailed() and return. otherwise:
-        setThreadActivity(dThreadActivity)
-        setCommentReply(dCommentReply)
-        setMention(dMention)
-        setThreadReply(dThreadReply)
+        // setThreadActivity(dThreadActivity)
+        // setCommentReply(dCommentReply)
+        // setMention(dMention)
+        // setThreadReply(dThreadReply)
 
-        alertSaveSuccess()
+        // alertSaveSuccess()
     }
+
+    const watchActivityMsg = `
+        Email me when there is activity in a thread I'm watching`
+    const myPostActivityMsg = `
+        Email me when someone replies to my thread`
+    const myCommentReplyMsg = `
+        Email me when someone replies to my comment`
+    const mentionMsg = `
+        Email me when someone mentions me`
+    const couldntSaveMsg = `
+        Couldn't save your settings. Please check your connection.`
 
     return (
         <div data-testid="notifications-menu-container"
             className="bg-zinc-900 text-white h-full p-6 flex-auto w-3/4">
             <h2 className="text-2xl mb-3 ml-4">Manage Notifications</h2>
-            <div className="min-w-max w-[850px] border-2 border-light-gray rounded p-4 pr-8">
-                <EmailSetting
-                    label="Email me when there is activity in a thread I'm watching"
-                    status={ threadActivity }
-                    dStatus={ dThreadActivity }
-                    handleChange={ () => setDThreadActivity(!dThreadActivity) } />
-                <EmailSetting
-                    label="Email me when someone replies to my thread"
-                    status={ threadReply }
-                    dStatus={ dThreadReply }
-                    handleChange={ () => setDThreadReply(!dThreadReply) } />
-                <EmailSetting
-                    label="Email me when someone replies to my comment"
-                    status={ commentReply }
-                    dStatus={ dCommentReply }
-                    handleChange={ () => setDCommentReply(!dCommentReply) } />
-                <EmailSetting
-                    label="Email me when someone mentions me"
-                    status={ mention }
-                    dStatus={ dMention }
-                    handleChange={ () => setDMention(!dMention) } />
+            <div className="min-w-max w-[850px] border-2 
+                border-light-gray rounded p-4 pr-8">
+                <EmailSetting label={ watchActivityMsg }
+                    status={ threadActivity } dStatus={ dThreadActivity }
+                    handleChange={ () => 
+                        setDThreadActivity(!dThreadActivity) } />
+                <EmailSetting label={ myPostActivityMsg }
+                    status={ threadReply } dStatus={ dThreadReply }
+                    handleChange={ () => 
+                        setDThreadReply(!dThreadReply) } />
+                <EmailSetting label={ myCommentReplyMsg }
+                    status={ commentReply } dStatus={ dCommentReply }
+                    handleChange={ () => 
+                        setDCommentReply(!dCommentReply) } />
+                <EmailSetting label={ mentionMsg }
+                    status={ mention } dStatus={ dMention }
+                    handleChange={ () => 
+                        setDMention(!dMention) } />
                 <button onClick={ handleSave }
-                    className="border border-white rounded bg-purple py-3 w-full
-                        mt-6 hover:bg-violet-800">
+                    className="border border-white rounded bg-purple 
+                        py-3 w-full mt-6 hover:bg-violet-800">
                     Save
                 </button>
                 { showSavedAlert && <span>Saved!</span>}
                 { showSaveFailedAlert && 
-                <span> Couldn't save your settings. Please check your connection. </span>}
+                <span> { couldntSaveMsg } </span>}
             </div>
         </div>
     )
