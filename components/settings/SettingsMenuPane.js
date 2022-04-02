@@ -6,7 +6,8 @@ function SettingsMenuPane() {
             className="flex flex-col flex-auto w-1/4 bg-light-gray h-full
                 items-end p-6">
             <SettingsMenuButton label="Account" href="/settings/account"/>
-            <SettingsMenuButton label="Notifications" href="/settings/notifications"/>
+            <SettingsMenuButton 
+                label="Notifications" href="/settings/notifications"/>
         </div>
     )
 }
