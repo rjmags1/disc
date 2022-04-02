@@ -7,7 +7,8 @@ function ProfileCard({ name, email, avatarSrc, handleNewSrc }) {
             <div className="w-max">
                 <div className="flex border-2 border-light-gray rounded-md
                     mt-3 p-4 pr-32">
-                    <ProfileCardAvatar src={ avatarSrc } handleNewSrc={ handleNewSrc }/>
+                    <ProfileCardAvatar 
+                        src={ avatarSrc } handleNewSrc={ handleNewSrc } />
                     <div className="ml-8 flex flex-col justify-center">
                         <h3 className="text-xl my-1">{ name }</h3>
                         <h4 className="text-xs my-1">{ email }</h4>

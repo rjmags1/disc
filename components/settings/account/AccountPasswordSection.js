@@ -4,6 +4,9 @@ function AccountPasswordSection() {
         // be sure to throttle
     }
 
+    const emailPasswordResetMsg = `
+        Click to have a reset password email sent to your primary email.`
+
     return (
         <div data-testid="account-password-section-container"
             className="mt-10">
@@ -15,7 +18,7 @@ function AccountPasswordSection() {
                     Reset Password
                 </button>
                 <p className="text-sm mt-2">
-                    Click to have a reset password email sent to your primary email.
+                    { emailPasswordResetMsg }
                 </p>
             </div>
         </div>
