@@ -28,7 +28,7 @@ ALTER TABLE person
 ALTER TABLE person
     ADD CONSTRAINT no_shared_primary_email UNIQUE (user_id, primary_email);
 CREATE INDEX person_lookup ON person (user_id, primary_email, is_staff, is_instructor);
-CREATE INDEX email_lookup ON email (email);
+CREATE INDEX email_lookup ON email (person, email);
 
 
 

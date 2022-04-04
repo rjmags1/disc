@@ -24,11 +24,9 @@ function LoginForm() {
         }
 
         const body = {
-            credentials: {
-                email: email,
-                password: password,
-                org: org
-            }
+            email: email,
+            password: password,
+            org: org
         }
         try {
             mutateUser(async () => {

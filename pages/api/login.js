@@ -13,11 +13,13 @@ export default withIronSessionApiRoute(async function(req, resp) {
         resp.status(204).json({ message: "already logged in" })
         return
     }
-    if (!req.body?.credentials) {
-        resp.status(400).json({ message: "need to supply credentials to login" })
+    if (!req.body) {
+        resp.status(400).json({
+            message: "need to supply credentials to login"
+        })
         return
     }
-    const { email, password, org } = await req.body.credentials
+    const { email, password, org } = await req.body
     if (!email || !password || !loginValidator(email, password, org)) {
         resp.status(400).json({ message: "invalid credentials" })
         return
@@ -26,12 +28,21 @@ export default withIronSessionApiRoute(async function(req, resp) {
     let result
     try {
         let queryText = `SELECT
-                            userId, fname, lname, email, avatarurl, passwordhash, isadmin
-                            FROM person
-                            WHERE email = $1 LIMIT 1`
+                            user_id, 
+                            f_name, 
+                            l_name, 
+                            is_admin,
+                            is_staff,
+                            is_instructor,
+                            avatar_url,
+                            password_hash
+                        FROM person JOIN email ON
+                            person.user_id = email.person WHERE email = $1`
         let params = [email]
         result = await query(queryText, params)
+        console.log(result.rows[0])
 
+        // extra round trip now for dev
         queryText = `SELECT * FROM orgs WHERE name = $1`
         params = [formatOrgForDb(org)]
         const checkForRow = await query(queryText, params)
@@ -50,14 +61,14 @@ export default withIronSessionApiRoute(async function(req, resp) {
         return
     }
     
-    const hashed = result.rows[0].passwordhash
+    const hashed = result.rows[0].password_hash
     const match = await compare(password, hashed)
     if (!match) {
         resp.status(400).json({ message: "invalid credentials" })
         return
     }
     const userInfo = Object.fromEntries(Object.entries(result.rows[0]).
-        filter(([key]) => !key.includes("passwordhash")))
+        filter(([key]) => !key.includes("password_hash")))
     const user = { 
         authenticated: true,
         ...userInfo
