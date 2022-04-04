@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test')
+const { test } = require('@playwright/test')
 const { login, TESTUSER_REGISTERED } = require('../lib/auth')
 
 test.describe('auth protected pages redirect to login page when logged in',
