@@ -1,5 +1,5 @@
-import { query } from "../../db/index"
-import { sessionOptions } from "../../lib/session"
+import { query } from "../../../db/index"
+import { sessionOptions } from "../../../lib/session"
 import { withIronSessionApiRoute } from "iron-session/next"
 
 export default withIronSessionApiRoute(async function(req, resp) {

@@ -1,8 +1,8 @@
 import { withIronSessionApiRoute } from "iron-session/next"
-import { sessionOptions } from "../../lib/session"
-import { query } from "../../db/index"
+import { sessionOptions } from "../../../lib/session"
+import { query } from "../../../db/index"
 import { compare } from "bcrypt"
-import { loginValidator, formatOrgForDb } from "../../lib/validation"
+import { loginValidator, formatOrgForDb } from "../../../lib/validation"
 
 export default withIronSessionApiRoute(async function(req, resp) {
     if (req.method !== 'POST') {

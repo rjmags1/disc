@@ -9,7 +9,7 @@ function ProfileDropdownButton({ label, last, href }) {
         event.preventDefault()
         if (/logout/gi.test(href)) {
             mutateUser(async () => {
-                await fetch("/api/logout", {
+                await fetch("/api/auth/logout", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" }
                 })

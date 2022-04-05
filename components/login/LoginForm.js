@@ -30,7 +30,7 @@ function LoginForm() {
         }
         try {
             mutateUser(async () => {
-                const resp = await fetch("/api/login", {
+                const resp = await fetch("/api/auth/login", {
                     method: 'POST',
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(body)
@@ -57,7 +57,7 @@ function LoginForm() {
             org: org
         }
         try {
-            const resp = await fetch("/api/sendMagicLink", {
+            const resp = await fetch("/api/auth/sendMagicLink", {
                 method: 'POST',
                 headers: { "Content-Type" : "application/json" },
                 body: JSON.stringify(body)

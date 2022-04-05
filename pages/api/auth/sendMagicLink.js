@@ -1,9 +1,9 @@
-import { sendEmail } from '../../lib/email'
-import { validEmail, formatOrgForDb, validOrg } from '../../lib/validation'
-import { query } from '../../db/index'
+import { sendEmail } from '../../../lib/email'
+import { validEmail, formatOrgForDb, validOrg } from '../../../lib/validation'
+import { query } from '../../../db/index'
 import { withIronSessionApiRoute } from 'iron-session/next'
 import { sealData } from 'iron-session'
-import { sessionOptions } from '../../lib/session'
+import { sessionOptions } from '../../../lib/session'
 
 export default withIronSessionApiRoute(async function(req, resp) {
     if (req.method !== 'POST') {
@@ -59,7 +59,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
             <h1>Hello from disc!</h1>
             <p>Here's your magic 
                 <a href=
-                ${ process.env.DOMAIN_URL }/api/magicLogin?seal=${ seal }>link
+                ${ process.env.DOMAIN_URL }/api/auth/magicLogin?seal=${ seal }>link
                 </a>
                 . Click it to login.
             </p>`

@@ -1,7 +1,7 @@
 import { unsealData } from 'iron-session'
 import { withIronSessionApiRoute } from 'iron-session/next'
-import { sessionOptions } from '../../lib/session'
-import { query } from '../../db/index'
+import { sessionOptions } from '../../../lib/session'
+import { query } from '../../../db/index'
 
 export default withIronSessionApiRoute(async function(req, resp) {
     if (req.method !== 'GET') {
