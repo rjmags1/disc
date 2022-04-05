@@ -28,19 +28,22 @@ export default withIronSessionApiRoute(async function(req, resp) {
     let result
     try {
         let queryText = `SELECT
-                            user_id, 
-                            f_name, 
-                            l_name, 
-                            is_admin,
-                            is_staff,
-                            is_instructor,
-                            avatar_url,
-                            password_hash
-                        FROM person JOIN email ON
-                            person.user_id = email.person WHERE email = $1`
+                            person.user_id, 
+                            person.f_name, 
+                            person.l_name, 
+                            person.is_admin,
+                            person.is_staff,
+                            person.is_instructor,
+                            person.avatar_url,
+                            person.password_hash,
+                            email.email as primary_email
+                        FROM person JOIN email ON person.user_id = email.person
+                        WHERE (SELECT person.primary_email FROM person 
+                            WHERE person.user_id = 
+                            (SELECT person from email WHERE email = $1))
+                        = email.email_id;`
         let params = [email]
         result = await query(queryText, params)
-        console.log(result.rows[0])
 
         // extra round trip now for dev
         queryText = `SELECT * FROM orgs WHERE name = $1`
@@ -73,6 +76,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
         authenticated: true,
         ...userInfo
     }
+    console.log(user)
     req.session.user = user
     await req.session.save()
     resp.status(200).json(user)

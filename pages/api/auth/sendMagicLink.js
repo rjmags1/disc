@@ -28,8 +28,8 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
     try {
         let queryText = `SELECT user_id FROM
-                            person JOIN email ON
-                                person.user_id = email.person WHERE email = $1`
+                            person JOIN email ON person.user_id = email.person 
+                        WHERE email = $1 LIMIT 1`
         let params = [email]
         const result = await query(queryText, params)
         const rows = result.rows
@@ -38,7 +38,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
             return
         }
 
-        // extra round trip for now
+        // extra round trip for now (dev)
         queryText = `SELECT * FROM orgs WHERE name = $1`
         params = [formatOrgForDb(org)]
         const checkForRow = await query(queryText, params)

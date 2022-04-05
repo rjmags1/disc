@@ -17,7 +17,7 @@ async function logoutRoute(req, resp) {
         user_id: "",
         f_name: "",
         l_name: "",
-        email: "",
+        primary_email: "",
         avatar_url: ""
     })
 }
