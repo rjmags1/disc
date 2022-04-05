@@ -15,7 +15,8 @@ export default withIronSessionApiRoute(async function(req, resp) {
         return
     }
     if (!req.body.email) {
-        resp.status(400).json({ message: "must specify email to send magic link to"})
+        resp.status(400).json({ 
+            message: "must specify email to send magic link to"})
         return
     }
     const { org, email } = req.body
@@ -26,7 +27,9 @@ export default withIronSessionApiRoute(async function(req, resp) {
     
 
     try {
-        let queryText = "SELECT userid from person where email = $1"
+        let queryText = `SELECT user_id FROM
+                            person JOIN email ON
+                                person.user_id = email.person WHERE email = $1`
         let params = [email]
         const result = await query(queryText, params)
         const rows = result.rows
@@ -35,6 +38,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
             return
         }
 
+        // extra round trip for now
         queryText = `SELECT * FROM orgs WHERE name = $1`
         params = [formatOrgForDb(org)]
         const checkForRow = await query(queryText, params)
@@ -43,22 +47,28 @@ export default withIronSessionApiRoute(async function(req, resp) {
             return
         }
 
-        const userId = rows[0].userid
+        const userId = rows[0].user_id
         const seal = await sealData(
             { userId: userId },
             { 
                 password: process.env.SECRET_COOKIE_PASSWORD,
-                ttl: 5 * 60 // 5 minutes in seconds
+                ttl: 5 * 60 // expire in 5 minutes
             }
         )
         const message = `
             <h1>Hello from disc!</h1>
             <p>Here's your magic 
-                <a href=${ process.env.DOMAIN_URL }/api/magicLogin?seal=${ seal }>link</a>
+                <a href=
+                ${ process.env.DOMAIN_URL }/api/magicLogin?seal=${ seal }>link
+                </a>
                 . Click it to login.
             </p>`
         
-        await sendEmail(email, "disc <donotreply@disc.com>", "Email login link", message)
+        await sendEmail(
+            email, 
+            "disc <donotreply@disc.com>", 
+            "Email login link", 
+            message)
         
         resp.status(200).json({ message: "check your email!" })
     }

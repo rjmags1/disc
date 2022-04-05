@@ -15,8 +15,14 @@ test.describe('valid registered inputs accepted', async () => {
     test(`email and org fields filled with valid input -> 
         check your email alert`, 
         async ({ page }) => {
+
+        page.on('dialog', async dialog => {
+            expect(dialog.message()).toContain(/check your email/gi)
+            await dialog.dismiss()
+        })
+
         await emailLogin(page, TESTUSER_REGISTERED)
 
-        page.on('dialog', dialog => dialog.accept())
+        await expect(page.locator('text=/invalid/gi')).not.toBeVisible()
     })
 })

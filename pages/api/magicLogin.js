@@ -20,10 +20,16 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
     let result
     try {
-        const queryText = `SELECT
-                            userId, fname, lname, email, avatarurl, isadmin
-                            FROM person
-                            WHERE userid = $1 LIMIT 1`
+        const queryText =`SELECT
+                            user_id, 
+                            f_name, 
+                            l_name, 
+                            is_admin,
+                            is_staff,
+                            is_instructor,
+                            avatar_url,
+                            password_hash
+                        FROM person WHERE user_id = $1`
         const params = [userId]
         result = await query(queryText, params)
     }
@@ -33,7 +39,8 @@ export default withIronSessionApiRoute(async function(req, resp) {
         return
     }
     if (result.rows.length === 0) {
-        resp.status(400).json({ message: "failed to perform login. do not alter the sent link." })
+        resp.status(400).json({ 
+            message: "failed to perform login. do not alter the sent link." })
         return
     }
 
