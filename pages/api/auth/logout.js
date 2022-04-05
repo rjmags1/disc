@@ -14,9 +14,10 @@ async function logoutRoute(req, resp) {
     req.session.destroy()
     resp.status(200).json({
         authenticated: false,
-        userId: "",
-        username: "",
+        user_id: "",
+        f_name: "",
+        l_name: "",
         email: "",
-        avatarUrl: ""
+        avatar_url: ""
     })
 }

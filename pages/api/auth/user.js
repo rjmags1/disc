@@ -14,11 +14,11 @@ export default withIronSessionApiRoute(async function (req, resp) {
     else {
         resp.json({
             authenticated: false,
-            userid: "",
-            fname: "",
-            lname: "",
+            user_id: "",
+            f_name: "",
+            l_name: "",
             email: "",
-            avatarurl: ""
+            avatar_url: ""
         })
     }
 }, sessionOptions)
