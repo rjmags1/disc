@@ -1,7 +1,7 @@
 import AccountEmailList from './AccountEmailList'
 import AccountAddEmailInput from './AccountAddEmailInput'
 
-function AccountEmailSection({ primary, emails, updateDisplayedEmails }) {
+function AccountEmailSection() {
     const primaryEmailMsg = `
         You will only receive emails at your primary email address.`
     const additionalEmailMsg = `
@@ -20,10 +20,8 @@ function AccountEmailSection({ primary, emails, updateDisplayedEmails }) {
                     <p className="text-sm mb-3">{ primaryEmailMsg }</p>
                     <p className="text-sm mb-3">{ additionalEmailMsg }</p>
                     <p className="text-sm mb-3">{ registeredEmailLoginMsg }</p>
-                    <AccountEmailList primary={ primary } emails={ emails }/>
-                    <AccountAddEmailInput 
-                        updateDisplayedEmails={ updateDisplayedEmails }
-                        emails={ emails }/>
+                    <AccountEmailList />
+                    <AccountAddEmailInput />
                 </div>
             </div>
         </div>

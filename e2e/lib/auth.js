@@ -1,7 +1,12 @@
 exports.TESTUSER_REGISTERED = {
     email: "john-doe@hogwarts.edu",
     password: "johnspassword",
-    organization: "Hogwarts"
+    organization: "Hogwarts",
+    allEmails: [
+        "john-doe@hogwarts.edu", 
+        "john@gmail.com", 
+        "john@yahoo.com"
+    ]
 }
 
 exports.TESTUSER_UNREGISTERED = {

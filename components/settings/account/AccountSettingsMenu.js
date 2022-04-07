@@ -1,33 +1,26 @@
-import { useState, useEffect } from 'react'
+import { useUser } from '../../../lib/hooks'
 
 import ProfileCard from './ProfileCard'
 import AccountEmailSection from './AccountEmailSection'
 import AccountPasswordSection from './AccountPasswordSection'
 
 function AccountSettingsMenu() {
-    const [name, setName] = useState("")
-    const [emails, setEmails] = useState([])
-    const [primaryEmail, setPrimaryEmail] = useState("")
-    const [avatarSrc, setAvatarSrc] = useState("/profile-button-img.png")
+    const { user } = useUser()
+    const {
+        f_name: firstName,
+        l_name: lastName,
+        primary_email: primaryEmail,
+        avatar_url: avatarUrl
+    } = user
+    const fullName = `${ firstName } ${ lastName }`
 
-    useEffect(() => {
-        // dummy data for now
-        setName("dummy-name")
-        setPrimaryEmail("dummy-email-0")
-        setEmails(["dummy-email-0", "dummy-email-1", "dummy-email-2"])
-    }, [])
-
-    const showNewEmail = function(newEmail) {
-        setEmails(oldEmails => [...oldEmails, newEmail])
-    }
 
     return  (
         <div data-testid="account-menu-container"
             className="bg-zinc-900 text-white h-full p-6 flex-auto w-3/4">
-            <ProfileCard name={ name } email={ primaryEmail }
-                avatarSrc={ avatarSrc } handleNewSrc={ setAvatarSrc }/>
-            <AccountEmailSection primary={ primaryEmail }
-                emails={ emails } updateDisplayedEmails={ showNewEmail } />
+            <ProfileCard name={ fullName } email={ primaryEmail }
+                avatarSrc={ avatarUrl } />
+            <AccountEmailSection />
             <AccountPasswordSection />
         </div>
     )

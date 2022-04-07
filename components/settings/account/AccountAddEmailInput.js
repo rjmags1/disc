@@ -1,15 +1,20 @@
 import { useState } from 'react'
+import { useUser, useEmails } from '../../../lib/hooks'
 
 import NewEmailSubmitFailedMessage from './NewEmailSubmitFailedMessage'
 import { validEmail } from '../../../lib/validation'
 
-function AccountAddEmailInput({ updateDisplayedEmails, emails }) {
-    const [newEmail, setNewEmail] = useState("")
+function AccountAddEmailInput() {
     const [submitFailed, setSubmitFailed] = useState(false)
     const [invalidEmail, setInvalidEmail] = useState(false)
+    const [newEmail, setNewEmail] = useState("")
+
+    const { user: { user_id: userId } } = useUser()
+    const { emails, mutateEmails } = useEmails(userId)
 
     const validNewEmail = function() {
-        const previouslyRegistered = emails.indexOf(newEmail) > -1
+        console.log(typeof(emails.emails))
+        const previouslyRegistered = emails.emails.indexOf(newEmail) > -1
         return validEmail(newEmail) && !previouslyRegistered
     }
 
@@ -26,6 +31,29 @@ function AccountAddEmailInput({ updateDisplayedEmails, emails }) {
         // setSubmitFailed(false)
         // setNewEmail("")
         // updateDisplayedEmails(newEmail)
+        const body = {
+            userId: userId,
+            newEmail: newEmail
+        }
+        try {
+            mutateEmails(async () => {
+                const resp = await fetch('/api/settings/email/create', {
+                    method: 'POST',
+                    headers: { "Content-Type" : "application/json" },
+                    body: JSON.stringify(body)
+                })
+                if (!resp.ok) setSubmitFailed(true)
+                else {
+                    setSubmitFailed(false)
+                    setNewEmail("")
+                }
+                return { emails: [...emails.emails, newEmail] }
+            })
+        }
+        catch (error) {
+            setSubmitFailed(true)
+            console.error(error)
+        }
     }
 
     return (
@@ -40,7 +68,7 @@ function AccountAddEmailInput({ updateDisplayedEmails, emails }) {
                             border-white p-0.5 px-1 w-72">
                     </input>
                 </label>
-                <input type="submit" value="Add" 
+                <input type="submit" value="Add" id="new-email-submit"
                     className="mx-2 bg-purple border rounded
                         border-white p-0.5 px-4 
                         hover:cursor-pointer hover:bg-black" />
