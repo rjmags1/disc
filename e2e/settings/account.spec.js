@@ -1,8 +1,7 @@
 const { test, expect } = require('@playwright/test')
 const { login, TESTUSER_REGISTERED } = require('../lib/auth')
 const { unsealData } = require('iron-session')
-const path = require('path')
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env.e2e') })
+const { query } = require('../lib/db')
 
 const NEW_REGISTERED_TEST_USER_EMAIL = "johnsNewEmail@gmail.com"
 
@@ -18,24 +17,9 @@ test.beforeEach(async ({ page }) => {
 })
 
 test.afterAll(async () => {
-    const { Pool } = require('pg')
-    const pool = new Pool({
-        user: process.env.PGUSER,
-        host: process.env.PGHOST,
-        database: process.env.PGDATABASE,
-        password: process.env.PGPASSWORD,
-        port: process.env.PGPORT
-    })
-
     const queryText = `DELETE FROM email WHERE email = $1`
     const params = [NEW_REGISTERED_TEST_USER_EMAIL]
-    
-    try {
-        await pool.query(queryText, params)
-    }
-    catch (error) {
-        console.error(error.message)
-    }
+    await query(queryText, params)
 })
 
 test.describe('settings menu pane', async () => {

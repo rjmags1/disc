@@ -20,3 +20,15 @@ export const query = async function (text, params) {
         throw new Error("query failed", { cause: error })
     }
 }
+
+export const poolQuery = async function(queryText, params) {
+    const client = await pool.connect()
+    let queryResult
+    try {
+        queryResult = await client.query(queryText, params)
+    }
+    finally {
+        client.release()
+    }
+    return queryResult
+}

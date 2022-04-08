@@ -1,69 +1,90 @@
 import { useEffect, useState } from 'react'
+import { useNotificationSettings, useUser } from '../../../lib/hooks'
 
+import Loading from '../../../components/lib/Loading'
 import EmailSetting from './EmailSetting'
 
 function NotificationsMenu() {
-    const [threadActivity, setThreadActivity] = useState(false)
-    const [threadReply, setThreadReply] = useState(false)
+    const [watch, setWatch] = useState(false)
+    const [myPostActivity, setMyPostActivity] = useState(false)
     const [commentReply, setCommentReply] = useState(false)
     const [mention, setMention] = useState(false)
 
-    const [dThreadActivity, setDThreadActivity] = useState(false)
-    const [dThreadReply, setDThreadReply] = useState(false)
-    const [dCommentReply, setDCommentReply] = useState(false)
-    const [dMention, setDMention] = useState(false)
+    const [displayedWatch, setDisplayedWatch] = useState(false)
+    const [displayedMyPostActivity, setDisplayedMyPostActivity] = useState(false)
+    const [displayedCommentReply, setDisplayedCommentReply] = useState(false)
+    const [displayedMention, setDisplayedMention] = useState(false)
 
     const [showSavedAlert, setShowSavedAlert] = useState(false)
     const [showSaveFailedAlert, setSaveFailedAlert] = useState(false)
 
+    const { user : { user_id: userId }, loadingUserFromCache } = useUser()
+
+    const { 
+        notificationSettings,
+        mutateNotificationSettings,
+        loading
+    } = useNotificationSettings(userId)
+
+
     useEffect(() => {
-        // fetch user settings
-        // dummy for now
-        const fetched = {
-            watchedThreadActivity: true,
-            myThreadReply: false,
-            myCommentReply: true,
-            mention: false,
-        }
-        const { 
-            watchedThreadActivity,
-            myThreadReply,
-            myCommentReply,
-            mention } = fetched
+        if (notificationSettings === undefined) return
+        const {
+            settingStatuses: {
+                comment_reply_email_setting: replyStatus,
+                mention_email_setting: mentionStatus,
+                post_activity_email_setting: myPostActivityStatus,
+                watch_email_setting: watchStatus
+            }
+        } = notificationSettings
+        setWatch(watchStatus)
+        setDisplayedWatch(watchStatus)
+        setMyPostActivity(myPostActivityStatus)
+        setDisplayedMyPostActivity(myPostActivityStatus)
+        setCommentReply(replyStatus)
+        setDisplayedCommentReply(replyStatus)
+        setMention(mentionStatus)
+        setDisplayedMention(mentionStatus)
+    }, [notificationSettings])
 
-        setThreadActivity(watchedThreadActivity)
-        setThreadReply(myThreadReply)
-        setCommentReply(myCommentReply)
-        setMention(mention)
-
-        setDThreadActivity(watchedThreadActivity)
-        setDThreadReply(myThreadReply)
-        setDCommentReply(myCommentReply)
-        setDMention(mention)
-    }, [])
 
     const alertSaveSuccess = function() {
         setShowSavedAlert(true)
-        setTimeout(() => setShowSavedAlert(false), 2000)
+        setTimeout(() => setShowSavedAlert(false), 2 * 1000)
     }
 
     const alertSaveFailed = function() {
         setSaveFailedAlert(true)
-        setTimeout(() => setSaveFailedAlert(false), 2000)
+        setTimeout(() => setSaveFailedAlert(false), 2 * 1000)
     }
 
     const handleSave = function() {
-        // collect settings
-        // api call to write new settings to database
+        const newSettings = {
+            comment_reply_email_setting: displayedCommentReply,
+            mention_email_setting: displayedMention,
+            post_activity_email_setting: displayedMyPostActivity,
+            watch_email_setting: displayedWatch
+        }
 
-        // if api call failed alertSaveFailed() and return. otherwise:
-        // setThreadActivity(dThreadActivity)
-        // setCommentReply(dCommentReply)
-        // setMention(dMention)
-        // setThreadReply(dThreadReply)
-
-        // alertSaveSuccess()
+        const body = { userId, settings: newSettings }
+        const updateUrl = '/api/settings/email/notifications/update'
+        try {
+            mutateNotificationSettings(async () => {
+                const resp = await fetch(updateUrl, {
+                    method: 'PATCH',
+                    headers: { "Content-Type" : "application/json" },
+                    body: JSON.stringify(body)
+                })
+                if (!resp.ok) alertSaveFailed()
+                else alertSaveSuccess()
+            })
+        }
+        catch (error) {
+            alertSaveFailed()
+            console.error(error.message)
+        }
     }
+
 
     const watchActivityMsg = `
         Email me when there is activity in a thread I'm watching`
@@ -76,6 +97,7 @@ function NotificationsMenu() {
     const couldntSaveMsg = `
         Couldn't save your settings. Please check your connection.`
 
+    if (loading || loadingUserFromCache) return <Loading />
     return (
         <div data-testid="notifications-menu-container"
             className="bg-zinc-900 text-white h-full p-6 flex-auto w-3/4">
@@ -83,21 +105,23 @@ function NotificationsMenu() {
             <div className="min-w-max w-[850px] border-2 
                 border-light-gray rounded p-4 pr-8">
                 <EmailSetting label={ watchActivityMsg }
-                    status={ threadActivity } dStatus={ dThreadActivity }
+                    status={ watch } dStatus={ displayedWatch }
                     handleChange={ () => 
-                        setDThreadActivity(!dThreadActivity) } />
+                        setDisplayedWatch(!displayedWatch) } />
                 <EmailSetting label={ myPostActivityMsg }
-                    status={ threadReply } dStatus={ dThreadReply }
+                    status={ myPostActivity }
+                    dStatus={ displayedMyPostActivity }
                     handleChange={ () => 
-                        setDThreadReply(!dThreadReply) } />
+                        setDisplayedMyPostActivity(
+                            !displayedMyPostActivity) } />
                 <EmailSetting label={ myCommentReplyMsg }
-                    status={ commentReply } dStatus={ dCommentReply }
+                    status={ commentReply } dStatus={ displayedCommentReply }
                     handleChange={ () => 
-                        setDCommentReply(!dCommentReply) } />
+                        setDisplayedCommentReply(!displayedCommentReply) } />
                 <EmailSetting label={ mentionMsg }
-                    status={ mention } dStatus={ dMention }
+                    status={ mention } dStatus={ displayedMention }
                     handleChange={ () => 
-                        setDMention(!dMention) } />
+                        setDisplayedMention(!displayedMention) } />
                 <button onClick={ handleSave }
                     className="border border-white rounded bg-purple 
                         py-3 w-full mt-6 hover:bg-violet-800">
