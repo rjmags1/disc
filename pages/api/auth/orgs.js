@@ -10,8 +10,8 @@ export default withIronSessionApiRoute(async function(req, resp) {
     try {
         const queryText = "SELECT * FROM Orgs"
         const result = await query(queryText) // array of row objects
-        const orgs = {}
-        result.rows.forEach((org, idx) => { orgs[idx] = org })
+        const orgs = []
+        result.rows.forEach((row) => { orgs.push(row.name) })
         resp.status(200).json(orgs)
     }
     catch (error) {
