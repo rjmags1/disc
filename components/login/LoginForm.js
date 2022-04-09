@@ -12,7 +12,7 @@ function LoginForm() {
     const [password, setPassword] = useState("")
     const [showInvalidMessage, setInvalidMessage] = useState(false)
 
-    const { orgs } = useOrgs()
+    const { orgs, loading: loadingOrgs } = useOrgs()
     const { mutateUser } = useUser({ redirectTo: '/', redirectIfFound: true })
 
     const handleNormalLogin = async function(event) {
@@ -75,7 +75,7 @@ function LoginForm() {
         }
     }
 
-    const orgNames = orgs ? Object.entries(orgs).map(([_, v]) => v.name) : []
+    const orgNames = loadingOrgs ? [] : Object.entries(orgs).map(([_, v]) => v.name)
     const emailInputAttributes = {
         label: "Email:",
         inputId: "email-input",

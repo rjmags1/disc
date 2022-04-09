@@ -18,7 +18,7 @@ function NotificationsMenu() {
     const [showSavedAlert, setShowSavedAlert] = useState(false)
     const [showSaveFailedAlert, setSaveFailedAlert] = useState(false)
 
-    const { user : { user_id: userId }, loadingUserFromCache } = useUser()
+    const { user : { user_id: userId }, loading: loadingUser } = useUser()
 
     const { 
         notificationSettings,
@@ -97,7 +97,7 @@ function NotificationsMenu() {
     const couldntSaveMsg = `
         Couldn't save your settings. Please check your connection.`
 
-    if (loading || loadingUserFromCache) return <Loading />
+    if (loading || loadingUser) return <Loading />
     return (
         <div data-testid="notifications-menu-container"
             className="bg-zinc-900 text-white h-full p-6 flex-auto w-3/4">

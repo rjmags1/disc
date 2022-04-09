@@ -4,9 +4,9 @@ import Loading from '../components/lib/Loading'
 import Head from 'next/head'
 
 function Index() {
-    const { loadingUserFromCache, user } = useUser({ redirectTo: "/login" })
+    const { loading: loadingUser, user } = useUser({ redirectTo: "/login" })
 
-    if (loadingUserFromCache || !user.authenticated) {
+    if (loadingUser || !user.authenticated) {
         return (
             <>
                 <Head>

@@ -4,9 +4,9 @@ import Loading from '../components/lib/Loading'
 import Head from 'next/head'
 
 function Login() {
-    const { loadingUserFromCache, user } = useUser({ redirectTo: "/", redirectIfFound: true })
+    const { loading: loadingUser, user } = useUser({ redirectTo: "/", redirectIfFound: true })
 
-    if (loadingUserFromCache || user.authenticated) return <Loading />
+    if (loadingUser || user.authenticated) return <Loading />
     return (
         <div data-testid="login-page-container"
             className="w-screen h-screen flex justify-center
