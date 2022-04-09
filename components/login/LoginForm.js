@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useOrgs, useUser } from '../../lib/hooks'
 import { validLoginInfo, validEmail, validOrg } from '../../lib/validation'
-import ButtonLoading from '../lib/ButtonLoading'
 
+import NormalLoginButton from './NormalLoginButton'
+import EmailButtonLoading from './EmailLoginButton'
 import LoginDatalist from './LoginDatalist'
 import LoginTextInput from './LoginTextInput'
 import InvalidLoginMessage from './InvalidLoginMessage'
@@ -18,6 +19,7 @@ function LoginForm() {
 
     const { orgs, loading: loadingOrgs } = useOrgs()
     const { mutateUser } = useUser({ redirectTo: '/', redirectIfFound: true })
+
 
     const handleNormalLogin = async function(event) {
         event.preventDefault()
@@ -100,6 +102,7 @@ function LoginForm() {
         }
     }
 
+
     const orgNames = loadingOrgs ? [] : orgs
     const emailInputAttributes = {
         label: "Email:",
@@ -128,29 +131,12 @@ function LoginForm() {
                     handleChange={ e => setEmail(e.target.value) } />
                 <LoginTextInput attributes={ passwordInputAttributes } blur
                     handleChange={ e => setPassword(e.target.value) } />
-                <button type="button" onClick={ handleNormalLogin }
-                    id="full-login-submit-button"
-                    className="w-full bg-purple rounded-md h-12 mt-7 
-                    hover:bg-violet-600 hover:cursor-pointer" >
-                    { processingNormalLogin ? 
-                    <span className='flex justify-center items-center'>
-                        Processing...<ButtonLoading />
-                    </span>  
-                    : 
-                    "Login" }
-                </button>
+                <NormalLoginButton handleClick={ handleNormalLogin } 
+                    processing={ processingNormalLogin }/>
             </div>
             <div>
-                <button type="button" className="mt-7 p-3 bg-slate-600 
-                    rounded-md hover:bg-gray-700 h-12 w-full" 
-                    id="email-login-submit-button" onClick={ handleEmailLogin }>
-                    { processingEmailLogin ? 
-                    <span className='flex justify-center items-center'>
-                        Processing...<ButtonLoading />
-                    </span>  
-                    : 
-                    "Email Me Login Link" }
-                </button>
+                <EmailButtonLoading handleClick={ handleEmailLogin }
+                    processing={ processingEmailLogin } />
                 <p className="text-xs mt-1">
                     <i>{ forgotPasswordText }</i>
                 </p>
