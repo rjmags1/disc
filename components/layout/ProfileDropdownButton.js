@@ -3,32 +3,34 @@ import { useUser } from '../../lib/hooks'
 
 function ProfileDropdownButton({ label, last, href }) {
     const router = useRouter()
-    const { mutateUser } = useUser({ redirectTo: '/login' })
+    const { mutateUser } = useUser()
 
     const handleClick = async function(event) {
         event.preventDefault()
         if (/logout/gi.test(href)) {
             // destroy session cookie
-            await fetch("/api/auth/logout", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" }
-            })
-            // cast revalidation message on user data hook 
-            mutateUser()
+            try {
+                await fetch("/api/auth/logout", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                })
+                // cast revalidation message on user data hook 
+                mutateUser()
+            }
+            catch (error) {
+                console.error(error)
+                alert("problem logging you out. check your connection")
+            }
 
             /*
-            cant utilize redirect effect of useUser hook to redirect
-            to login at this point because we cant allow attempts to 
-            render components on the current page who useUser and expect 
-            parent page component to auth/render guard on user for them. 
-            render guard --> if (loadingUser) return <Loading />.
-            note that login page is in fact auth/render guarded.
-            not forcing a login page render by pushing to router here could
-            cause current page components, who were previously protected
-            from runtime undefined user ReferenceError by a render guarding 
-            parent page component, to throw runtime ReferenceError on 
-            undefined user before the post-logout-click, revalidated user  
-            useUser effect causes login page redirection.
+            may seem redundant to directly push login to router here but 
+            cant rely on redirect effect of useUser hook to redirect
+            to login at this point because it would allow a render attempt
+            of components that assume defined user with undefined user, causing
+            runtime ref error (previously prevented by ancestor page component
+            auth guard behavior that specifies redirect behavior in its useUser 
+            call). note that login page is in fact auth/render guarded and so
+            it checks for undefined user (by checking loadingUser).
             */
             router.push('/login')  
         }

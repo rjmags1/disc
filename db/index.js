@@ -11,13 +11,20 @@ const pool = new Pool({
 export const query = async function (text, params) {
     try {
         const result = await pool.query(text, params)
-        console.log(`/db/index QUERY SUCCESS: query: ${text},\n
-            result first row: ${result.rows ? result.rows[0] : result.rows}`)
+        console.log(`
+            QUERY SUCCESS: 
+            query: ${text},\n
+            result first row: ${result.rows ? result.rows[0] : result.rows}
+        `)
         return result
     }
     catch (error) {
-        console.error(`/db/index QUERY ERROR: query: ${text}`, error.stack)
-        throw new Error("query failed", { cause: error })
+        console.error(`
+            QUERY ERROR: 
+            query: ${text}\n
+            error: ${error.stack}
+        `)
+        throw new Error("query failed", error)
     }
 }
 
@@ -27,8 +34,16 @@ export const poolQuery = async function(queryText, params) {
     try {
         queryResult = await client.query(queryText, params)
     }
+    catch (error) {
+        console.error(`
+            QUERY ERROR: 
+            query: ${text}\n
+            error: ${error.stack}
+        `)
+        throw new Error("query failed", error)
+    }
     finally {
-        client.release()
+        client.release() // always release client. client leaks = bad.
     }
     return queryResult
 }
