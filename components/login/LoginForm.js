@@ -11,6 +11,7 @@ function LoginForm() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [showInvalidMessage, setInvalidMessage] = useState(false)
+    const [failedAttempts, setFailedAttempts] = useState(0)
 
     const { orgs, loading: loadingOrgs } = useOrgs()
     const { mutateUser } = useUser({ redirectTo: '/', redirectIfFound: true })
@@ -19,6 +20,7 @@ function LoginForm() {
         event.preventDefault()
         const valid = loginValidator(email, password, org)
         if (!valid) {
+            setFailedAttempts(failedAttempts + 1)
             setInvalidMessage(true)
             return
         }
@@ -35,7 +37,10 @@ function LoginForm() {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(body)
                 })
-                if (!resp.ok) setInvalidMessage(true)
+                if (!resp.ok) {
+                    setFailedAttempts(failedAttempts + 1)
+                    setInvalidMessage(true)
+                }
                 else setInvalidMessage(false)
                 return resp
             })
@@ -48,6 +53,7 @@ function LoginForm() {
 
     const handleEmailLogin = async function() {
         if (!validEmail(email) || !validOrg(org)) {
+            setFailedAttempts(failedAttempts + 1)
             setInvalidMessage(true)
             return
         }
@@ -63,6 +69,7 @@ function LoginForm() {
                 body: JSON.stringify(body)
             })
             if (resp.status !== 200) {
+                setFailedAttempts(failedAttempts + 1)
                 setInvalidMessage(true)
                 return
             }
@@ -71,11 +78,12 @@ function LoginForm() {
         }
         catch (error) {
             console.error(error)
+            setFailedAttempts(failedAttempts + 1)
             setInvalidMessage(true)
         }
     }
 
-    const orgNames = loadingOrgs ? [] : Object.entries(orgs).map(([_, v]) => v.name)
+    const orgNames = loadingOrgs ? [] : orgs
     const emailInputAttributes = {
         label: "Email:",
         inputId: "email-input",
@@ -89,12 +97,13 @@ function LoginForm() {
     const forgotPasswordText = `
         Forgot password? Just enter org + email
         and click the gray button for email sign-in.
-        Login links expire after 5 minutes.
+        Emailed login links expire after 5 minutes.
         `
 
     return (
         <div data-testid="login-form-container" className="w-60 sm:w-96">
-            { showInvalidMessage && <InvalidLoginMessage />}
+            { showInvalidMessage && 
+            <InvalidLoginMessage failedAttempts={ failedAttempts } />}
             <form onSubmit={ handleNormalLogin }
                 name="login-form" className="mt-3">
                 <LoginDatalist label="Organization:" optionValues={ orgNames }
