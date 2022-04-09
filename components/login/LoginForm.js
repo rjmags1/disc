@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useOrgs, useUser } from '../../lib/hooks'
-import { loginValidator, validEmail, validOrg } from '../../lib/validation'
+import { validLoginInfo, validEmail, validOrg } from '../../lib/validation'
 import ButtonLoading from '../lib/ButtonLoading'
 
 import LoginDatalist from './LoginDatalist'
@@ -21,8 +21,7 @@ function LoginForm() {
 
     const handleNormalLogin = async function(event) {
         event.preventDefault()
-        const valid = loginValidator(email, password, org)
-        if (!valid) {
+        if (!validLoginInfo(email, password, org)) {
             setFailedAttempts(failedAttempts + 1)
             setInvalidMessage(true)
             return
