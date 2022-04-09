@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 function InvalidLoginMessage({ failedAttempts }) {
-    const pulseTime = 150 // needs to comply with tailwind duration- util
+    const pulseTime = 100
 
     useEffect(() => {
         const invalidMsgContainer = document.getElementById(
@@ -20,7 +20,7 @@ function InvalidLoginMessage({ failedAttempts }) {
             id="invalid-message-container"
             className={`text-center mt-6 border-solid border-2
             border-white rounded-md bg-red-800 p-1.5
-            transition-opacity duration-${ pulseTime }`}>
+            transition-opacity duration-[${ pulseTime }]`}>
             { messageText }
         </div>
     )
