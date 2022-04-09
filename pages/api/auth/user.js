@@ -6,7 +6,7 @@ export default withIronSessionApiRoute(async function (req, resp) {
         resp.status(405).json({ message: "invalid method" })
         return
     }
-    if (req.session.user) {
+    if (req.session?.user) {
         resp.json({
             ...req.session.user
         })
