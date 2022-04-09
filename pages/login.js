@@ -4,7 +4,10 @@ import Loading from '../components/lib/Loading'
 import Head from 'next/head'
 
 function Login() {
-    const { loading: loadingUser, user } = useUser({ redirectTo: "/", redirectIfFound: true })
+    const {
+        loading: loadingUser, 
+        user
+    } = useUser({ redirectTo: "/", redirectIfFound: true })
 
     if (loadingUser || user.authenticated) return <Loading />
     return (
@@ -14,7 +17,9 @@ function Login() {
             <Head>
                 <title>Login</title>
             </Head>
-            <h1 className="text-white font-mono text-7xl mb-8"><em><b>disc</b></em></h1>
+            <h1 className="text-white font-mono text-7xl mb-8">
+                <em><b>disc</b></em>
+            </h1>
             <LoginForm />
         </div>
     )

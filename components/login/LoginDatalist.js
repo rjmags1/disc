@@ -1,8 +1,8 @@
 function Datalist({ handleChange, label, optionValues }) {
-
     const options = optionValues.map((val, i) => 
         <option value={ val } key={ `${val}-${i}` }>{ val }</option>
     )
+
     return (
         <div data-testid="datalist-container-test" className="py-2">
             <label htmlFor="organization-input">{ label } </label>
