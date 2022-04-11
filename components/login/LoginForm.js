@@ -3,7 +3,7 @@ import { useOrgs, useUser } from '../../lib/hooks'
 import { validLoginInfo, validEmail, validOrg } from '../../lib/validation'
 
 import NormalLoginButton from './NormalLoginButton'
-import EmailButtonLoading from './EmailLoginButton'
+import EmailLoginButton from './EmailLoginButton'
 import LoginDatalist from './LoginDatalist'
 import LoginTextInput from './LoginTextInput'
 import InvalidLoginMessage from './InvalidLoginMessage'
@@ -16,10 +16,10 @@ function LoginForm() {
     const [failedAttempts, setFailedAttempts] = useState(0)
     const [processingNormalLogin, setProcessingNormalLogin] = useState(false)
     const [processingEmailLogin, setProcessingEmailLogin] = useState(false)
+    const [processing, setProcessing] = useState(false)
 
     const { orgs, loading: loadingOrgs } = useOrgs()
     const { mutateUser } = useUser({ redirectTo: '/', redirectIfFound: true })
-
 
     const handleNormalLogin = async function(event) {
         event.preventDefault()
@@ -30,8 +30,8 @@ function LoginForm() {
         }
 
         setProcessingNormalLogin(true)
+        setProcessing(true)
         setInvalidMessage(false)
-        document.getElementById("full-login-submit-button").disabled = true
         const body = {
             email: email,
             password: password,
@@ -40,7 +40,7 @@ function LoginForm() {
         try {
             mutateUser(async () => {
                 const resp = await fetch("/api/auth/login", {
-                    method: 'POST',
+                    method: 'PUT',
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(body)
                 })
@@ -57,7 +57,7 @@ function LoginForm() {
             alert("there was a problem verifying your credentials. try again")
         }
         finally {
-            document.getElementById("full-login-submit-button").disabled = false
+            setProcessing(false)
             setProcessingNormalLogin(false)
         }
     }
@@ -70,8 +70,8 @@ function LoginForm() {
         }
         
         setProcessingEmailLogin(true)
+        setProcessing(true)
         setInvalidMessage(false)
-        document.getElementById("email-login-submit-button").disabled = true
         const body = {
             email: email,
             org: org
@@ -97,7 +97,7 @@ function LoginForm() {
             setInvalidMessage(true)
         }
         finally {
-            document.getElementById("email-login-submit-button").disabled = false
+            setProcessing(false)
             setProcessingEmailLogin(false)
         }
     }
@@ -132,11 +132,13 @@ function LoginForm() {
                 <LoginTextInput attributes={ passwordInputAttributes } blur
                     handleChange={ e => setPassword(e.target.value) } />
                 <NormalLoginButton handleClick={ handleNormalLogin } 
-                    processing={ processingNormalLogin }/>
+                    processing={ processing } 
+                    processingNormal={ processingNormalLogin } />
             </div>
             <div>
-                <EmailButtonLoading handleClick={ handleEmailLogin }
-                    processing={ processingEmailLogin } />
+                <EmailLoginButton handleClick={ handleEmailLogin }
+                    processing={ processing }
+                    processingEmail={ processingEmailLogin } />
                 <p className="text-xs mt-1">
                     <i>{ forgotPasswordText }</i>
                 </p>
