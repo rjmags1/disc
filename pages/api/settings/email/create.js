@@ -3,6 +3,7 @@ import { sessionOptions } from '../../../../lib/session'
 import { withIronSessionApiRoute } from 'iron-session/next'
 
 export default withIronSessionApiRoute(async function(req, resp) {
+    // req guard
     if (req.method !== 'POST') {
         resp.status(405).json({ message: "invalid method" })
         return
@@ -11,27 +12,29 @@ export default withIronSessionApiRoute(async function(req, resp) {
         resp.status(401).json({ message: "not authenticated" })
         return
     }
-    if (!req.body?.userId || !req.body.newEmail) {
-        resp.status(400).json({ message: "must provide email and userId"})
+    if (!req.body?.newEmail) {
+        resp.status(400).json({ message: "bad request body"})
         return
     }
 
+
+    // insert new email into db
+    const { newEmail } = req.body
+    const { user_id: userId } = req.session.user
     try {
-        const { userId, newEmail } = req.body
-        const queryText = `INSERT into EMAIL
-                            (person,
-                            email)
-                            VALUES
-                            ($1,
-                            $2);`
-        const params = [userId, newEmail]
-        const result = await query(queryText, params)
-        console.log(result)
-        resp.status(200).json({ 
-            message: `successfully registered ${ newEmail }`
-        })
+        const createEmailQueryText = `
+            INSERT into EMAIL (person, email) VALUES ($1, $2);`
+        const createEmailQueryParams = [userId, newEmail]
+        await query(createEmailQueryText, createEmailQueryParams)
     }
     catch (error) {
-        resp.status(500).json({ message: error.message })
+        console.error(error)
+        resp.status(500).json({ message: "internal server error" })
+        return
     }
+    
+
+    // send new email added message in success response
+    resp.status(200).json({ message: `successfully registered ${ newEmail }` })
+
 }, sessionOptions)

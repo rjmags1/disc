@@ -3,6 +3,7 @@ import { sessionOptions } from '../../../../lib/session'
 import { withIronSessionApiRoute } from 'iron-session/next'
 
 export default withIronSessionApiRoute(async function(req, resp) {
+    // req guard
     if (req.method !== 'GET') {
         resp.status(405).json({ message: "invalid method" })
         return
@@ -11,22 +12,33 @@ export default withIronSessionApiRoute(async function(req, resp) {
         resp.status(401).json({ message: "not authenticated" })
         return
     }
-    if (!req.query?.userId) {
-        resp.status(400).json({ message: "bad url "})
+    if (parseInt(req.query.userId, 10) !== req.session.user.user_id) {
+        // userId in query should always come from 
+        // session cookie via useUser hook in normal app usage. if not, 
+        // ie the session cookie user_id doesnt match userId in body,
+        // someone may be trying to maliciously view someone elses info
+        resp.status(400).json({ message: "dont be malicious" })
         return
     }
 
+    
+    // get emails associated with userId from db
+    const { userId } = req.query
+    let emailQueryResult
     try {
-        const { userId } = req.query
-        const queryText = `SELECT email FROM email WHERE
-                            person = $1;`
-        const params = [userId]
-        const result = await query(queryText, params)
-        const emails = { emails: [] }
-        result.rows.forEach(({ email }) => emails.emails.push(email))
-        resp.status(200).json(emails)
+        const emailQueryText = `SELECT email FROM email WHERE person = $1;`
+        const emailQueryParams = [userId]
+        emailQueryResult = await query(emailQueryText, emailQueryParams)
     }
     catch (error) {
-        resp.status(500).json({ message: error.message })
+        console.error(error)
+        resp.status(500).json({ message: "internal server error" })
+        return
     }
+    
+
+    // send user associated emails in success resp
+    const emails = emailQueryResult.rows.map(({ email }) => email)
+    resp.status(200).json({ emails })
+
 }, sessionOptions)

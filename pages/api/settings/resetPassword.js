@@ -3,9 +3,11 @@ import { sessionOptions } from '../../../lib/session'
 import { query } from '../../../db/index'
 import { hash } from 'bcrypt'
 import { unsealData } from 'iron-session'
+import { validPassword } from '../../../lib/validation'
 
 export default withIronSessionApiRoute(async function(req, resp) {
-    if (req.method !== 'PATCH') {
+    // req guard
+    if (req.method !== 'PUT') {
         resp.status(405).json({ message: "invalid method" })
         return
     }
@@ -18,32 +20,84 @@ export default withIronSessionApiRoute(async function(req, resp) {
         return
     }
 
-    const newPassword = req.body.newPassword
+
+    // unseal seal that was supposed to come email sent by server, check it
+    const { newPassword } = req.body
     const { user_id: userId } = req.session.user
+    let canReset
     try {
-        const { canReset } = await unsealData(req.body.seal, {
+        if (!process.env.SECRET_COOKIE_PASSWORD) {
+            throw new Error("no cookie password in env")
+        }
+        const unsealed = await unsealData(req.body.seal, {
             password: process.env.SECRET_COOKIE_PASSWORD
         })
-        if (!canReset) {
-            resp.status(400).json({ message: "try again" })
-            return
-        }
+        canReset = unsealed.canReset
+    }
+    catch (error) {
+        console.error(error)
+        resp.status(500).json({ message: "internal server error" })
+        return 
+    }
+    if (!canReset) {
+        resp.status(400).json({ message: "dont be malicious" })
+        return
+    }
 
-        const hashedNewPassword = await new Promise((res, rej) => {
+
+    // validate password before hashing and storing
+    if (!validPassword(newPassword)) {
+        resp.status(400).json({ 
+            message: `input password too long, too short, 
+                or contains unaccepted special characters` 
+        })
+        return
+    }
+
+
+    // hash the new password if everything ok so far
+    let hashedNewPassword
+    try {
+        hashedNewPassword = await new Promise((res, rej) => {
             hash(newPassword, 12, function(err, hash) {
                 if (err) rej(err)
                 res(hash)
             })
         })
-        const queryText = `UPDATE person SET 
-                            password_hash = $1 WHERE 
-                            user_id = $2;`
-        const params = [hashedNewPassword, userId]
-        await query(queryText, params)
-        req.session.destroy()
-        resp.status(200).json({ message: "successfully updated password" })
     }
     catch (error) {
-        resp.status(400).json({ message: error.message })
+        console.error(error)
+        resp.status(500).json({ message: "internal server error "})
+        return 
     }
+
+
+    // put the new hashed password into the db
+    try {
+        const updatePasswordQueryText = `UPDATE person SET password_hash = $1
+                                         WHERE user_id = $2;`
+        const updatePasswordQueryParams = [hashedNewPassword, userId]
+        await query(updatePasswordQueryText, updatePasswordQueryParams)
+    }
+    catch (error) {
+        console.error(error)
+        resp.status(500).json({ message: "internal server error" })
+        return
+    }
+
+
+    // destroy session cookie to force login with new password
+    try {
+        req.session.destroy()
+    }
+    catch (error) {
+        console.error(error)
+        resp.status(500).json({ message: "internal server error" })
+        return
+    }
+
+
+    // send redirect response to login page
+    resp.status(307).redirect('/login')
+
 }, sessionOptions)
