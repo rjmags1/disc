@@ -8,7 +8,7 @@ export default withIronSessionApiRoute(async function (req, resp) {
         return
     }
     if (!req.session?.user) { // no session cookie
-        resp.status(404).json({
+        resp.status(200).json({
             authenticated: false,
             user_id: "",
             f_name: "",
