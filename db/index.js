@@ -5,20 +5,22 @@ const pool = new Pool()
 
 // for executing single query with any available client in pool
 // releasing of client is handled for us
-export const query = async function (text, params) {
+export const query = async function (queryText, queryParams) {
     try {
-        const result = await pool.query(text, params)
+        const queryResult = await pool.query(queryText, queryParams)
         console.log(`
             QUERY SUCCESS: 
-            query: ${text},\n
-            result first row: ${result.rows ? result.rows[0] : result.rows}
+            query: ${queryText},\n
+            result first row: ${
+                queryResult.rows ? 
+                queryResult.rows[0] : queryResult.rows}
         `)
-        return result
+        return queryResult
     }
     catch (error) {
         console.error(`
             QUERY ERROR: 
-            query: ${text}\n
+            query: ${queryText}\n
             error: ${error.stack}
         `)
         throw new Error("problem executing query", { cause: error })
@@ -49,6 +51,26 @@ export const releaseClient = async function(client) {
     catch (error) {
         console.error(error)
         throw new Error("problem releasing passed client", {
+            cause: error
+        })
+    }
+}
+
+export const clientQuery = async function(client, queryText, params) {
+    try {
+        const queryResult = await client.query(queryText, params)
+        console.log(`
+            QUERY SUCCESS: 
+            query: ${queryText},\n
+            result first row: ${
+                queryResult.rows ? 
+                queryResult.rows[0] : queryResult.rows}
+        `)
+        return queryResult
+    }
+    catch (error) {
+        console.error(error)
+        throw new Error("problem executing query on passed client", {
             cause: error
         })
     }
