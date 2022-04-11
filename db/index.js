@@ -1,13 +1,10 @@
 import { Pool } from "pg"
 
-const pool = new Pool({
-    user: process.env.PGUSER,
-    host: process.env.PGHOST,
-    database: process.env.PGDATABASE,
-    password: process.env.PGPASSWORD,
-    port: process.env.PGPORT
-})
+// initialize pool with environment variables
+const pool = new Pool()
 
+// for executing single query with any available client in pool
+// releasing of client is handled for us
 export const query = async function (text, params) {
     try {
         const result = await pool.query(text, params)
@@ -24,26 +21,35 @@ export const query = async function (text, params) {
             query: ${text}\n
             error: ${error.stack}
         `)
-        throw new Error("query failed", error)
+        throw new Error("problem executing query", { cause: error })
     }
 }
 
-export const poolQuery = async function(queryText, params) {
-    const client = await pool.connect()
-    let queryResult
+// obtain a client for a transaction (atomic multi-query db interaction)
+// all transaction queries must be enacted by the same client
+export const getClientFromPool = async function() {
     try {
-        queryResult = await client.query(queryText, params)
+        const client = await pool.connect()
+        return client
     }
     catch (error) {
-        console.error(`
-            QUERY ERROR: 
-            query: ${text}\n
-            error: ${error.stack}
-        `)
-        throw new Error("query failed", error)
+        console.error(error)
+        throw new Error("problem checking out client from pool", { 
+            cause: error 
+        })
     }
-    finally {
-        client.release() // always release client. client leaks = bad.
+}
+
+// release a client after a transaction.
+// should always be called in a finally block after a transaction
+export const releaseClient = async function(client) {
+    try {
+        client.release()
     }
-    return queryResult
+    catch (error) {
+        console.error(error)
+        throw new Error("problem releasing passed client", {
+            cause: error
+        })
+    }
 }
