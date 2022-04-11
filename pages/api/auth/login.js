@@ -6,7 +6,7 @@ import { validLoginInfo, formatOrgForDb } from "../../../lib/validation"
 
 export default withIronSessionApiRoute(async function(req, resp) {
     // req guard
-    if (req.method !== 'POST') {
+    if (req.method !== 'PUT') {
         resp.status(405).json({ message: "invalid method" })
         return
     }
@@ -22,59 +22,65 @@ export default withIronSessionApiRoute(async function(req, resp) {
     }
     const { email, password, org } = req.body
     if (!email || !password || !org || !validLoginInfo(email, password, org)) {
-        resp.status(400).json({ message: "invalid credentials" })
+        resp.status(401).json({ message: "invalid credentials" })
         return
     }
 
 
-    // db query
-    let userQueryResult
-    try {
+    // db query to check for valid org 
+    //  (dev, would be used to route to org's db-server in real app)
+    // db query on input email for session info + password_hash for verification
+    let queryResults
+    const orgQueryText = `SELECT org_id FROM orgs WHERE name = $1`
+    const orgQueryParams = [formatOrgForDb(org)]
+    const userQueryText = `
         /*
-        real app would do something like determine if we have a valid
-        org-user relation, and then forward the request to a db
-        server associated with the user's organization to
-        do the actual user verification and send client response
+        cant select directly on email from join because we need
+        to store primary_email, not just any user-associated email,
+        in session. email param may be non-primary, user-associated email.
+        so, email -> id of associated user -> primary_email id
+            -> join table row with primary_email address
         */
-        let queryText = `SELECT * FROM orgs WHERE name = $1`
-        let queryParams = [formatOrgForDb(org)]
-        const orgCheck = await query(queryText, queryParams)
-        if (orgCheck.rows.length === 0) {
-            resp.status(400).json({ message: "invalid credentials" })
-            return
-        }
-
-        queryText = `SELECT
-                        person.user_id, 
-                        person.f_name, 
-                        person.l_name, 
-                        person.is_admin,
-                        person.is_staff,
-                        person.is_instructor,
-                        person.avatar_url,
-                        person.password_hash,
-                        email.email as primary_email
-                    FROM person JOIN email ON person.user_id = email.person
-                    WHERE (
-                        SELECT person.primary_email FROM person 
-                            WHERE person.user_id = 
-                                (SELECT person from email WHERE email = $1)
-                        ) = email.email_id;` // unique email-org
-        queryParams = [email]
-        userQueryResult = await query(queryText, queryParams)
+        SELECT
+            person.user_id, 
+            person.f_name, 
+            person.l_name, 
+            person.is_admin,
+            person.is_staff,
+            person.is_instructor,
+            person.avatar_url,
+            person.password_hash,
+            email.email as primary_email
+        FROM person JOIN email ON person.user_id = email.person
+        WHERE (
+            SELECT person.primary_email FROM person 
+            WHERE (
+                SELECT person from email WHERE email = $1
+            ) = person.user_id
+        ) = email.email_id;`
+    const userQueryParams = [email]
+    try {
+        const queryPromises = []
+        const orgQueryPromise = query(orgQueryText, orgQueryParams)
+        queryPromises.push(orgQueryPromise)
+        const userQueryPromise = query(userQueryText, userQueryParams)
+        queryPromises.push(userQueryPromise)
+        queryResults = await Promise.all(queryPromises)
     }
-    catch (err) {
-        console.log(err)
+    catch (error) {
+        console.error(error)
         resp.status(500).json({ message: "internal server error" })
         return
     }
-    if (userQueryResult.rows.length === 0) {
+    const [orgQueryResult, userQueryResult] = queryResults
+    if (orgQueryResult.rows.length === 0 || userQueryResult.rows.length === 0) {
         resp.status(400).json({ message: "invalid credentials" })
         return
     }
     
 
-    // user verification
+    // password user verification using bcrypt.compare w/ 
+    // hashed password supplied on account creation/password reset
     const userByEmail = userQueryResult.rows[0]
     const { password_hash: hashed } = userByEmail
     const correctPassword = await compare(password, hashed)
@@ -82,6 +88,9 @@ export default withIronSessionApiRoute(async function(req, resp) {
         resp.status(400).json({ message: "invalid credentials" })
         return
     }
+
+
+    // dont put password hash in session
     const userInfo = Object.fromEntries(
         Object.entries(userByEmail).
             filter(([db_field]) => !db_field.includes("password_hash"))
