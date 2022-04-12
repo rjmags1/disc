@@ -1,25 +1,52 @@
 const { Pool } = require('pg')
 
-const pool = new Pool({
-    user: process.env.PGUSER,
-    host: process.env.PGHOST,
-    database: process.env.PGDATABASE,
-    password: process.env.PGPASSWORD,
-    port: process.env.PGPORT
-})
+const pool = new Pool()
 
 exports.query = async function(queryText, params) {
     return pool.query(queryText, params)
 }
 
-exports.poolQuery = async function(queryText, params) {
-    const client = await pool.connect()
-    let queryResult
+exports.getClientFromPool = async function() {
     try {
-        queryResult = await client.query(queryText, params)
+        const client = await pool.connect()
+        return client
     }
-    finally {
+    catch (error) {
+        console.error(error)
+        throw new Error("problem checking out client from pool", { 
+            cause: error 
+        })
+    }
+}
+
+exports.releaseClient = async function(client) {
+    try {
         client.release()
     }
-    return queryResult
+    catch (error) {
+        console.error(error)
+        throw new Error("problem releasing passed client", {
+            cause: error
+        })
+    }
+}
+
+exports.clientQuery = async function(client, queryText, params) {
+    try {
+        const queryResult = await client.query(queryText, params)
+        console.log(`
+            QUERY SUCCESS: 
+            query: ${queryText},\n
+            result first row: ${
+                queryResult.rows ? 
+                queryResult.rows[0] : queryResult.rows}
+        `)
+        return queryResult
+    }
+    catch (error) {
+        console.error(error)
+        throw new Error("problem executing query on passed client", {
+            cause: error
+        })
+    }
 }
