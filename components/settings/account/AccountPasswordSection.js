@@ -3,24 +3,20 @@ import { useState, useEffect } from 'react'
 function AccountPasswordSection() {
     const [throttle, setThrottle] = useState(null)
 
-    // cancel timer in cleanup function
+    // cancel throttle timer in cleanup function
     useEffect(() => () => { if (throttle) clearTimeout(throttle) })
 
     const handleClick = async function() {
         try {
             const resp = await fetch("/api/settings/sendPasswordReset", {
-                method: 'PUT',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    message: "please send a password reset email"
-                })
+                method: 'PUT'
             })
             if (resp.ok) {
-                // throttle for 2 min
-                const timer = setTimeout(() => { setThrottle(false) }, 2 * 60 * 1000) 
+                // front-end throttle for 2 min
+                const timer = setTimeout(
+                    () => { setThrottle(false) }, 2 * 60 * 1000) 
                 setThrottle(timer)
-                alert(`we sent you a reset email. the reset button
-                    will now be throttled for a short while`)
+                alert(`We sent a reset password link to your primary email!`)
             }
         }
         catch (error) {
