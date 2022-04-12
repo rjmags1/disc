@@ -6,7 +6,7 @@ function ProfileCard({ name, email, avatarSrc }) {
             <h2 className="text-2xl ml-4">Profile</h2>
             <div className="w-max">
                 <div className="flex border-2 border-light-gray rounded-md
-                    mt-3 p-4 pr-32">
+                    mt-3 p-4 pr-8">
                     <ProfileCardAvatar src={ avatarSrc } />
                     <div className="ml-8 flex flex-col justify-center">
                         <h3 className="text-xl my-1">{ name }</h3>
