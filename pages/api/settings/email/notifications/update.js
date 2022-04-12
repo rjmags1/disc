@@ -25,7 +25,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
         resp.status(401).json({ message: "not authenticated" })
         return
     }
-    if (!req.body?.settings) { 
+    if (!req.body?.newSettings) { 
         resp.status(400).json({ message: "bad request body" })
         return
     }
@@ -46,7 +46,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
     // do transaction to update user settings in db 
     // (1 distinct table per setting)
     const { user_id: userId } = req.session.user
-    const { settings: newSettings } = req.body
+    const { newSettings } = req.body
     try {
         await clientQuery(updater, 'BEGIN')
         for (const setting in SETTING_QUERIES) {

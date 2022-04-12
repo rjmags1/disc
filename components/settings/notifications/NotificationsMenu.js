@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNotificationSettings, useUser } from '../../../lib/hooks'
 
+import ButtonLoading from '../../lib/ButtonLoading'
 import Loading from '../../../components/lib/Loading'
 import EmailSetting from './EmailSetting'
 
@@ -17,18 +18,23 @@ function NotificationsMenu() {
 
     const [showSavedAlert, setShowSavedAlert] = useState(false)
     const [showSaveFailedAlert, setSaveFailedAlert] = useState(false)
+    const [saving, setSaving] = useState(false)
 
-    const { user : { user_id: userId }, loading: loadingUser } = useUser()
+    const { 
+        user, 
+        loading: loadingUser 
+    } = useUser({ redirectTo: '/login' })
 
     const { 
         notificationSettings,
         mutateNotificationSettings,
-        loading
-    } = useNotificationSettings(userId)
+        loading: loadingNotificationSettings
+    } = useNotificationSettings(user?.user_id)
 
 
     useEffect(() => {
-        if (notificationSettings === undefined) return
+        if (!notificationSettings) return
+
         const {
             settingStatuses: {
                 comment_reply_email_setting: replyStatus,
@@ -58,30 +64,36 @@ function NotificationsMenu() {
         setTimeout(() => setSaveFailedAlert(false), 2 * 1000)
     }
 
-    const handleSave = function() {
+    const handleSave = async function() {
+        if (loadingNotificationSettings || loadingUser) return
+
         const newSettings = {
             comment_reply_email_setting: displayedCommentReply,
             mention_email_setting: displayedMention,
             post_activity_email_setting: displayedMyPostActivity,
             watch_email_setting: displayedWatch
         }
-
-        const body = { userId, settings: newSettings }
         const updateUrl = '/api/settings/email/notifications/update'
+
+        setSaving(true)
         try {
-            mutateNotificationSettings(async () => {
-                const resp = await fetch(updateUrl, {
-                    method: 'PATCH',
-                    headers: { "Content-Type" : "application/json" },
-                    body: JSON.stringify(body)
-                })
-                if (!resp.ok) alertSaveFailed()
-                else alertSaveSuccess()
+            const resp = await fetch(updateUrl, {
+                method: 'PUT',
+                headers: { "Content-Type" : "application/json" },
+                body: JSON.stringify({ newSettings })
             })
+            if (!resp.ok) alertSaveFailed()
+            else {
+                alertSaveSuccess()
+                mutateNotificationSettings()
+            }
         }
         catch (error) {
             alertSaveFailed()
             console.error(error.message)
+        }
+        finally {
+            setSaving(false)
         }
     }
 
@@ -96,8 +108,13 @@ function NotificationsMenu() {
         Email me when someone mentions me`
     const couldntSaveMsg = `
         Couldn't save your settings. Please check your connection.`
+    const normalButtonStyles = `border border-white rounded bg-purple 
+        py-3 w-full mt-6 hover:bg-violet-800`
+    const savingButtonStyles = `border border-white rounded bg-purple 
+        py-3 w-full mt-6 hover:cursor-not-allowed
+        flex flex-row items-center justify-center`
 
-    if (loading || loadingUser) return <Loading />
+    if (loadingNotificationSettings || loadingUser) return <Loading />
     return (
         <div data-testid="notifications-menu-container"
             className="bg-zinc-900 text-white h-full p-6 flex-auto w-3/4">
@@ -123,13 +140,15 @@ function NotificationsMenu() {
                     handleChange={ () => 
                         setDisplayedMention(!displayedMention) } />
                 <button onClick={ handleSave }
-                    className="border border-white rounded bg-purple 
-                        py-3 w-full mt-6 hover:bg-violet-800">
-                    Save
+                    disabled={ saving ? true : "" }
+                    className={ saving ? 
+                        savingButtonStyles : normalButtonStyles} >
+                    { saving ? "Saving..." : "Save" }
+                    { saving && <ButtonLoading /> }
                 </button>
-                { showSavedAlert && <span>Saved!</span>}
+                { showSavedAlert && <span>Saved!</span> }
                 { showSaveFailedAlert && 
-                <span> { couldntSaveMsg } </span>}
+                <span> { couldntSaveMsg } </span> }
             </div>
         </div>
     )
