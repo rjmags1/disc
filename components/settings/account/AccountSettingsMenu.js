@@ -14,7 +14,6 @@ function AccountSettingsMenu() {
     } = user
     const fullName = `${ firstName } ${ lastName }`
 
-
     return  (
         <div data-testid="account-menu-container"
             className="bg-zinc-900 text-white h-full p-6 flex-auto w-3/4">

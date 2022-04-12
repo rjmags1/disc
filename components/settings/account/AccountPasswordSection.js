@@ -9,7 +9,7 @@ function AccountPasswordSection() {
     const handleClick = async function() {
         try {
             const resp = await fetch("/api/settings/sendPasswordReset", {
-                method: 'POST',
+                method: 'PUT',
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
                     message: "please send a password reset email"
