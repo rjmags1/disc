@@ -19,7 +19,7 @@ test.describe('valid registered inputs accepted', async () => {
         async ({ page }) => {
 
         page.on('dialog', async dialog => {
-            expect(dialog.message()).toContain(/check your email/gi)
+            expect(dialog.message()).toContainText(/check your email/gi)
             await dialog.dismiss()
         })
 
