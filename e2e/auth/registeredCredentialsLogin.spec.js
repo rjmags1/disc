@@ -9,6 +9,8 @@ test.describe('valid registered inputs accepted', async () => {
         const title = await page.title()
 
         expect(title).toMatch(/dashboard/gi)
+
+        await expect(page.locator('h3:has-text("dashboard")')).toBeVisible()
     })
 
 
