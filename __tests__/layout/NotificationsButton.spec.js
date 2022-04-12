@@ -9,7 +9,7 @@ describe('NotificationsButton', () => {
         expect(screen.getByTestId("notifications-button-container")).
             toBeInTheDocument()
 
-        expect(screen.getByRole("button")).  toBeInTheDocument()
+        expect(screen.getByRole("button")).toBeInTheDocument()
 
         expect(screen.getByRole("button")).toHaveAttribute("type", "image")
     })
