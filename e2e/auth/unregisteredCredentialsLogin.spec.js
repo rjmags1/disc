@@ -17,7 +17,7 @@ test.describe('valid unregistered inputs rejected', async () => {
 
         await page.locator('#password-input').fill(registered.password)
 
-        await page.locator('text=Login').click()
+        await page.locator('#full-login-submit-button').click()
 
         const invalidMessage = await page.
             waitForSelector('text=/invalid/gi', waitOptions)
@@ -29,14 +29,14 @@ test.describe('valid unregistered inputs rejected', async () => {
     test('unregistered email rejected -- full login', async ({ page }) => {
         await page.goto('/login')
 
-        await page.locator('[id=organization-input]').
+        await page.locator('#organization-input').
             fill(registered.organization)
 
-        await page.locator('[id=email-input]').fill(unregistered.email)
+        await page.locator('#email-input').fill(unregistered.email)
 
-        await page.locator('[id=password-input]').fill(registered.password)
+        await page.locator('#password-input').fill(registered.password)
 
-        await page.locator('text=Submit').click()
+        await page.locator('#full-login-submit-button').click()
 
         const invalidMessage = await page.
             waitForSelector('text=/invalid/gi', waitOptions)
@@ -49,14 +49,14 @@ test.describe('valid unregistered inputs rejected', async () => {
         async ({ page }) => {
         await page.goto('/login')
 
-        await page.locator('[id=organization-input]').
+        await page.locator('#organization-input').
             fill(registered.organization)
 
-        await page.locator('[id=email-input]').fill(registered.email)
+        await page.locator('#email-input').fill(registered.email)
 
-        await page.locator('[id=password-input]').fill(unregistered.password)
+        await page.locator('#password-input').fill(unregistered.password)
 
-        await page.locator('text=Submit').click()
+        await page.locator('#full-login-submit-button').click()
 
         const invalidMessage = await page.
             waitForSelector('text=/invalid/gi', waitOptions)
@@ -68,10 +68,10 @@ test.describe('valid unregistered inputs rejected', async () => {
     test('unregistered org rejected -- email login', async ({ page }) => {
         await page.goto('/login')
 
-        await page.locator('[id=organization-input]').
+        await page.locator('#organization-input').
             fill(unregistered.organization)
 
-        await page.locator('[id=email-input]').fill(registered.email)
+        await page.locator('#email-input').fill(registered.email)
 
         await page.locator('text=Email Me Login Link').click()
 
@@ -85,10 +85,10 @@ test.describe('valid unregistered inputs rejected', async () => {
     test('unregistered email rejected -- email login', async ({ page }) => {
         await page.goto('/login')
 
-        await page.locator('[id=organization-input]').
+        await page.locator('#organization-input').
             fill(registered.organization)
 
-        await page.locator('[id=email-input]').fill(unregistered.email)
+        await page.locator('#email-input').fill(unregistered.email)
 
         await page.locator('text=Email Me Login Link').click()
 
