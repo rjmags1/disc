@@ -16,7 +16,8 @@ function AccountSettingsMenu() {
 
     return  (
         <div data-testid="account-menu-container"
-            className="bg-zinc-900 text-white h-full p-6 flex-auto w-3/4">
+            className="bg-zinc-900 text-white h-full p-6 flex-auto w-3/4
+                overflow-auto">
             <ProfileCard name={ fullName } email={ primaryEmail }
                 avatarSrc={ avatarUrl } />
             <AccountEmailSection />
