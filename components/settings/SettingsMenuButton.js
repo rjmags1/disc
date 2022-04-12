@@ -4,8 +4,8 @@ import { useRouter } from 'next/router'
 function SettingsMenuButton({ label, href }) {
     const router = useRouter()
     
-    const handleDivClick = function(e) {
-        e.preventDefault()
+    const handleDivClick = function(event) {
+        event.preventDefault()
         router.push(href)
     }
 
