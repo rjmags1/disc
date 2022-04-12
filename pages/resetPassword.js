@@ -28,7 +28,7 @@ function ResetPassword() {
             const url = window.location.href
             const seal = url.slice(url.search("seal") + "seal=".length)
             const resp = await fetch('/api/settings/resetPassword', {
-                method: 'PATCH',
+                method: 'PUT',
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     newPassword: newPassword,
