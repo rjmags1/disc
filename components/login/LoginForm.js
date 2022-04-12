@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useOrgs, useUser } from '../../lib/hooks'
 import { validLoginInfo, validEmail, validOrg } from '../../lib/validation'
 
@@ -17,9 +17,12 @@ function LoginForm() {
     const [processingNormalLogin, setProcessingNormalLogin] = useState(false)
     const [processingEmailLogin, setProcessingEmailLogin] = useState(false)
     const [processing, setProcessing] = useState(false)
+    const [throttle, setThrottle] = useState(null)
 
     const { orgs, loading: loadingOrgs } = useOrgs()
     const { mutateUser } = useUser({ redirectTo: '/', redirectIfFound: true })
+
+    useEffect(() => () => { if (throttle) clearTimeout(throttle) })
 
     const handleNormalLogin = async function(event) {
         event.preventDefault()
@@ -87,6 +90,11 @@ function LoginForm() {
                 setInvalidMessage(true)
                 return
             }
+
+            const throttleTimer = setTimeout(() => { 
+                setThrottle(false) 
+            }, 2 * 60 * 1000)
+            setThrottle(throttleTimer) // front end throttle email login button
             setInvalidMessage(false)
             setProcessingEmailLogin(false)
             alert("check your email!")
@@ -137,7 +145,7 @@ function LoginForm() {
             </div>
             <div>
                 <EmailLoginButton handleClick={ handleEmailLogin }
-                    processing={ processing }
+                    processing={ processing } throttle={ throttle }
                     processingEmail={ processingEmailLogin } />
                 <p className="text-xs mt-1">
                     <i>{ forgotPasswordText }</i>
