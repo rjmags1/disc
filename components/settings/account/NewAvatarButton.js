@@ -8,13 +8,35 @@ function NewAvatarButton({ src }) {
     const [failedUploadMessage, setFailedUploadMessage] = useState(false)
     const [uploading, setUploading] = useState(false)
 
-    const { user, mutateUser } = useUser()
+    const { 
+        user, 
+        mutateUser, 
+        loading: loadingUser 
+    } = useUser({ redirectTo: '/login' })
 
-    const updateAvatar = async function(newAvatarUrl) {
-        let uploaded = false
+    const handleUpload = async function(event) {
+        // early render button but only allow fxn when user is loaded
+        if (loadingUser) return
+
+        event.preventDefault()
+        setUploading(true)
+        // real app would upload new image to blob store then store url in db:
+        // const newFile = event.target.files[0]
+        // const newUrl = putInBlobStore(newFile) (in try-catch block)
+        // for dev just flip flop /public avatar images to show frontend works
+        const newUrl = src === '/cool-profile-img.jpg' ?
+            '/profile-button-img.png' : '/cool-profile-img.jpg'
+        const updated = await updateAvatarInDb(newUrl)
+        if (updated) mutateUser()
+        setUploading(false)
+    }
+
+    const updateAvatarInDb = async function(newAvatarUrl) {
+        const { user_id: userId } = user
+        let updated = false
         try {
             const body = {
-                userId: user.user_id,
+                userId: userId,
                 newAvatarUrl: newAvatarUrl
             }
             const resp = await fetch("/api/settings/updateAvatar", {
@@ -22,30 +44,15 @@ function NewAvatarButton({ src }) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body)
             })
-            uploaded = resp.ok
-            setFailedUploadMessage(!uploaded)
+            updated = resp.ok
+            setFailedUploadMessage(!updated)
         }
         catch (error) {
             setFailedUploadMessage(true)
         }
         finally { 
-            return uploaded
+            return updated
         }
-    }
-
-    const handleUpload = async function(event) {
-        event.preventDefault()
-        setUploading(true)
-        // real app would upload new image to blob store then store url in db
-        // to image in the store to the db
-        // const newFile = event.target.files[0]
-        // const newUrl = putInBlobStore(newFile) in try-catch block
-        // for dev just flip flop /public avatar images to show frontend works
-        const newUrl = src === '/cool-profile-img.jpg' ? 
-            '/profile-button-img.png' : '/cool-profile-img.jpg'
-        const uploaded = await updateAvatar(newUrl)
-        if (uploaded) mutateUser()
-        setUploading(false)
     }
 
     const normalStyles = `bg-purple border border-white text-xs min-w-fit p-1

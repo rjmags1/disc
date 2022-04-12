@@ -22,7 +22,9 @@ function LoginForm() {
     const { orgs, loading: loadingOrgs } = useOrgs()
     const { mutateUser } = useUser({ redirectTo: '/', redirectIfFound: true })
 
-    useEffect(() => () => { if (throttle) clearTimeout(throttle) })
+    useEffect(() => () => { 
+        if (throttle) clearTimeout(throttle) 
+    }, [])
 
     const handleNormalLogin = async function(event) {
         event.preventDefault()
@@ -92,7 +94,7 @@ function LoginForm() {
             }
 
             const throttleTimer = setTimeout(() => { 
-                setThrottle(false) 
+                setThrottle(null) 
             }, 2 * 60 * 1000)
             setThrottle(throttleTimer) // front end throttle email login button
             setInvalidMessage(false)

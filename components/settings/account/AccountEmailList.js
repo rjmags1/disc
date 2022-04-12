@@ -3,18 +3,18 @@ import Loading from '../../../components/lib/Loading'
 
 function AccountEmailList() {
     const { 
-        user: { 
-            user_id: userId,
-            primary_email: primaryEmail 
-        } 
-    } = useUser()
+        user, 
+        loading: loadingUser 
+    } = useUser({ redirectTo: '/login' })
 
-    const {
-        emails,
-        loading
-    } = useEmails(userId)
+    const { 
+        emails, 
+        loading: loadingEmails 
+    } = useEmails(user?.user_id)
 
-    if (loading) return <Loading />
+    if (loadingEmails || loadingUser) return <Loading /> 
+
+    const { primary_email: primaryEmail } = user
 
     const emailListings = emails.emails.map((email) => 
         <li key={ email } 
@@ -29,6 +29,7 @@ function AccountEmailList() {
             }
         </li>
     )
+    
     return (
         <div data-testid="account-email-list-container"
             className="my-6">

@@ -8,11 +8,12 @@ export default withIronSessionApiRoute(async function(req, resp) {
         resp.status(405).json({ message: "invalid method" })
         return
     }
-    if (!req.session?.user) {
-        resp.status(401).json({ message: "not authenticated" })
+    const parsed = parseInt(req.query.userId, 10)
+    if (!req.session?.user || parsed === -1) { // not authed or loading user
+        resp.status(200).json({ emails: [] })
         return
     }
-    if (parseInt(req.query.userId, 10) !== req.session.user.user_id) {
+    if (parsed !== req.session.user.user_id) {
         // userId in query should always come from 
         // session cookie via useUser hook in normal app usage. if not, 
         // ie the session cookie user_id doesnt match userId in body,

@@ -1,7 +1,14 @@
+import { useUser } from '../../../lib/hooks'
+
 import Image from 'next/image'
 import NewAvatarButton from './NewAvatarButton'
 
-function ProfileCardAvatar({ src }) {
+function ProfileCardAvatar() {
+    const { user } = useUser({ redirectTo: '/login' })
+
+    const src = !user?.avatar_url ? 
+        '/profile-button-img.png' : user.avatar_url
+
     return (
         <div data-testid="profile-card-avatar-container"
             className="flex flex-col items-center justify-center">

@@ -11,8 +11,16 @@ function AccountAddEmailInput() {
     const [newEmail, setNewEmail] = useState("")
     const [uploading, setUploading] = useState(false)
 
-    const { user: { user_id: userId } } = useUser()
-    const { emails, mutateEmails } = useEmails(userId)
+    const { 
+        user, 
+        loading: loadingUser 
+    } = useUser({ redirectTo: '/login' })
+
+    const { 
+        emails, 
+        mutateEmails, 
+        loading: loadingEmails 
+    } = useEmails(user?.user_id)
 
     const validNewEmail = function() {
         const previouslyRegistered = emails.emails.indexOf(newEmail) > -1
@@ -21,6 +29,9 @@ function AccountAddEmailInput() {
 
     const handleClick = async function(event) {
         event.preventDefault()
+        // early render button but only allow fxn once user, email loaded
+        if (loadingUser || loadingEmails) return
+
         if (!validNewEmail()) {
             setInvalidEmail(true)
             setSubmitFailed(true)
@@ -53,7 +64,7 @@ function AccountAddEmailInput() {
         p-0.5 px-4 inline-flex flex-row items-center justify-center
         hover:cursor-pointer hover:bg-black`
 
-    const uploadingAddButtonStyles = `mx-2 bg-purple border rounded border-white 
+    const uploadingAddButtonStyles = `mx-2 bg-purple border rounded border-white
         p-0.5 px-4 inline-flex flex-row items-center justify-center
         hover:cursor-not-allowed`
 
@@ -69,16 +80,16 @@ function AccountAddEmailInput() {
                             border-white p-0.5 px-1 w-72">
                     </input>
                 </label>
-                <button onClick={ handleClick } id="new-email-submit"
+                <button onClick={ handleClick } id="new-email-submit" 
+                    disabled={ uploading ? true : "" }
                     className={ uploading ? 
-                        uploadingAddButtonStyles : normalAddButtonStyles } 
-                    disabled={ uploading ? true : "" } >
+                        uploadingAddButtonStyles : normalAddButtonStyles } >
+                     
                     Add
                     { uploading && <ButtonLoading /> }
                 </button>
             { submitFailed && 
-            <NewEmailSubmitFailedMessage
-                dueToInvalidEmail={ invalidEmail } /> 
+            <NewEmailSubmitFailedMessage dueToInvalidEmail={ invalidEmail } />
             }
         </div>
     )
