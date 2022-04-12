@@ -11,7 +11,7 @@ function ProfileDropdownButton({ label, last, href }) {
             // destroy session cookie
             try {
                 await fetch("/api/auth/logout", {
-                    method: "POST",
+                    method: "DELETE",
                     headers: { "Content-Type": "application/json" }
                 })
                 // cast revalidation message on user data hook 
