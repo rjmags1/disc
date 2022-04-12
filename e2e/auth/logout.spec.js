@@ -17,11 +17,13 @@ test.describe('logout flow', () => {
             page.locator('text=Log out').click()
         ])
 
+        await expect(page.locator('#full-login-submit-button')).toBeVisible()
+
         const loggedOutCookies = await context.cookies()
 
         expect(loggedOutCookies.
             filter(c => /session/gi.test(c.name)).length).toBe(0)
-    });
+    })
 
 
     test('logout from account settings', async({ page, context }) => {
@@ -40,6 +42,8 @@ test.describe('logout flow', () => {
             page.waitForNavigation({ url: "/login" }),
             page.locator('text=Log out').click()
         ])
+
+        await expect(page.locator('#full-login-submit-button')).toBeVisible()
 
         const loggedOutCookies = await context.cookies()
 
@@ -65,11 +69,12 @@ test.describe('logout flow', () => {
             page.locator('text=Log out').click()
         ])
 
+        await expect(page.locator('#full-login-submit-button')).toBeVisible()
+
         const loggedOutCookies = await context.cookies()
 
         expect(loggedOutCookies.
             filter(c => /session/gi.test(c.name)).length).toBe(0)
     })
-
     // test logout from discussion page
 })
