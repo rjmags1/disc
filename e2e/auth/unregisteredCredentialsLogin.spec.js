@@ -9,15 +9,15 @@ test.describe('valid unregistered inputs rejected', async () => {
     test('unregistered org rejected -- full login', async ({ page }) => {
         await page.goto('/login')
 
-        await page.locator('[id=organization-input]').
+        await page.locator('#organization-input').
             fill(unregistered.organization)
 
-        await page.locator('[id=email-input]').
+        await page.locator('#email-input').
             fill(registered.email)
 
-        await page.locator('[id=password-input]').fill(registered.password)
+        await page.locator('#password-input').fill(registered.password)
 
-        await page.locator('text=Submit').click()
+        await page.locator('text=Login').click()
 
         const invalidMessage = await page.
             waitForSelector('text=/invalid/gi', waitOptions)
