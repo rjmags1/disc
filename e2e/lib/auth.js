@@ -18,18 +18,18 @@ exports.TESTUSER_UNREGISTERED = {
 
 exports.login = async function(page, user) {
     await page.goto('/login');
-    await page.locator('id=organization-input').fill(user.organization)
-    await page.locator('id=email-input').fill(user.email)
-    await page.locator('id=password-input').fill(user.password)
+    await page.locator('#organization-input').fill(user.organization)
+    await page.locator('#email-input').fill(user.email)
+    await page.locator('#password-input').fill(user.password)
     await Promise.all([
         page.waitForNavigation({ url: '/' }),
-        page.locator('text=Submit').click()
+        page.locator('#full-login-submit-button').click()
     ]);
 }
 
 exports.emailLogin = async function(page, user) {
     await page.goto('/login')
-    await page.locator('[id=organization-input]').fill(user.organization)
-    await page.locator('[id=email-input]').fill(user.email)
+    await page.locator('#organization-input').fill(user.organization)
+    await page.locator('#email-input').fill(user.email)
     await page.locator('text=Email Me Login Link').click()
 }
