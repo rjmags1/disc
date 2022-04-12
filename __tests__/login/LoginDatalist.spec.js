@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 
 import LoginDatalist from '../../components/login/LoginDatalist'
 
@@ -37,18 +36,5 @@ describe('LoginDatalist', () => {
             children.length).toEqual(3)
 
         expect(screen.getByRole("combobox")).toHaveValue("")
-    })
-
-
-    test('handleChange callback on change', () => {
-        const mockHandleChange = jest.fn()
-
-        render(<LoginDatalist label={ label } 
-            handleChange={ mockHandleChange }  
-            optionValues={ optionValues } />)
-
-        userEvent.type(screen.getByRole("combobox"), "four")
-
-        expect(mockHandleChange).toHaveBeenCalledTimes(4)
     })
 })

@@ -1,4 +1,4 @@
-function Datalist({ handleChange, label, optionValues }) {
+function LoginDatalist({ handleChange, label, optionValues }) {
     const options = optionValues.map((val, i) => 
         <option value={ val } key={ `${val}-${i}` }>{ val }</option>
     )
@@ -18,4 +18,4 @@ function Datalist({ handleChange, label, optionValues }) {
     )
 }
 
-export default Datalist
+export default LoginDatalist
