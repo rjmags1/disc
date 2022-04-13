@@ -22,6 +22,7 @@ test.afterAll(async () => {
     await query(queryText, params)
 })
 
+
 test.describe('settings menu pane', async () => {
     test('navigation to notifications settings menu', async ({ page }) => {
         await Promise.all([
@@ -54,6 +55,7 @@ test.describe('profile card', async () => {
             toMatch(new RegExp(noForwardSlashCookieAvatarUrl, "g"))
     })
 
+
     test('profile card displays first and last name, primary email',
     async ({ page, context }) => {
         const loggedInCookies = await context.cookies()
@@ -79,6 +81,7 @@ test.describe('profile card', async () => {
     })
 })
 
+
 test.describe('email section', async () => {
     test('all emails associated with account listed', async ({ page }) => {
         const registeredUserEmails = TESTUSER_REGISTERED.allEmails
@@ -90,6 +93,7 @@ test.describe('email section', async () => {
         }
     })
 
+
     test('primary email correctly marked', async ({ page }) => {
         const registeredPrimaryEmail = TESTUSER_REGISTERED.email
 
@@ -98,6 +102,7 @@ test.describe('email section', async () => {
         
         expect(primaryEmailHtml).toMatch(/primary/gi)
     })
+
 
     test('add email input rejects previously registered email, shows message',
     async ({ page }) => {
@@ -110,6 +115,7 @@ test.describe('email section', async () => {
         await page.waitForSelector('text=/unable to register email/gi')
     })
 
+
     test('add email input rejects new but invalid email, shows message',
     async ({ page }) => {
         const newButInvalid = "userATmissingatsymbol.com"
@@ -121,6 +127,7 @@ test.describe('email section', async () => {
         await page.waitForSelector('text=/unable to register email/gi')
     })
 
+
     test('add email input accepts valid new email', async ({ page }) => {
         const newAndValid = NEW_REGISTERED_TEST_USER_EMAIL
 
@@ -131,6 +138,7 @@ test.describe('email section', async () => {
         await page.waitForSelector(`text=${ newAndValid }`)
     })
 })
+
 
 test.describe('reset password button', async () => {
     test('reset password button throttles on click, alerts on success', 
