@@ -31,7 +31,7 @@ test.describe('correct email button throttling, button processing status',
 
     test(`email login throttled`, async ({ page }) => {
         page.on('dialog', async dialog => {
-            expect(dialog.message()).toMatch(/check your email/gi)
+            expect(dialog.message()).toMatch(/check your email/i)
             await dialog.dismiss()
         })
 

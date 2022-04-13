@@ -8,7 +8,7 @@ describe('AccountAddEmailInput', () => {
 
         expect(screen.getByRole('textbox')).toBeInTheDocument()
 
-        expect(screen.getByText(/add email address/gi)).
+        expect(screen.getByText(/add email address/i)).
             toBeInTheDocument()
     })
 

@@ -20,6 +20,6 @@ describe('profile dropdown button', () => {
         render(<ProfileDropdownButton last={ true } />)
 
         expect(screen.getByTestId("profile-dropdown-button-container").
-            className).toMatch(/rounded-b/gi)
+            className).toMatch(/rounded-b/i)
     })
 })

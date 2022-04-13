@@ -38,7 +38,7 @@ test.describe('profile card', async () => {
         const loggedInCookies = await context.cookies()
 
         const sealedSessionCookie = loggedInCookies.
-            filter(c => /session/gi.test(c.name))[0].value
+            filter(c => /session/i.test(c.name))[0].value
         
         const unsealedSessionCookie = await unsealData(sealedSessionCookie, {
             password: process.env.SECRET_COOKIE_PASSWORD
@@ -61,7 +61,7 @@ test.describe('profile card', async () => {
         const loggedInCookies = await context.cookies()
 
         const sealedSessionCookie = loggedInCookies.
-            filter(c => /session/gi.test(c.name))[0].value
+            filter(c => /session/i.test(c.name))[0].value
 
         const unsealedSessionCookie = await unsealData(sealedSessionCookie, {
             password: process.env.SECRET_COOKIE_PASSWORD
@@ -100,7 +100,7 @@ test.describe('email section', async () => {
         const primaryEmailHtml = await page.locator(
             `li:has-text("${ registeredPrimaryEmail }")`).innerHTML()
         
-        expect(primaryEmailHtml).toMatch(/primary/gi)
+        expect(primaryEmailHtml).toMatch(/primary/i)
     })
 
 
@@ -112,7 +112,7 @@ test.describe('email section', async () => {
 
         await page.locator('#new-email-submit').click()
 
-        await page.waitForSelector('text=/unable to register email/gi')
+        await page.waitForSelector('text=/unable to register email/i')
     })
 
 
@@ -124,7 +124,7 @@ test.describe('email section', async () => {
 
         await page.locator('#new-email-submit').click()
 
-        await page.waitForSelector('text=/unable to register email/gi')
+        await page.waitForSelector('text=/unable to register email/i')
     })
 
 
@@ -144,7 +144,7 @@ test.describe('reset password button', async () => {
     test('reset password button throttles on click, alerts on success', 
     async ({ page }) => {
         page.on('dialog', async (dialog) => {
-            expect(dialog.message()).toMatch(/sent you a reset email/gi)
+            expect(dialog.message()).toMatch(/sent you a reset email/i)
             await dialog.dismiss()
         })
 
@@ -152,6 +152,6 @@ test.describe('reset password button', async () => {
 
         const nowDisabled = await page.waitForSelector('[disabled] >> nth=-1')
         const nowDisabledHtml = await nowDisabled.innerHTML()
-        expect(nowDisabledHtml).toMatch(/reset password/gi)
+        expect(nowDisabledHtml).toMatch(/reset password/i)
     })
 })

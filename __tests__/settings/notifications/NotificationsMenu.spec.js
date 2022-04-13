@@ -13,7 +13,7 @@ describe('NotificationsMenu', () => {
 
         expect(screen.getAllByRole("heading").length).toBeGreaterThan(0)
 
-        expect(screen.getByText(/manage notifications/gi)).
+        expect(screen.getByText(/manage notifications/i)).
             toBeInTheDocument()
 
         expect(screen.getAllByTestId("notifications-setting-container")
@@ -21,7 +21,7 @@ describe('NotificationsMenu', () => {
 
         expect(screen.getAllByRole("button").length).toBeGreaterThan(0)
 
-        expect(screen.getByText(/save/gi)).toBeInTheDocument()
+        expect(screen.getByText(/save/i)).toBeInTheDocument()
     })
 
 

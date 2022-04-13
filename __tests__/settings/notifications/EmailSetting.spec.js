@@ -12,7 +12,7 @@ describe('EmailSetting', () => {
 
         expect(screen.getByRole("heading")).toBeInTheDocument()
 
-        expect(screen.getByText(/test-label/gi)).toBeInTheDocument()
+        expect(screen.getByText(/test-label/i)).toBeInTheDocument()
 
         expect(screen.getByTestId("notifications-setting-toggler")).
             toBeInTheDocument()

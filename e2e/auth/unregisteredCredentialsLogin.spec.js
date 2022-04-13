@@ -20,7 +20,7 @@ test.describe('valid unregistered inputs rejected', async () => {
         await page.locator('#full-login-submit-button').click()
 
         const invalidMessage = await page.
-            waitForSelector('text=/invalid/gi', waitOptions)
+            waitForSelector('text=/invalid/i', waitOptions)
 
         expect(invalidMessage).not.toBeNull()
     })
@@ -39,7 +39,7 @@ test.describe('valid unregistered inputs rejected', async () => {
         await page.locator('#full-login-submit-button').click()
 
         const invalidMessage = await page.
-            waitForSelector('text=/invalid/gi', waitOptions)
+            waitForSelector('text=/invalid/i', waitOptions)
 
         expect(invalidMessage).not.toBeNull()
     })
@@ -59,7 +59,7 @@ test.describe('valid unregistered inputs rejected', async () => {
         await page.locator('#full-login-submit-button').click()
 
         const invalidMessage = await page.
-            waitForSelector('text=/invalid/gi', waitOptions)
+            waitForSelector('text=/invalid/i', waitOptions)
 
         expect(invalidMessage).not.toBeNull()
     })
@@ -76,7 +76,7 @@ test.describe('valid unregistered inputs rejected', async () => {
         await page.locator('text=Email Me Login Link').click()
 
         const invalidMessage = await page.
-            waitForSelector('text=/invalid/gi', waitOptions)
+            waitForSelector('text=/invalid/i', waitOptions)
 
         expect(invalidMessage).not.toBeNull()
     })
@@ -93,7 +93,7 @@ test.describe('valid unregistered inputs rejected', async () => {
         await page.locator('text=Email Me Login Link').click()
 
         const invalidMessage = await page.
-            waitForSelector('text=/invalid/gi', waitOptions)
+            waitForSelector('text=/invalid/i', waitOptions)
 
         expect(invalidMessage).not.toBeNull()
     })

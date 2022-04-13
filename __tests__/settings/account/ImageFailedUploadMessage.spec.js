@@ -10,8 +10,8 @@ describe('failed upload message', () => {
         expect(screen.getByTestId("failed-upload-message-container")).
             toBeInTheDocument()
 
-        expect(screen.getByText(/upload/gi)).toBeInTheDocument()
+        expect(screen.getByText(/upload/i)).toBeInTheDocument()
 
-        expect(screen.getByText(/failed/gi)).toBeInTheDocument()
+        expect(screen.getByText(/failed/i)).toBeInTheDocument()
     })
 })

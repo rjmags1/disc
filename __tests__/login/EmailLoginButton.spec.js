@@ -8,7 +8,7 @@ describe('EmailLoginButton', () => {
 
         expect(screen.getByRole('button')).toBeInTheDocument()
 
-        expect(screen.getByText(/email me login link/gi)).
+        expect(screen.getByText(/email me login link/i)).
             toBeInTheDocument()
     })
 })

@@ -22,7 +22,7 @@ describe('ProfileButton', () => {
         expect(screen.queryByTestId("profile-dropdown-container")).toBeNull()
 
         expect(screen.getByTestId("profile-button-arrow").className).
-            not.toMatch(/rotate-180/g)
+            not.toMatch(/rotate-180/)
 
         userEvent.click(screen.getByTestId("profile-button-container"))
 
@@ -30,7 +30,7 @@ describe('ProfileButton', () => {
             toBeInTheDocument()
 
         expect(screen.getByTestId("profile-button-arrow").className).
-            toMatch(/rotate-180/g)
+            toMatch(/rotate-180/)
     })
 
 
@@ -44,14 +44,14 @@ describe('ProfileButton', () => {
             toBeInTheDocument()
 
         expect(screen.getByTestId("profile-button-arrow").className).
-            toMatch(/rotate-180/g)
+            toMatch(/rotate-180/)
 
         userEvent.click(screen.getByTestId("profile-button-container"))
 
         expect(screen.queryByTestId("profile-dropdown-container")).toBeNull()
 
         expect(screen.getByTestId("profile-button-arrow").className).
-            not.toMatch(/rotate-180/g)
+            not.toMatch(/rotate-180/)
     })
 
 

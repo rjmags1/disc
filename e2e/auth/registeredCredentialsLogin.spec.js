@@ -8,7 +8,7 @@ test.describe('valid registered inputs accepted', async () => {
 
         const title = await page.title()
 
-        expect(title).toMatch(/dashboard/gi)
+        expect(title).toMatch(/dashboard/i)
 
         await expect(page.locator('h3:has-text("dashboard")')).toBeVisible()
     })
@@ -19,12 +19,12 @@ test.describe('valid registered inputs accepted', async () => {
         async ({ page }) => {
 
         page.on('dialog', async dialog => {
-            expect(dialog.message()).toContainText(/check your email/gi)
+            expect(dialog.message()).toContainText(/check your email/i)
             await dialog.dismiss()
         })
 
         await emailLogin(page, TESTUSER_REGISTERED)
 
-        await expect(page.locator('text=/invalid/gi')).not.toBeVisible()
+        await expect(page.locator('text=/invalid/i')).not.toBeVisible()
     })
 })

@@ -16,7 +16,7 @@ describe('AccountPasswordSection', () => {
 
         expect(screen.getByText("Password")).toBeInTheDocument()
 
-        expect(screen.getAllByText(/reset password/gi).length).
+        expect(screen.getAllByText(/reset password/i).length).
             toBeGreaterThan(0)
     })
 })

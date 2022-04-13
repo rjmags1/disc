@@ -12,7 +12,7 @@ function ProfileDropdownButton({ label, last, href }) {
         event.preventDefault()
         if (loadingUser) return
 
-        if (/logout/gi.test(href)) {
+        if (/logout/i.test(href)) {
             // destroy session cookie
             try {
                 await fetch("/api/auth/logout", {

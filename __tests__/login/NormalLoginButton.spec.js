@@ -8,7 +8,7 @@ describe('NormalLoginButton', () => {
 
         expect(screen.getByRole('button')).toBeInTheDocument()
 
-        expect(screen.getByText(/login/gi)).
+        expect(screen.getByText(/login/i)).
             toBeInTheDocument()
     })
 })

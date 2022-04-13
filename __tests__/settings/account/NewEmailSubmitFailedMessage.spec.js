@@ -10,7 +10,7 @@ describe('NewEmailSubmitFailedMessage', () => {
         expect(screen.getByTestId("email-submit-failed-msg-container")).
             toBeInTheDocument()
 
-        expect(screen.getByText(/unable to register email/gi)).
+        expect(screen.getByText(/unable to register email/i)).
             toBeInTheDocument()
     })
 
@@ -19,9 +19,9 @@ describe('NewEmailSubmitFailedMessage', () => {
         () => {
         render(<NewEmailSubmitFailedMessage dueToInvalidEmail={ true } />)
 
-        expect(screen.getByText(/typos/gi)).toBeInTheDocument()
+        expect(screen.getByText(/typos/i)).toBeInTheDocument()
 
-        expect(screen.getByText(/previously registered/gi)).toBeInTheDocument()
+        expect(screen.getByText(/previously registered/i)).toBeInTheDocument()
     })
 
 
@@ -29,7 +29,7 @@ describe('NewEmailSubmitFailedMessage', () => {
         () => {
         render(<NewEmailSubmitFailedMessage dueToInvalidEmail={ false } />)
 
-        expect(screen.getByText(/check network connection/gi)).
+        expect(screen.getByText(/check network connection/i)).
             toBeInTheDocument()
     })
 })

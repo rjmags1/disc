@@ -10,8 +10,8 @@ describe('InvalidLoginMessage', () => {
         expect(screen.getByTestId("invalid-message-container")).
             toBeInTheDocument()
 
-        expect(screen.getByText(/invalid/gi)).toBeInTheDocument()
+        expect(screen.getByText(/invalid/i)).toBeInTheDocument()
 
-        expect(screen.getByText(/account information/gi)).toBeInTheDocument()
+        expect(screen.getByText(/account information/i)).toBeInTheDocument()
     })
 })
