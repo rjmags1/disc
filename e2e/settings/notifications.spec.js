@@ -1,36 +1,6 @@
 const { test, expect } = require('@playwright/test')
 const { login, TESTUSER_REGISTERED } = require('../lib/auth')
-const { poolQuery } = require('../lib/db')
-
-const SELECT_NOTI_QUERIES = [
-    `SELECT is_on FROM comment_reply_email_setting 
-        WHERE person = $1;`,
-    `SELECT is_on FROM mention_email_setting 
-        WHERE person = $1;`,
-    `SELECT is_on FROM post_activity_email_setting 
-        WHERE person = $1;`,
-    `SELECT is_on FROM watch_email_setting
-        WHERE person = $1`
-]
-
-const RESET_NOTI_QUERIES = [
-    `UPDATE comment_reply_email_setting SET
-        is_on = NOT (SELECT is_on from comment_reply_email_setting
-            WHERE person = $1)
-        WHERE person = $1;`,
-    `UPDATE mention_email_setting SET
-        is_on = NOT (SELECT is_on from mention_email_setting
-            WHERE person = $1)
-        WHERE person = $1;`,
-    `UPDATE post_activity_email_setting SET
-        is_on = NOT (SELECT is_on from post_activity_email_setting
-            WHERE person = $1)
-        WHERE person = $1;`,
-    `UPDATE watch_email_setting SET
-        is_on = NOT (SELECT is_on from watch_email_setting
-            WHERE person = $1)
-        WHERE person = $1`
-]
+const { query } = require('../lib/db')
 
 const SETTINGS = [
     "comment_reply_email_setting",
@@ -38,6 +8,18 @@ const SETTINGS = [
     "post_activity_email_setting",
     "watch_email_setting"
 ]
+
+const SELECT_QUERIES = []
+const RESET_QUERIES = []
+for (let i = 0; i < SETTINGS.length; i++) {
+    const table = SETTINGS[i]
+    SELECT_QUERIES.push(`SELECT is_on FROM ${ table } WHERE person = $1;`)
+    RESET_QUERIES.push(`
+        UPDATE ${ table } SET is_on = NOT (
+            SELECT is_on from ${ table } WHERE person = $1)
+        WHERE person = $1`
+    )
+}
 
 test.beforeEach(async ({ page }) => {
     await login(page, TESTUSER_REGISTERED)
@@ -58,12 +40,13 @@ test.beforeEach(async ({ page }) => {
 test.afterAll(async () => {
     const { userId } = TESTUSER_REGISTERED
     const queryPromises = []
-    for (const queryText of RESET_NOTI_QUERIES) {
-        const queryPromise = poolQuery(queryText, [userId])
+    for (const queryText of RESET_QUERIES) {
+        const queryPromise = query(queryText, [userId])
         queryPromises.push(queryPromise)
     }
     await Promise.all(queryPromises)
 })
+
 
 test.describe('settings menu pane', async () => {
     test('navigation to notifications settings menu', async ({ page }) => {
@@ -73,6 +56,7 @@ test.describe('settings menu pane', async () => {
         ])
     })
 })
+
 
 test.describe('manage notifications', async () => {
     test('current notification statuses match those in db', 
@@ -89,49 +73,48 @@ test.describe('manage notifications', async () => {
             toEqual([pageReply, pageMention, pagePostActivity, pageWatch])
     })
    
+
     test('toggling flips button, doesnt change status unless save click',
     async ({ page }) => {
         // allow data hooks to load and setState
         await new Promise(res => setTimeout(res, 500))
         
+        // get original actual setting statuses and toggler labels
         const originalSettings = await getPageSettings(page)
+        const originalToggleButtonLabels = await getToggleButtonLabels(page)
 
-        const labels = await getButtonLabels(page)
-
-        const clickPromises = []
+        // click all of the toggle buttons
         for (let i = 0; i < SETTINGS.length; i++) {
-            const clickPromise = await page.locator(
-                `button >> nth=${ i }`).  click()
-            clickPromises.push(clickPromise)
+            await page.locator(`button >> nth=${ i }`).click()
         }
-        await Promise.all(clickPromises)
         
-        const newLabels = await getButtonLabels(page)
-        
+        // we havent saved yet so actual setting statuses shouldnt have changed
         const notSaved = await getPageSettings(page)
-
         expect(notSaved).toEqual(originalSettings)
         
-        for (let i = 0; i < labels.length; i++) {
-            const oldLabel = labels[i], newLabel = newLabels[i]
+        // we clicked all toggle buttons so their labels should have flipped
+        const newToggleButtonLabels = await getToggleButtonLabels(page)
+        for (let i = 0; i < originalToggleButtonLabels.length; i++) {
+            const oldLabel = originalToggleButtonLabels[i]
+            const newLabel = newToggleButtonLabels[i]
             expect(oldLabel).not.toEqual(newLabel)
         }
 
+        // save the toggled settings
         await page.locator('text=Save').click()
-
         await page.waitForSelector('text=Saved!')
 
         const savedSettings = await getPageSettings(page)
-
-        const newAndSavedLabels = await getButtonLabels(page)
-        
+        const postSaveToggleButtonLabels = await getToggleButtonLabels(page)
         for (let i = 0; i < originalSettings.length; i++) {
+            // check that save was successful
             const oldSetting = originalSettings[i]
             const newSetting = savedSettings[i]
             expect(newSetting).not.toEqual(oldSetting)
             
-            const preSavePostToggleLabel = newLabels[i]
-            const postSaveLabel = newAndSavedLabels[i]
+            // toggler labels shouldnt have changed due to save
+            const preSavePostToggleLabel = newToggleButtonLabels[i]
+            const postSaveLabel = postSaveToggleButtonLabels[i]
             expect(postSaveLabel).toEqual(preSavePostToggleLabel)
         }
     })
@@ -142,8 +125,8 @@ test.describe('manage notifications', async () => {
 const getDbSettings = async function() {
     const { userId } = TESTUSER_REGISTERED
     const queryPromises = []
-    for (const queryText of SELECT_NOTI_QUERIES) {
-        const queryPromise = poolQuery(queryText, [userId])
+    for (const queryText of SELECT_QUERIES) {
+        const queryPromise = query(queryText, [userId])
         queryPromises.push(queryPromise)
     }
     const queryResults = await Promise.all(queryPromises)
@@ -159,7 +142,9 @@ const getDbSettings = async function() {
     return [dbReply, dbMention, dbPostActivity, dbWatch]
 }
 
+
 const getPageSettings = async function(page) {
+    // get markup associated with each notification setting
     let pageReply, pageMention, pagePostActivity, pageWatch
     const htmlPromises = []
     for (let i = 0; i < SETTINGS.length; i++) {
@@ -168,14 +153,16 @@ const getPageSettings = async function(page) {
                 >> nth=${ i }` ).innerHTML()
         htmlPromises.push(pageSettingHtml)
     }
+
+    // use markup to determine setting status according to rendered component
     const pageSettingHtmls = await Promise.all(htmlPromises)
-    const settingStatus = html => /enabled/gi.test(html)
+    const settingStatus = html => /enabled/i.test(html)
     for (const html of pageSettingHtmls) {
-        if (/someone replies to my comment/gi.test(html)) {
+        if (/someone replies to my comment/i.test(html)) {
             pageReply = settingStatus(html)
-        } else if (/someone mentions me/gi.test(html)) {
+        } else if (/someone mentions me/i.test(html)) {
             pageMention = settingStatus(html)
-        } else if (/activity in a thread I'm watching/gi.test(html)) {
+        } else if (/activity in a thread I'm watching/i.test(html)) {
             pageWatch = settingStatus(html)
         } else {
             pagePostActivity = settingStatus(html)
@@ -185,7 +172,8 @@ const getPageSettings = async function(page) {
     return [pageReply, pageMention, pagePostActivity, pageWatch]
 }
 
-const getButtonLabels = async function(page) {
+const getToggleButtonLabels = async function(page) {
+    // get markup associated with each notification setting
     const htmlPromises = []
     for (let i = 0; i < SETTINGS.length; i++) {
         const pageSettingHtml = page.locator(
@@ -195,15 +183,16 @@ const getButtonLabels = async function(page) {
     }
     const pageSettingHtmls = await Promise.all(htmlPromises)
 
-    const buttonLabel = html => /Disable/g.test(html) ? 'Disable' : 'Enable'
+    // use markup to get the toggle button label
+    const buttonLabel = html => /Disable/.test(html) ? 'Disable' : 'Enable'
     let replyButtonLabel, mentionButtonLabel, 
         activityButtonLabel, watchButtonLabel
     for (const html of pageSettingHtmls) {
-        if (/someone replies to my comment/gi.test(html)) {
+        if (/someone replies to my comment/i.test(html)) {
             replyButtonLabel = buttonLabel(html)
-        } else if (/someone mentions me/gi.test(html)) {
+        } else if (/someone mentions me/i.test(html)) {
             mentionButtonLabel = buttonLabel(html)
-        } else if (/activity in a thread I'm watching/gi.test(html)) {
+        } else if (/activity in a thread I'm watching/i.test(html)) {
             watchButtonLabel = buttonLabel(html)
         } else {
             activityButtonLabel = buttonLabel(html)
