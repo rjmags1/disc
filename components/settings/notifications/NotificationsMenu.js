@@ -117,10 +117,10 @@ function NotificationsMenu() {
     if (loadingNotificationSettings || loadingUser) return <Loading />
     return (
         <div data-testid="notifications-menu-container"
-            className="bg-zinc-900 text-white h-full p-6 flex-auto w-3/4">
+            className="bg-zinc-900 text-white h-full p-6 relative
+                md:left-60  md:w-fit md:max-w-[calc(100%-15rem)]">
             <h2 className="text-2xl mb-3 ml-4">Manage Notifications</h2>
-            <div className="min-w-max w-[850px] border-2 
-                border-light-gray rounded p-4 pr-8">
+            <div className="border-2 border-light-gray rounded p-4 pr-8">
                 <EmailSetting label={ watchActivityMsg }
                     status={ watch } dStatus={ displayedWatch }
                     handleChange={ () => 
