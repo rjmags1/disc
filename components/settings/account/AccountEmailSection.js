@@ -14,9 +14,9 @@ function AccountEmailSection() {
     return (
         <div data-testid="account-email-section-container" className="mt-10">
             <h2 className="text-2xl ml-4">Email</h2>
-            <div className="w-fit">
+            <div className="">
                 <div className="border-2 border-light-gray 
-                    rounded-md p-4 mt-3 pr-12">
+                    rounded-md p-4 mt-3 pr-12 max-w-[48rem]">
                     <p className="text-sm mb-3">{ primaryEmailMsg }</p>
                     <p className="text-sm mb-3">{ additionalEmailMsg }</p>
                     <p className="text-sm mb-3">{ registeredEmailLoginMsg }</p>

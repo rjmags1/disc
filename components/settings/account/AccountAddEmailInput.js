@@ -60,8 +60,8 @@ function AccountAddEmailInput() {
         }
     }
 
-    const normalAddButtonStyles = `mx-2 bg-purple border rounded border-white 
-        p-0.5 px-4 inline-flex flex-row items-center justify-center
+    const normalAddButtonStyles = `my-2 md:my-0 md:ml-2 border rounded border-white 
+        bg-purple p-0.5 px-4 inline-flex flex-row items-center justify-center
         hover:cursor-pointer hover:bg-black`
 
     const uploadingAddButtonStyles = `mx-2 bg-purple border rounded border-white

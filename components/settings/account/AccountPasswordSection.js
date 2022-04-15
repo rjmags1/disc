@@ -43,7 +43,7 @@ function AccountPasswordSection() {
 
     return (
         <div data-testid="account-password-section-container"
-            className="mt-10">
+            className="mt-10 pb-16">
             <div className="ml-4">
                 <h2 className="text-2xl mb-1">Password</h2>
                 <button onClick={ handleClick } 

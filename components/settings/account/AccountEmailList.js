@@ -20,7 +20,9 @@ function AccountEmailList() {
         <li key={ email } 
             className="bg-purple border-2 border-white rounded
                 p-2 pl-4 mb-2 flex items-center justify-between">
-            { email }
+            <span className="overflow-hidden text-ellipsis">
+                { email }
+            </span>
             { email === primaryEmail && 
             <span className="text-xs bg-zinc-900 border
                 rounded py-0.5 px-4 mr-4">
@@ -33,11 +35,9 @@ function AccountEmailList() {
     return (
         <div data-testid="account-email-list-container"
             className="my-6">
-            <div className="min-w-max max-w-2xl">
-                <ul>
-                    { emailListings }
-                </ul>
-            </div>
+            <ul className="max-w-[40rem]">
+                { emailListings }
+            </ul>
         </div>
     )
 }
