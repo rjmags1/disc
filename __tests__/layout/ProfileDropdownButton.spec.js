@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react'
 
-import ProfileDropdownButton from
-    '../../components/layout/ProfileDropdownButton'
+import DropdownButton from
+    '../../components/layout/DropdownButton'
 
 describe('profile dropdown button', () => {
     test('renders a div containing a button with passed text', () => {
-        render(<ProfileDropdownButton label="test-label" />)
+        render(<DropdownButton label="test-label" />)
 
-        expect(screen.getByTestId("profile-dropdown-button-container")).
+        expect(screen.getByTestId("dropdown-button-container")).
             toBeInTheDocument()
 
         expect(screen.getByRole("button")).toBeInTheDocument()
@@ -17,9 +17,9 @@ describe('profile dropdown button', () => {
 
 
     test('if last, has rounded-b-md, (rounded bottom border)', () => {
-        render(<ProfileDropdownButton last={ true } />)
+        render(<DropdownButton last={ true } />)
 
-        expect(screen.getByTestId("profile-dropdown-button-container").
+        expect(screen.getByTestId("dropdown-button-container").
             className).toMatch(/rounded-b/i)
     })
 })

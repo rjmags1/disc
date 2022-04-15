@@ -3,6 +3,7 @@ import PageHeader from './PageHeader'
 import HomeButton from './HomeButton'
 import NotificationsButton from './NotificationsButton'
 import ProfileButton from './ProfileButton'
+import Hamburger from './Hamburger'
 
 function Navbar({ pageName }) {
     return (
@@ -13,6 +14,7 @@ function Navbar({ pageName }) {
             <HomeButton />
             <NotificationsButton />
             <ProfileButton />
+            <Hamburger />
         </nav>
     )
 }

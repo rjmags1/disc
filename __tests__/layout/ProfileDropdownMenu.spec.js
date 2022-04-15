@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react'
 
-import ProfileDropdownMenu from '../../components/layout/ProfileDropdownMenu'
+import DropdownMenu from '../../components/layout/DropdownMenu'
 
-describe('ProfileDropdownMenu', () => {
+describe('DropdownMenu', () => {
     test('renders a div containing settings and logout buttons', () => {
-        render(<ProfileDropdownMenu />)
+        render(<DropdownMenu />)
 
-        expect(screen.getByTestId("profile-dropdown-container")).
+        expect(screen.getByTestId("dropdown-container")).
             toBeInTheDocument()
 
         expect(screen.getAllByRole("button").length).toEqual(2)

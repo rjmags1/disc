@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import { useUser } from '../../lib/hooks'
 
-function ProfileDropdownButton({ label, last, href }) {
+function DropdownButton({ label, last, href, hamburgerItem=false }) {
     const router = useRouter()
     const { 
         loading: loadingUser, 
@@ -27,17 +27,18 @@ function ProfileDropdownButton({ label, last, href }) {
                 alert("problem logging you out. check your connection")
             }
         }
-        else router.push(href)
+        else if (href) router.push(href)
     }
 
     const baseStyles = "w-full hover:bg-violet-500 px-4 py-1"
+    if (hamburgerItem) baseStyles += " sm:hidden"
     const styles = last ? baseStyles + " rounded-b-md" : baseStyles
     return (
-        <div data-testid="profile-dropdown-button-container"
+        <div data-testid="dropdown-button-container"
             className={ styles } onClick={ handleClick }>
-            <button>{ label }</button>
+            <button className="w-full text-right">{ label }</button>
         </div>
     )
 }
 
-export default ProfileDropdownButton
+export default DropdownButton

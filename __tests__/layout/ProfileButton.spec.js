@@ -19,14 +19,14 @@ describe('ProfileButton', () => {
             dropdown to show and arrow to rotate`, () => {
         render(<ProfileButton />)
 
-        expect(screen.queryByTestId("profile-dropdown-container")).toBeNull()
+        expect(screen.queryByTestId("dropdown-container")).toBeNull()
 
         expect(screen.getByTestId("profile-button-arrow").className).
             not.toMatch(/rotate-180/)
 
         userEvent.click(screen.getByTestId("profile-button-container"))
 
-        expect(screen.getByTestId("profile-dropdown-container")).
+        expect(screen.getByTestId("dropdown-container")).
             toBeInTheDocument()
 
         expect(screen.getByTestId("profile-button-arrow").className).
@@ -40,7 +40,7 @@ describe('ProfileButton', () => {
 
         userEvent.click(screen.getByTestId("profile-button-container"))
 
-        expect(screen.getByTestId("profile-dropdown-container")).
+        expect(screen.getByTestId("dropdown-container")).
             toBeInTheDocument()
 
         expect(screen.getByTestId("profile-button-arrow").className).
@@ -48,7 +48,7 @@ describe('ProfileButton', () => {
 
         userEvent.click(screen.getByTestId("profile-button-container"))
 
-        expect(screen.queryByTestId("profile-dropdown-container")).toBeNull()
+        expect(screen.queryByTestId("dropdown-container")).toBeNull()
 
         expect(screen.getByTestId("profile-button-arrow").className).
             not.toMatch(/rotate-180/)
@@ -61,20 +61,20 @@ describe('ProfileButton', () => {
 
         userEvent.click(screen.getByTestId("profile-button-container"))
 
-        expect(screen.getByTestId("profile-dropdown-container")).
+        expect(screen.getByTestId("dropdown-container")).
             toBeInTheDocument()
 
         userEvent.click(screen.getByTestId("logo-link-container"))
 
-        expect(screen.queryByTestId("profile-dropdown-container")).toBeNull()
+        expect(screen.queryByTestId("dropdown-container")).toBeNull()
 
         userEvent.click(screen.getByTestId("profile-button-container"))
 
-        expect(screen.queryByTestId("profile-dropdown-container")).
+        expect(screen.queryByTestId("dropdown-container")).
             toBeInTheDocument()
 
         userEvent.click(screen.getByTestId("profile-button-container"))
 
-        expect(screen.queryByTestId("profile-dropdown-container")).toBeNull()
+        expect(screen.queryByTestId("dropdown-container")).toBeNull()
     })
 })
