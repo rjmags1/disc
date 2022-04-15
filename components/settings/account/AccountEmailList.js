@@ -35,7 +35,7 @@ function AccountEmailList() {
     return (
         <div data-testid="account-email-list-container"
             className="my-6">
-            <ul className="max-w-[40rem]">
+            <ul className="">
                 { emailListings }
             </ul>
         </div>
