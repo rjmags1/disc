@@ -26,7 +26,7 @@ function TermSection({ term, courses }) {
     )
 
     return (
-        <div data-testid="term-section-container" className="m-6">
+        <div data-testid="term-section-container" className="p-6">
             <h3 className="font-mono text-lg mb-2">{ term }</h3>
             <div className="flex justify-start">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-12 gap-y-4">

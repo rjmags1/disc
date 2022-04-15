@@ -8,7 +8,8 @@
 
     body {
         @apply h-screen;
-        @apply overflow-hidden;
+        @apply overflow-auto;
+        @apply bg-zinc-900;
     }
 
     #__next {
