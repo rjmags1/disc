@@ -6,7 +6,7 @@ function EmailSetting({ label, status, dStatus, handleChange }) {
     
     return (
         <div data-testid="notifications-setting-container"
-            className="flex justify-between items-center border 
+            className="flex flex-col md:flex-row justify-between items-center border 
                 border-white rounded bg-light-gray px-4 py-3 mb-4">
             <h4>{ label }. Currently { styledStatusString }.</h4>
             <SettingToggler isOn={ dStatus } handleClick={ handleChange } />
