@@ -32,6 +32,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
             SELECT 
                 term.name AS term_name, 
                 term.year, 
+                course.course_id AS course_id,
                 course.name AS course_name, 
                 course.section, 
                 course.code
@@ -58,17 +59,17 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
 
     // put courses into terms array of shape 
-    // [{ termName: { courses: [{ name, code, section }, ...] } }, ...]
+    // [{ termName: { courses: [{ courseId, name, code, section }, ...] } }, ...]
     const terms = []
     const newTerm = (termName) => {
         return terms.length > 0 && !(termName in terms[terms.length - 1])
     }
     for (let i = 0; i < coursesQueryResult.rows.length; i++) {
         const row = coursesQueryResult.rows[i]
-        const { term_name, year, course_name, section, code } = row
+        const { term_name, year, course_id, course_name, section, code } = row
 
         const termName = `${ term_name } ${ year }`
-        const course = { name: course_name, section, code }
+        const course = { courseId: course_id, name: course_name, section, code }
         // rows sorted by desc term.year, tie break on term.name,
         // so all courses in a given term will be grouped together.
         // use these properties to reshape rows into terms in one pass

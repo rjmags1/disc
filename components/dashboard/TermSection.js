@@ -15,10 +15,10 @@ function TermSection({ term, courses }) {
     const courseCards = courses.map(
         (course) => {
             colorIdx = colorIdx === COLORS.length - 1 ? 0 : colorIdx + 1
-            const { name, code, section } = course
+            const { courseId, name, code, section } = course
 
             return (
-                <CourseCard name={ name } code={ code } 
+                <CourseCard id={ courseId } name={ name } code={ code }
                     key={ `${code}-${section}` }
                     section={ section } color={ COLORS[colorIdx] }/>
             )
