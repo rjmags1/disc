@@ -3,20 +3,19 @@ const { login, TESTUSER_REGISTERED } = require('../lib/auth')
 const { query } = require('../lib/db')
 
 const SETTINGS = [
-    "comment_reply_email_setting",
-    "mention_email_setting",
+    "watch_email_setting",
     "post_activity_email_setting",
-    "watch_email_setting"
+    "comment_reply_email_setting",
+    "mention_email_setting"
 ]
 
 const SELECT_QUERIES = []
 const RESET_QUERIES = []
-for (let i = 0; i < SETTINGS.length; i++) {
-    const table = SETTINGS[i]
-    SELECT_QUERIES.push(`SELECT is_on FROM ${ table } WHERE person = $1;`)
+for (const setting of SETTINGS) {
+    SELECT_QUERIES.push(`SELECT is_on FROM ${ setting } WHERE person = $1;`)
     RESET_QUERIES.push(`
-        UPDATE ${ table } SET is_on = NOT (
-            SELECT is_on from ${ table } WHERE person = $1)
+        UPDATE ${ setting } SET is_on = NOT (
+            SELECT is_on from ${ setting } WHERE person = $1)
         WHERE person = $1`
     )
 }
@@ -24,16 +23,17 @@ for (let i = 0; i < SETTINGS.length; i++) {
 test.beforeEach(async ({ page }) => {
     await login(page, TESTUSER_REGISTERED)
 
-    await page.locator('[data-testid=profile-button-container]').click()
-
-    await Promise.all([
-        page.waitForNavigation({ url: "/settings/account" }),
-        page.locator('text=Settings').click()
-    ])
+    const profileButtonLocator = page.locator(
+        '[data-testid=profile-button-container]')
+    const smallViewport = !(await profileButtonLocator.isVisible())
+    if (smallViewport) {
+        await page.locator('[data-testid=hamburger-container]').click()
+    }
+    else await profileButtonLocator.click()
 
     await Promise.all([
         page.waitForNavigation({ url: "/settings/notifications" }),
-        page.locator('text=Notifications').click()
+        page.locator('text=Notification Settings').click()
     ])
 })
 
@@ -47,158 +47,128 @@ test.afterAll(async () => {
     await Promise.all(queryPromises)
 })
 
-
 test.describe('settings menu pane', async () => {
     test('navigation to notifications settings menu', async ({ page }) => {
+        const settingsPaneAccountBtnLocator = page.locator(
+            'a:has-text("Account")')
+        // only test this for browser contexts with large viewports
+        const necessaryToTestThis = await settingsPaneAccountBtnLocator.
+            isVisible()
+        if (!necessaryToTestThis) return
+
         await Promise.all([
             page.waitForNavigation({ url: "/settings/account" }),
-            page.locator('text=Account').click()
+            settingsPaneAccountBtnLocator.click()
         ])
     })
 })
 
-
 test.describe('manage notifications', async () => {
     test('current notification statuses match those in db', 
     async ({ page }) => {
-        const [
-            dbReply, dbMention, dbPostActivity, dbWatch
-        ] = await getDbSettings()
+        const dbSettings = await getDbSettings()
 
-        const [
-            pageReply, pageMention, pagePostActivity, pageWatch
-        ] = await getPageSettings(page)
+        // make sure page is fully loaded
+        await page.waitForSelector(
+            '[data-testid=notifications-setting-container]')
+        
+        const pageSettings = await getPageSettings(page)
 
-        expect([dbReply, dbMention, dbPostActivity, dbWatch]).
-            toEqual([pageReply, pageMention, pagePostActivity, pageWatch])
+        expect(pageSettings).toEqual(dbSettings)
     })
-   
 
     test('toggling flips button, doesnt change status unless save click',
     async ({ page }) => {
-        // allow data hooks to load and setState
-        await new Promise(res => setTimeout(res, 500))
-        
-        // get original actual setting statuses and toggler labels
-        const originalSettings = await getPageSettings(page)
-        const originalToggleButtonLabels = await getToggleButtonLabels(page)
+        // make sure page is fully loaded
+        await page.waitForSelector(
+            '[data-testid=notifications-setting-container]')
 
-        // click all of the toggle buttons
-        for (let i = 0; i < SETTINGS.length; i++) {
-            await page.locator(`button >> nth=${ i }`).click()
-        }
-        
-        // we havent saved yet so actual setting statuses shouldnt have changed
-        const notSaved = await getPageSettings(page)
-        expect(notSaved).toEqual(originalSettings)
-        
-        // we clicked all toggle buttons so their labels should have flipped
-        const newToggleButtonLabels = await getToggleButtonLabels(page)
-        for (let i = 0; i < originalToggleButtonLabels.length; i++) {
-            const oldLabel = originalToggleButtonLabels[i]
-            const newLabel = newToggleButtonLabels[i]
-            expect(oldLabel).not.toEqual(newLabel)
-        }
-
-        // save the toggled settings
-        await page.locator('text=Save').click()
-        await page.waitForSelector('text=Saved!')
-
-        const savedSettings = await getPageSettings(page)
-        const postSaveToggleButtonLabels = await getToggleButtonLabels(page)
-        for (let i = 0; i < originalSettings.length; i++) {
-            // check that save was successful
-            const oldSetting = originalSettings[i]
-            const newSetting = savedSettings[i]
-            expect(newSetting).not.toEqual(oldSetting)
-            
-            // toggler labels shouldnt have changed due to save
-            const preSavePostToggleLabel = newToggleButtonLabels[i]
-            const postSaveLabel = postSaveToggleButtonLabels[i]
-            expect(postSaveLabel).toEqual(preSavePostToggleLabel)
+        const originalTogglerLabels = await getTogglerLabels(page)
+        await toggleAllTogglers(page)
+        const toggledLabels = await getTogglerLabels(page)
+        for (let i = 0; i < toggledLabels.length; i++) {
+            expect(originalTogglerLabels[i]).not.toEqual(toggledLabels[i])
         }
     })
 })
 
+const toggleAllTogglers = async function(page) {
+    const togglers = await page.locator(
+        '[data-testid=notifications-setting-toggler]').locator(
+            'button'
+        ).elementHandles()
+    for (const toggler of togglers) {
+        await toggler.click()
+    }
+}
 
+const getTogglerLabels = async function(page) {
+    const labels = [null, null, null, null]
+    const pageHtmlRegexes = [
+        /email me when there is activity in a thread i'm watching/i,
+        /email me when someone replies to my thread/i,
+        /email me when someone replies to my comment/i,
+        /email me when someone mentions me/i
+    ]
+    const getLabelFromHtml = html => /Enable/.test(html) ? "Enable" : "Disable"
+    const settingContainers = await page.locator(
+        '[data-testid=notifications-setting-container]').elementHandles()
+    for (const settingContainer of settingContainers) {
+        const html = await settingContainer.innerHTML()
+        if (pageHtmlRegexes[0].test(html)) {
+            labels[0] = getLabelFromHtml(html)
+        }
+        else if (pageHtmlRegexes[1].test(html)) {
+            labels[1] = getLabelFromHtml(html)
+        }
+        else if (pageHtmlRegexes[2].test(html)) {
+            labels[2] = getLabelFromHtml(html)
+        }
+        else {
+            labels[3] = getLabelFromHtml(html)
+        }
+    }
+
+    return labels
+}
 
 const getDbSettings = async function() {
-    const { userId } = TESTUSER_REGISTERED
-    const queryPromises = []
+    const { userId: testUserId } = TESTUSER_REGISTERED
+    const dbSettings = []
     for (const queryText of SELECT_QUERIES) {
-        const queryPromise = query(queryText, [userId])
-        queryPromises.push(queryPromise)
+        const settingQuery = await query(queryText, [testUserId])
+        dbSettings.push(settingQuery.rows[0].is_on)
     }
-    const queryResults = await Promise.all(queryPromises)
-    const {
-        comment_reply_email_setting: dbReply,
-        mention_email_setting: dbMention,
-        post_activity_email_setting: dbPostActivity,
-        watch_email_setting: dbWatch
-    } = Object.fromEntries(
-        queryResults.map((result, i) => 
-            [SETTINGS[i], result.rows[0].is_on]))
 
-    return [dbReply, dbMention, dbPostActivity, dbWatch]
+    return dbSettings
 }
-
 
 const getPageSettings = async function(page) {
-    // get markup associated with each notification setting
-    let pageReply, pageMention, pagePostActivity, pageWatch
-    const htmlPromises = []
-    for (let i = 0; i < SETTINGS.length; i++) {
-        const pageSettingHtml = page.locator(
-            `[data-testid=notifications-setting-container] 
-                >> nth=${ i }` ).innerHTML()
-        htmlPromises.push(pageSettingHtml)
-    }
-
-    // use markup to determine setting status according to rendered component
-    const pageSettingHtmls = await Promise.all(htmlPromises)
-    const settingStatus = html => /enabled/i.test(html)
-    for (const html of pageSettingHtmls) {
-        if (/someone replies to my comment/i.test(html)) {
-            pageReply = settingStatus(html)
-        } else if (/someone mentions me/i.test(html)) {
-            pageMention = settingStatus(html)
-        } else if (/activity in a thread I'm watching/i.test(html)) {
-            pageWatch = settingStatus(html)
-        } else {
-            pagePostActivity = settingStatus(html)
+    const pageSettings = [null, null, null, null]
+    const pageHtmlRegexes = [
+        /email me when there is activity in a thread i'm watching/i,
+        /email me when someone replies to my thread/i,
+        /email me when someone replies to my comment/i,
+        /email me when someone mentions me/i
+    ]
+    const getStatusFromHtml = html => /enabled/i.test(html)
+    const settingContainers = await page.locator(
+        '[data-testid=notifications-setting-container]').elementHandles()
+    for (const settingContainer of settingContainers) {
+        const html = await settingContainer.innerHTML()
+        if (pageHtmlRegexes[0].test(html)) {
+            pageSettings[0] = getStatusFromHtml(html)
+        }
+        else if (pageHtmlRegexes[1].test(html)) {
+            pageSettings[1] = getStatusFromHtml(html)
+        }
+        else if (pageHtmlRegexes[2].test(html)) {
+            pageSettings[2] = getStatusFromHtml(html)
+        }
+        else {
+            pageSettings[3] = getStatusFromHtml(html)
         }
     }
 
-    return [pageReply, pageMention, pagePostActivity, pageWatch]
-}
-
-const getToggleButtonLabels = async function(page) {
-    // get markup associated with each notification setting
-    const htmlPromises = []
-    for (let i = 0; i < SETTINGS.length; i++) {
-        const pageSettingHtml = page.locator(
-            `[data-testid=notifications-setting-container] 
-                >> nth=${ i }` ).innerHTML()
-        htmlPromises.push(pageSettingHtml)
-    }
-    const pageSettingHtmls = await Promise.all(htmlPromises)
-
-    // use markup to get the toggle button label
-    const buttonLabel = html => /Disable/.test(html) ? 'Disable' : 'Enable'
-    let replyButtonLabel, mentionButtonLabel, 
-        activityButtonLabel, watchButtonLabel
-    for (const html of pageSettingHtmls) {
-        if (/someone replies to my comment/i.test(html)) {
-            replyButtonLabel = buttonLabel(html)
-        } else if (/someone mentions me/i.test(html)) {
-            mentionButtonLabel = buttonLabel(html)
-        } else if (/activity in a thread I'm watching/i.test(html)) {
-            watchButtonLabel = buttonLabel(html)
-        } else {
-            activityButtonLabel = buttonLabel(html)
-        }
-    }
-
-    return [replyButtonLabel, mentionButtonLabel, 
-            activityButtonLabel, watchButtonLabel]
+    return pageSettings
 }

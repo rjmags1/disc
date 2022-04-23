@@ -1,13 +1,8 @@
 exports.TESTUSER_REGISTERED = {
-    userId: 8,
-    email: "john-doe@hogwarts.edu",
-    password: "johnspassword",
+    userId: 2,
+    email: "harry-potter@hogwarts.edu",
+    password: "harryspassword",
     organization: "Hogwarts",
-    allEmails: [
-        "john-doe@hogwarts.edu", 
-        "john@gmail.com", 
-        "john@yahoo.com"
-    ]
 }
 
 exports.TESTUSER_UNREGISTERED = {

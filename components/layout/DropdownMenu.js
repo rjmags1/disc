@@ -7,7 +7,7 @@ function DropdownMenu() {
                 sm:top-12 rounded-b-md border-black right-0">
             <DropdownButton label="Home" href="/" hamburgerItem={ true }/>
             <DropdownButton label="Notifications" hamburgerItem={ true }/>
-            <DropdownButton label="Account Settings" href="/settings/account" />
+            <DropdownButton label="Account" href="/settings/account" />
             <DropdownButton label="Notification Settings" 
                 href="/settings/notifications"/>
             <DropdownButton label="Log out" last={ true } 

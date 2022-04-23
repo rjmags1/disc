@@ -3,16 +3,22 @@ const { login, TESTUSER_REGISTERED } = require('../lib/auth')
 const { unsealData } = require('iron-session')
 const { query } = require('../lib/db')
 
-const NEW_REGISTERED_TEST_USER_EMAIL = "johnsNewEmail@gmail.com"
+const NEW_REGISTERED_TEST_USER_EMAIL = "harrysNewEmail@gmail.com"
 
 test.beforeEach(async ({ page }) => {
     await login(page, TESTUSER_REGISTERED)
 
-    await page.locator('[data-testid=profile-button-container]').click()
+    const profileButtonLocator = page.locator(
+        '[data-testid=profile-button-container]')
+    const smallViewport = !(await profileButtonLocator.isVisible())
+    if (smallViewport) {
+        await page.locator('[data-testid=hamburger-container]').click()
+    }
+    else await profileButtonLocator.click()
 
     await Promise.all([
         page.waitForNavigation({ url: "/settings/account" }),
-        page.locator('text=Settings').click()
+        page.locator('text=Account').click()
     ])
 })
 
@@ -22,16 +28,20 @@ test.afterAll(async () => {
     await query(queryText, params)
 })
 
-
 test.describe('settings menu pane', async () => {
     test('navigation to notifications settings menu', async ({ page }) => {
+        const settingsPaneNotifBtnLocator = page.locator(
+            'a:has-text("Notifications")')
+        // only test this for browser contexts with large viewports
+        const necessaryToTestThis = await settingsPaneNotifBtnLocator.isVisible()
+        if (!necessaryToTestThis) return
+
         await Promise.all([
             page.waitForNavigation({ url: "/settings/notifications" }),
-            page.locator('text=Notifications').click()
+            settingsPaneNotifBtnLocator.click()
         ])
     })
 })
-
 
 test.describe('profile card', async () => {
     test('avatar picture uses avatar_url src', async ({ page, context }) => {
@@ -48,13 +58,21 @@ test.describe('profile card', async () => {
 
         const noForwardSlashCookieAvatarUrl = cookieAvatarUrl.slice(1)
 
-        const avatarImgSrc = await page.locator('img >> nth=-1').
-            getAttribute('src')
+        const profileContainerImgs = await page.locator(
+            '[data-testid=profile-card-avatar-container]').locator('img').
+                elementHandles()
+        
+        const srcTestRegex = new RegExp(noForwardSlashCookieAvatarUrl)
+        for (const img of profileContainerImgs) {
+            const src = await img.getAttribute('src')
+            if (srcTestRegex.test(src)) return
+        }
 
-        expect(avatarImgSrc).
-            toMatch(new RegExp(noForwardSlashCookieAvatarUrl, "g"))
+        // if none of the imgs within the avatar container containing
+        // a next/image have a src matching the cookie avatar url,
+        // make an assertion that will always fail
+        expect(false).toBe(true) 
     })
-
 
     test('profile card displays first and last name, primary email',
     async ({ page, context }) => {
@@ -81,18 +99,20 @@ test.describe('profile card', async () => {
     })
 })
 
-
 test.describe('email section', async () => {
     test('all emails associated with account listed', async ({ page }) => {
-        const registeredUserEmails = TESTUSER_REGISTERED.allEmails
+        const queryText = `SELECT email FROM email WHERE person = (
+            SELECT person FROM email WHERE email = $1);`
+        const emailsQuery = await query(queryText, [TESTUSER_REGISTERED.email])
+        const registeredUserEmails = emailsQuery.rows.map(
+            row => row.email
+        )
         
-        for (let i = 0; i < registeredUserEmails.length; i++) {
-            const email = registeredUserEmails[i]
-
-            await expect(page.locator(`text=${ email } >> nth=-1`)).toBeVisible()
+        for (const email of registeredUserEmails) {
+            await expect(page.locator(`text=${ email } >> nth=-1`)).
+                toBeVisible()
         }
     })
-
 
     test('primary email correctly marked', async ({ page }) => {
         const registeredPrimaryEmail = TESTUSER_REGISTERED.email

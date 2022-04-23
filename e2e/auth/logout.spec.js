@@ -10,7 +10,13 @@ test.describe('logout flow', () => {
         expect(loggedInCookies.
             filter(c => /session/i.test(c.name)).length).toBe(1)
 
-        await page.locator('[data-testid=profile-button-container]').click()
+        const profileButtonLocator = page.locator(
+            '[data-testid=profile-button-container]')
+        const smallViewport = !(await profileButtonLocator.isVisible())
+        if (smallViewport) {
+            await page.locator('[data-testid=hamburger-container]').click()
+        }
+        else await profileButtonLocator.click()
 
         await Promise.all([
             page.waitForNavigation({ url: "/login" }),
@@ -35,8 +41,14 @@ test.describe('logout flow', () => {
             filter(c => /session/i.test(c.name)).length).toBe(1)
         
         await page.goto('/settings/account')
-        
-        await page.locator('[data-testid=profile-button-container]').click()
+
+        const profileButtonLocator = page.locator(
+            '[data-testid=profile-button-container]')
+        const smallViewport = !(await profileButtonLocator.isVisible())
+        if (smallViewport) {
+            await page.locator('[data-testid=hamburger-container]').click()
+        }
+        else await profileButtonLocator.click()
 
         await Promise.all([
             page.waitForNavigation({ url: "/login" }),
@@ -62,7 +74,13 @@ test.describe('logout flow', () => {
         
         await page.goto('/settings/notifications')
         
-        await page.locator('[data-testid=profile-button-container]').click()
+        const profileButtonLocator = page.locator(
+            '[data-testid=profile-button-container]')
+        const smallViewport = !(await profileButtonLocator.isVisible())
+        if (smallViewport) {
+            await page.locator('[data-testid=hamburger-container]').click()
+        }
+        else await profileButtonLocator.click()
 
         await Promise.all([
             page.waitForNavigation({ url: "/login" }),
