@@ -42,7 +42,8 @@ for h in sampleCourses:
         if courseName[0] == '^':
             courseName = courseName[1:]
         if 'H' in code or '*' in courseName or 'SEMINAR' in courseName or \
-                'THESIS' in courseName or 'RESEARCH' in courseName: 
+                'THESIS' in courseName or 'RESEARCH' in courseName or \
+                'ORIENTATION' in courseName: 
             continue
 
         ### create (name, code, section, year, season) tuples
