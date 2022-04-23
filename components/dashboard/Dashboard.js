@@ -28,9 +28,8 @@ function Dashboard() {
 
     return (
         <div data-testid="dashboard-container"
-            className="text-white w-full h-full relative -z-10">
-            <div className="flex flex-col justify-center items-center 
-                w-full md:h-full absolute md:-top-8">
+            className="text-white w-full h-full relative -z-10 md:mt-24">
+            <div className="flex flex-col justify-center items-center">
                 { termSections }
             </div>
         </div>
