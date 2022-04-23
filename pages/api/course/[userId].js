@@ -85,10 +85,10 @@ export default withIronSessionApiRoute(async function(req, resp) {
     // we're not done yet. need to tie break on desc season order!
     // ie, want client to get the most recent term at the top of their response
     const seasonPriority = {
-        "Winter": 1,
-        "Fall": 2,
-        "Summer": 3,
-        "Spring": 4
+        "Fall": 1,
+        "Summer": 2,
+        "Spring": 3,
+        "Winter": 4
     }
     const termCompare = (term1, term2) => {
         term1 = Object.keys(term1)[0], term2 = Object.keys(term2)[0]
@@ -101,7 +101,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
         if (year1 === year2) {
             return seasonPriority[season1] - seasonPriority[season2]
         }
-        return year1 - year2
+        return year2 - year1
     }
     terms.sort(termCompare)
 
