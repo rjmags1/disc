@@ -1,6 +1,7 @@
 import Layout from '../../components/layout/Layout'
 import Loading from '../../components/lib/Loading'
 import { useRouter } from 'next/router'
+import Head from 'next/head'
 import { useState, useRef, useEffect } from 'react'
 import { useUser, useCourse } from '../../lib/hooks'
 
@@ -36,7 +37,7 @@ function Discussion() {
     } = useUser({ redirectTo: '/login' })
 
     const {
-        course, // {courseId, termName, courseName, code, section}
+        course,
         loading: loadingCourse
     } = useCourse(router.query.courseId)
 
@@ -71,40 +72,57 @@ function Discussion() {
     }
     
     if (loadingUser || !user.authenticated || loadingCourse) return <Loading />
+
+    const { termName, code, section } = course
+    const title = `${ termName } ${ code }-${ section } - Discussion`
     return (
-        <div data-testid="discussion-container" className="flex h-full">
-            <div data-testid="category-pane-container" ref={ catPane }
-                className="hidden lg:flex bg-zinc-700 text-white
-                    justify-between overflow-hidden w-[250px]">
-                <div data-testid="category-headers-container">
-                    <h3>category1</h3>
-                    <h3>category2</h3>
-                    <h3>category3</h3>
+        <>
+            <Head><title>{ title }</title></Head>
+            <div data-testid="discussion-container" className="flex h-full">
+                <div data-testid="category-pane-container" ref={ catPane }
+                    className="hidden lg:flex bg-zinc-700 text-white
+                        justify-between overflow-hidden w-[250px]">
+                    <div data-testid="category-headers-container">
+                        <h3>category1</h3>
+                        <h3>category2</h3>
+                        <h3>category3</h3>
+                    </div>
+                    <div className="w-1 bg-zinc-500 hover:cursor-ew-resize" 
+                        onMouseDown={ handleLeftDividerMouseDown } 
+                        data-testid="left-divider" />
                 </div>
-                <div className="w-1 bg-zinc-500 hover:cursor-ew-resize" 
-                    onMouseDown={ handleLeftDividerMouseDown } 
-                    data-testid="left-divider" />
+                <div className="flex-auto text-white flex" data-testid="posts-section">
+                    <div data-testid="post-listings-pane-container" ref={ listingsPane }
+                        className="flex-none bg-zinc-600 flex justify-between w-[400px]">
+                        <div data-testid="post-listings-container">PostListing</div>
+                        <div data-testid="right-divider" 
+                            onMouseDown={ handleRightDividerMouseDown }
+                            className="w-1 bg-zinc-500 hover:cursor-ew-resize" />
+                    </div>
+                    <div data-testid="post-container" 
+                        className="hidden md:flex w-full flex-auto">
+                        Post display
+                    </div>
+                </div>
             </div>
-            <div className="flex-auto text-white flex" data-testid="posts-section">
-                <div data-testid="post-listings-pane-container" ref={ listingsPane }
-                    className="flex-none bg-zinc-600 flex justify-between w-[400px]">
-                    <div data-testid="post-listings-container">PostListing</div>
-                    <div data-testid="right-divider" 
-                        onMouseDown={ handleRightDividerMouseDown }
-                        className="w-1 bg-zinc-500 hover:cursor-ew-resize" />
-                </div>
-                <div data-testid="post-container" 
-                    className="hidden md:flex w-full flex-auto">
-                    Post display
-                </div>
-            </div>
-        </div>
+        </>
     )
 }
 
 Discussion.getLayout = function getLayout(page) {
+    const router = useRouter()
+    const {
+        course,
+        loading: loadingCourse,
+        error
+    } = useCourse(router.query.courseId)
+
+    const pageName = loadingCourse || error ? 
+                        "" : 
+                        `${ course.termName } ${ course.courseName }`
+
     return (
-        <Layout pageName="Discussion">{ page }</Layout>
+        <Layout pageName={ pageName }>{ page }</Layout>
     )
 }
 
