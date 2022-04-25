@@ -12,7 +12,7 @@ CREATE TABLE avatar_url (
     avatar_url_id SERIAL PRIMARY KEY,
     avatar_url varchar(2048) NOT NULL
 );
-INSERT INTO avatar_url (avatar_url) VALUES ('/cool-profile-img.png');
+INSERT INTO avatar_url (avatar_url) VALUES ('/cool-profile-img.jpg');
 CREATE TABLE person (
     user_id SERIAL PRIMARY KEY,
     avatar_url integer REFERENCES avatar_url (avatar_url_id) DEFAULT 1,
