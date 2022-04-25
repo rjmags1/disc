@@ -46,10 +46,13 @@ export default withIronSessionApiRoute(async function(req, resp) {
     const { 
         course_id, year, term_name, name, code, section 
     } = courseQueryResult.rows[0]
+    const courseName = name.split(' ').map(
+        s => s.slice(0, 1).toUpperCase() + s.slice(1).toLowerCase()
+    ).join(' ')
     const courseInfo = {
         courseId: course_id,
         termName: `${ term_name } ${ year }`,
-        courseName: name,
+        courseName: courseName,
         code: code,
         section: section
     }
