@@ -1,27 +1,45 @@
 import Layout from '../../components/layout/Layout'
+import Loading from '../../components/lib/Loading'
+import { useRouter } from 'next/router'
 import { useState, useRef, useEffect } from 'react'
+import { useUser, useCourse } from '../../lib/hooks'
 
 function Discussion() {
     const MAX_CAT_PANE_WIDTH = 400
     const MAX_LISTING_PANE_WIDTH = 450
     const MIN_LISTING_PANE_WIDTH = 250
+    const router = useRouter()
 
-    const [catPaneWidth, setCatPaneWidth] = useState(250)
+    const [catPaneWidth, setCatPaneWidth] = useState(null)
     const catPane = useRef(null)
-    const [listingPaneWidth, setListingPaneWidth] = useState(400)
+    const [listingPaneWidth, setListingPaneWidth] = useState(null)
     const listingsPane = useRef(null)
 
     useEffect(() => {
         if (!listingsPane.current) return
+        if (listingPaneWidth === null) setListingPaneWidth(400)
 
         listingsPane.current.style.width = `${listingPaneWidth}px`
     }, [listingPaneWidth, listingsPane])
 
     useEffect(() => {
         if (!catPane.current) return
+        if (catPaneWidth === null) setCatPaneWidth(250)
 
         catPane.current.style.width = `${catPaneWidth}px`
     }, [catPaneWidth, catPane])
+
+
+    const {
+        user,
+        loading: loadingUser
+    } = useUser({ redirectTo: '/login' })
+
+    const {
+        course, // {courseId, termName, courseName, code, section}
+        loading: loadingCourse
+    } = useCourse(router.query.courseId)
+
 
     const handleLeftDividerMouseDown = () => {
         document.addEventListener('mousemove', handleLeftDividerDrag)
@@ -51,12 +69,13 @@ function Discussion() {
         document.removeEventListener('mousemove', handleRightDividerDrag)
         document.removeEventListener('mouseup', handleRightDividerMouseUp)
     }
-
+    
+    if (loadingUser || !user.authenticated || loadingCourse) return <Loading />
     return (
         <div data-testid="discussion-container" className="flex h-full">
             <div data-testid="category-pane-container" ref={ catPane }
                 className="hidden lg:flex bg-zinc-700 text-white
-                    justify-between overflow-hidden">
+                    justify-between overflow-hidden w-[250px]">
                 <div data-testid="category-headers-container">
                     <h3>category1</h3>
                     <h3>category2</h3>
@@ -68,7 +87,7 @@ function Discussion() {
             </div>
             <div className="flex-auto text-white flex" data-testid="posts-section">
                 <div data-testid="post-listings-pane-container" ref={ listingsPane }
-                    className="flex-none bg-zinc-600 flex justify-between">
+                    className="flex-none bg-zinc-600 flex justify-between w-[400px]">
                     <div data-testid="post-listings-container">PostListing</div>
                     <div data-testid="right-divider" 
                         onMouseDown={ handleRightDividerMouseDown }
