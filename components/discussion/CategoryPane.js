@@ -17,7 +17,7 @@ function CategoryPane({ catPaneRef }) {
         if (!catPaneRef.current) return
 
         catPaneRef.current.style.width = `${ catPaneWidth }px`
-    }, [catPaneWidth, catPaneRef])
+    })
 
     const {
         categories: categoriesInfo,

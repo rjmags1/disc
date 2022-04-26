@@ -14,7 +14,7 @@ function PostListingsPane({ catPaneRef }) {
         if (!listingsPane.current) return
 
         listingsPane.current.style.width = `${ listingPaneWidth }px`
-    }, [listingPaneWidth, listingsPane])
+    })
 
     const handleRightDividerMouseDown = () => {
         document.body.style.userSelect = "none"
