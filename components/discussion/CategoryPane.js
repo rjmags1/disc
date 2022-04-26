@@ -50,8 +50,10 @@ function CategoryPane({ catPaneRef }) {
     return (
         <div data-testid="category-pane-container" ref={ catPaneRef }
             className={ `hidden lg:flex bg-zinc-700 text-white justify-between
-                overflow-hidden w-[${ INITIAL_CAT_PANE_WIDTH }px]` } >
-            <div data-testid="category-headers-container" >
+                overflow-visible w-[${ INITIAL_CAT_PANE_WIDTH }px]` } >
+            <div data-testid="category-headers-container"
+                className="w-full flex flex-col items-center justify-start 
+                    overflow-hidden">
                 { categories }
             </div>
             <div className="w-1 bg-zinc-500 hover:cursor-ew-resize"
