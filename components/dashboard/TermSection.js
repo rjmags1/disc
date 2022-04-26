@@ -1,26 +1,18 @@
 import CourseCard from "./CourseCard"
+import { VIOLETS } from "../../lib/colors"
 
 function TermSection({ term, courses }) {
-    const COLORS = [
-        "bg-violet-400",
-        "bg-violet-500",
-        "bg-violet-600",
-        "bg-violet-700",
-        "bg-violet-800",
-        "bg-violet-900"
-    ]
-
     let colorIdx = 0
 
     const courseCards = courses.map(
         (course) => {
-            colorIdx = colorIdx === COLORS.length - 1 ? 0 : colorIdx + 1
+            colorIdx = colorIdx === VIOLETS.length - 1 ? 0 : colorIdx + 1
             const { courseId, name, code, section } = course
 
             return (
                 <CourseCard id={ courseId } name={ name } code={ code }
                     key={ `${code}-${section}` }
-                    section={ section } color={ COLORS[colorIdx] }/>
+                    section={ section } color={ VIOLETS[colorIdx] }/>
             )
         }
     )
