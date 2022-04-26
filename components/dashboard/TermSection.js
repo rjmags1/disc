@@ -1,18 +1,18 @@
 import CourseCard from "./CourseCard"
-import { VIOLETS } from "../../lib/colors"
+import { VIOLET_HEX } from "../../lib/colors"
 
 function TermSection({ term, courses }) {
     let colorIdx = 0
 
     const courseCards = courses.map(
         (course) => {
-            colorIdx = colorIdx === VIOLETS.length - 1 ? 0 : colorIdx + 1
+            colorIdx = colorIdx === VIOLET_HEX.length - 1 ? 0 : colorIdx + 1
             const { courseId, name, code, section } = course
 
             return (
                 <CourseCard id={ courseId } name={ name } code={ code }
                     key={ `${code}-${section}` }
-                    section={ section } color={ VIOLETS[colorIdx] }/>
+                    section={ section } color={ VIOLET_HEX[colorIdx] }/>
             )
         }
     )
