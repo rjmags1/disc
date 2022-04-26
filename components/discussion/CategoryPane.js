@@ -55,7 +55,10 @@ function CategoryPane({ catPaneRef }) {
                 overflow-visible w-[${ INITIAL_CAT_PANE_WIDTH }px]` } >
             <div data-testid="category-headers-container"
                 className="w-full flex flex-col items-center justify-start 
-                    overflow-hidden">
+                    overflow-hidden my-2 px-4">
+                <h3 className="text-sm font-mono text-gray-400 w-full text-left">
+                    CATEGORIES
+                </h3>
                 { categories }
             </div>
             <div className="w-1 bg-zinc-500 hover:cursor-ew-resize"
