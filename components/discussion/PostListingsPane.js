@@ -18,6 +18,7 @@ function PostListingsPane({ catPaneRef }) {
 
     const handleRightDividerMouseDown = () => {
         document.body.style.userSelect = "none"
+        document.body.style.cursor = "ew-resize"
         document.addEventListener('mousemove', handleRightDividerDrag)
         document.addEventListener('mouseup', handleRightDividerMouseUp)
     }
@@ -31,6 +32,7 @@ function PostListingsPane({ catPaneRef }) {
     }
     const handleRightDividerMouseUp = () => {
         document.body.style.userSelect = ""
+        document.body.style.cursor = ""
         document.removeEventListener('mousemove', handleRightDividerDrag)
         document.removeEventListener('mouseup', handleRightDividerMouseUp)
     }

@@ -25,6 +25,7 @@ function CategoryPane({ catPaneRef }) {
 
     const handleLeftDividerMouseDown = () => {
         document.body.style.userSelect = "none"
+        document.body.style.cursor = "ew-resize"
         document.addEventListener('mousemove', handleLeftDividerDrag)
         document.addEventListener('mouseup', handleLeftDividerMouseUp)
     }
@@ -34,6 +35,7 @@ function CategoryPane({ catPaneRef }) {
     }
     const handleLeftDividerMouseUp = () => {
         document.body.style.userSelect = ""
+        document.body.style.cursor = ""
         document.removeEventListener('mousemove', handleLeftDividerDrag)
         document.removeEventListener('mouseup', handleLeftDividerMouseUp)
     }
