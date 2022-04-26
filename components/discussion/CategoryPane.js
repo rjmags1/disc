@@ -24,6 +24,7 @@ function CategoryPane({ catPaneRef }) {
     } = useCategories(courseId)
 
     const handleLeftDividerMouseDown = () => {
+        document.body.style.userSelect = "none"
         document.addEventListener('mousemove', handleLeftDividerDrag)
         document.addEventListener('mouseup', handleLeftDividerMouseUp)
     }
@@ -32,6 +33,7 @@ function CategoryPane({ catPaneRef }) {
         setCatPaneWidth(Math.min(newWidthInPixels, MAX_CAT_PANE_WIDTH))
     }
     const handleLeftDividerMouseUp = () => {
+        document.body.style.userSelect = ""
         document.removeEventListener('mousemove', handleLeftDividerDrag)
         document.removeEventListener('mouseup', handleLeftDividerMouseUp)
     }

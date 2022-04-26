@@ -17,6 +17,7 @@ function PostListingsPane({ catPaneRef }) {
     }, [listingPaneWidth, listingsPane])
 
     const handleRightDividerMouseDown = () => {
+        document.body.style.userSelect = "none"
         document.addEventListener('mousemove', handleRightDividerDrag)
         document.addEventListener('mouseup', handleRightDividerMouseUp)
     }
@@ -29,6 +30,7 @@ function PostListingsPane({ catPaneRef }) {
         ))
     }
     const handleRightDividerMouseUp = () => {
+        document.body.style.userSelect = ""
         document.removeEventListener('mousemove', handleRightDividerDrag)
         document.removeEventListener('mouseup', handleRightDividerMouseUp)
     }
