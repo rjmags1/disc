@@ -57,8 +57,9 @@ function CategoryPane({ catPaneRef }) {
                 w-[${ INITIAL_CAT_PANE_WIDTH }px]` } >
             <div data-testid="category-headers-container"
                 className="w-full flex flex-col items-center justify-start 
-                    overflow-hidden my-2 px-4">
-                <h3 className="text-sm font-mono text-gray-400 w-full text-left">
+                    overflow-hidden my-2">
+                <h3 className="text-sm font-mono text-gray-400 w-full
+                        text-left px-4">
                     CATEGORIES
                 </h3>
                 { categories }
