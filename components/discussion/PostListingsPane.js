@@ -49,10 +49,6 @@ function PostListingsPane({ catPaneRef }) {
                     onMouseDown={ handleRightDividerMouseDown }
                     className="w-1 bg-zinc-500 hover:cursor-ew-resize" />
             </div>
-            <div data-testid="post-container"
-                className="hidden md:flex w-full flex-auto">
-                Post display
-            </div>
         </>
     )
 }

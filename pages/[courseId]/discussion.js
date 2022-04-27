@@ -2,6 +2,7 @@ import Layout from '../../components/layout/Layout'
 import Loading from '../../components/lib/Loading'
 import CategoryPane from '../../components/discussion/CategoryPane'
 import PostListingsPane from '../../components/discussion/PostListingsPane'
+import Post from '../../components/discussion/Post'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import {  useRef } from 'react'
@@ -32,6 +33,7 @@ function Discussion() {
                 <CategoryPane catPaneRef={ catPaneRef }/>
                 <div className="flex-auto text-white flex" data-testid="posts-section">
                     <PostListingsPane catPaneRef={ catPaneRef } />
+                    <Post />
                 </div>
             </div>
         </>
