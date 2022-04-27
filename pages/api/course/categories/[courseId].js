@@ -37,7 +37,6 @@ export default withIronSessionApiRoute(async function(req, resp) {
     }
 
 
-    console.log(categoriesQueryResult.rows)
     const categories = []
     categoriesQueryResult.rows.forEach(
         (row) => {
@@ -49,7 +48,6 @@ export default withIronSessionApiRoute(async function(req, resp) {
     )
 
 
-    console.log(categories)
     resp.status(200).json(categories)
 
 }, sessionOptions)
