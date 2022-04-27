@@ -11,3 +11,4 @@ node enroll.js
 node postCategory.js
 node posts.js
 node comment.js
+node postInteractions.js

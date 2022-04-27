@@ -16,7 +16,7 @@ const { faker } = require('@faker-js/faker')
 const Delta = require('quill-delta') // delta constructor
 
 
-// 12/18/2003 EON UTC, winter 2003 term end
+// 12/18/2003 EON UTC, fall 2003 term end
 const SPECIAL_TERM_END = +(new Date(Date.UTC(2003, 11, 18, 23, 59)))
 
 const genComments = async function() {

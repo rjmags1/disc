@@ -172,11 +172,11 @@ CREATE INDEX notification_lookup_by_deleted ON notification (deleted);
 CREATE TABLE post_watch (
     watch_id SERIAL PRIMARY KEY,
     watcher integer REFERENCES person (user_id) NOT NULL,
-    watched integer REFERENCES post (post_id) NOT NULL,
-    UNIQUE (watcher, watched)
+    post integer REFERENCES post (post_id) NOT NULL,
+    UNIQUE (watcher, post)
 );
 CREATE INDEX watch_lookup_by_watcher ON post_watch (watcher);
-CREATE INDEX watch_lookup_by_watched ON post_watch (watched);
+CREATE INDEX watch_lookup_by_watched ON post_watch (post);
 
 
 
@@ -225,6 +225,7 @@ CREATE TABLE post_view (
     post_view_id SERIAL PRIMARY KEY,
     post integer REFERENCES post (post_id) NOT NULL,
     viewer integer REFERENCES person (user_id) NOT NULL,
+    viewed_at timestamp NOT NULL,
     UNIQUE (post, viewer)
 );
 CREATE INDEX post_view_lookup_by_post ON post_view (post);
