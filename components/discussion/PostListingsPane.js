@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import PostsInfoList from './PostsInfoList'
 
 function PostListingsPane({ catPaneRef }) {
     const MAX_LISTING_PANE_WIDTH = 450
@@ -42,9 +43,7 @@ function PostListingsPane({ catPaneRef }) {
             <div data-testid="post-listings-pane-container" ref={ listingsPane }
                 className={ `flex-none bg-zinc-600 flex justify-between 
                     w-[${ INITIAL_LISTING_PANE_WIDTH }px]` }>
-                <div data-testid="post-listings-container">
-                    PostListing
-                </div>
+                <PostsInfoList />
                 <div data-testid="right-divider"
                     onMouseDown={ handleRightDividerMouseDown }
                     className="w-1 bg-zinc-500 hover:cursor-ew-resize" />
