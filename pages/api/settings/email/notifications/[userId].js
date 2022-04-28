@@ -2,18 +2,6 @@ import { query } from '../../../../../db/index'
 import { sessionOptions } from '../../../../../lib/session'
 import { withIronSessionApiRoute } from 'iron-session/next'
 
-const SETTING_TABLES = [
-    "comment_reply_email_setting",
-    "mention_email_setting",
-    "post_activity_email_setting",
-    "watch_email_setting"
-]
-
-const SETTING_QUERIES = Object.fromEntries(
-    SETTING_TABLES.map(setting => [
-        setting, `SELECT is_on FROM ${ setting } WHERE person = $1`
-    ])
-)
 
 export default withIronSessionApiRoute(async function(req, resp) {
     // req guard
@@ -38,35 +26,48 @@ export default withIronSessionApiRoute(async function(req, resp) {
     
     // get email notifications settings associated with userId from db
     const { userId } = req.query
-    let settingsQueryResults = []
+    let settingsQueryResult
     try {
-        const queryPromises = []
-        for (const setting in SETTING_QUERIES) {
-            const queryText = SETTING_QUERIES[setting]
-            const queryPromise = query(queryText, [userId])
-            queryPromises.push(queryPromise)
-        }
-        settingsQueryResults = await Promise.all(queryPromises)
+        // get all user notifications settings in one query
+        const settingsQueryText = `
+        SELECT
+            comment_reply_email_setting,
+            mention_email_setting,
+            post_activity_email_setting,
+            watch_email_setting
+        FROM
+            (SELECT 
+                is_on AS comment_reply_email_setting, person
+                FROM comment_reply_email_setting WHERE person = $1) 
+                AS setting_1
+            JOIN
+            (SELECT is_on AS mention_email_setting, person AS person_2
+                FROM mention_email_setting WHERE person = $1) 
+                AS setting_2 ON person = person_2
+            JOIN
+            (SELECT is_on AS post_activity_email_setting, person AS person_3
+                FROM post_activity_email_setting WHERE person = $1)
+                AS setting_3 ON person = person_3
+            JOIN
+            (SELECT is_on AS watch_email_setting, person AS person_4
+                FROM watch_email_setting WHERE person = $1)
+                AS setting_4 ON person = person_4;`
+        const settingsQueryParams = [userId]
+        settingsQueryResult = await query(settingsQueryText, settingsQueryParams)
     }
     catch (error) {
         console.error(error)
         resp.status(500).json({ message: "internal server error" })
         return
     }
-    for (const queryResult of settingsQueryResults) {
-        if (queryResult.rows.length === 0) {
-            resp.status(400).json({ message: "bad url" })
-            return
-        }
+    if (settingsQueryResult.rows.length === 0) {
+        resp.status(400).json({ message: "bad url" })
+        return
     }
 
 
     // send user settings in success response
-    const settingStatuses = Object.fromEntries(
-        settingsQueryResults.map((result, i) => [
-            SETTING_TABLES[i], result.rows[0].is_on
-        ])
-    )
+    const settingStatuses = settingsQueryResult.rows[0]
     resp.status(200).json({ settingStatuses })
 
 }, sessionOptions)
