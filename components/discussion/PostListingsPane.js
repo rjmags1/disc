@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useLayoutEffect } from 'react'
 import PostsInfoList from './PostsInfoList'
 
 function PostListingsPane({ catPaneRef }) {
@@ -11,7 +11,7 @@ function PostListingsPane({ catPaneRef }) {
     )
     const listingsPane = useRef(null)
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (!listingsPane.current) return
 
         listingsPane.current.style.width = `${ listingPaneWidth }px`

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useLayoutEffect } from 'react'
 import { useCategories } from '../../lib/hooks'
 import { useRouter } from 'next/router'
 import Loading from '../lib/Loading'
@@ -13,7 +13,7 @@ function CategoryPane({ catPaneRef }) {
 
     const [catPaneWidth, setCatPaneWidth] = useState(INITIAL_CAT_PANE_WIDTH)
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (!catPaneRef.current) return
 
         catPaneRef.current.style.width = `${ catPaneWidth }px`
