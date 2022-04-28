@@ -41,9 +41,7 @@ function CategoryPane({ catPaneRef }) {
         document.removeEventListener('mouseup', handleLeftDividerMouseUp)
     }
 
-    if (loadingCategories) return <Loading />
-
-    const categories = categoriesInfo.map(
+    const categories = loadingCategories ? [] : categoriesInfo.map(
         (categoryInfo, i) => {
             const { categoryId } = categoryInfo
             return <Category info={ categoryInfo } key={ categoryId } 
@@ -62,7 +60,7 @@ function CategoryPane({ catPaneRef }) {
                         text-left px-4">
                     CATEGORIES
                 </h3>
-                { categories }
+                { loadingCategories ? <Loading /> : categories }
             </div>
             <div className="w-1 bg-zinc-500 hover:cursor-ew-resize"
                 onMouseDown={ handleLeftDividerMouseDown }

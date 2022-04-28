@@ -2,7 +2,7 @@ function Loading() {
     return (
         <div data-testid="loading spinner container" 
             className="flex justify-center items-center 
-                w-full h-full bg-light-gray">
+                w-full h-full bg-inherit">
             <svg className="w-32 h-32 animate-spin fill-purple" 
                 viewBox="0 0 100 101" fill="none">
                 <path fill="currentColor"
