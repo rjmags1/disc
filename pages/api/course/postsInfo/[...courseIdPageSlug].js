@@ -1,7 +1,6 @@
 import { query } from '../../../../db/index'
 import { sessionOptions } from '../../../../lib/session'
 import { withIronSessionApiRoute } from 'iron-session/next'
-import { findRenderedComponentWithType } from 'react-dom/test-utils'
 
 const POSTS_PER_PAGE = 25
 
@@ -64,6 +63,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
 
 
+    // send processed post infos to client along with next api page
     resp.status(200).json({ nextPage, posts })
 }, sessionOptions)
 
