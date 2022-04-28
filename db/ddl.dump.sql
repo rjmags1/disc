@@ -196,7 +196,7 @@ CREATE INDEX comment_like_lookup_by_liker ON comment_like (liker);
 
 
 CREATE TABLE post_like (
-    comment_like_id SERIAL PRIMARY KEY,
+    post_like_id SERIAL PRIMARY KEY,
     post integer REFERENCES post (post_id) NOT NULL,
     liker integer REFERENCES person (user_id) NOT NULL,
     UNIQUE (post, liker)
@@ -225,7 +225,7 @@ CREATE TABLE post_view (
     post_view_id SERIAL PRIMARY KEY,
     post integer REFERENCES post (post_id) NOT NULL,
     viewer integer REFERENCES person (user_id) NOT NULL,
-    viewed_at timestamp NOT NULL,
+    last_viewed_at timestamp NOT NULL,
     UNIQUE (post, viewer)
 );
 CREATE INDEX post_view_lookup_by_post ON post_view (post);

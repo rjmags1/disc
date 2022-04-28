@@ -9,7 +9,7 @@ const pool = new Pool()
 const SPECIAL_TERM_END = +(new Date(Date.UTC(2003, 11, 18, 23, 59)))
 
 const VIEW_QUERY = `
-    INSERT INTO post_view (post, viewer, viewed_at) VALUES ($1, $2, $3);`
+    INSERT INTO post_view (post, viewer, last_viewed_at) VALUES ($1, $2, $3);`
 const QUERIES = [
     `INSERT INTO post_like (post, liker) VALUES ($1, $2);`,
     `INSERT INTO post_star (post, starrer) VALUES ($1, $2);`,
@@ -27,6 +27,7 @@ const genInteractions = async function() {
         if (i % 2 === 0) continue
 
         const { post_id: postId, created_at: postCreatedAt } = postsQuery.rows[i]
+        console.log(postId)
         const queryParams = [postId, harryId]
         for (const queryText of QUERIES) {
             if (queryText === VIEW_QUERY) {
