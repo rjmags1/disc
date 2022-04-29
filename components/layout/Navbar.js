@@ -7,7 +7,7 @@ import Hamburger from './Hamburger'
 
 function Navbar({ pageName }) {
     return (
-        <nav className='h-9 sm:h-12 flex flex-row 
+        <nav className='h-[48px] flex flex-row 
             bg-purple items-center px-2 fixed w-full z-10'>
             <LogoLink/>
             <PageHeader pageName={ pageName }/>

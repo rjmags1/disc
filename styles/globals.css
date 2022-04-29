@@ -12,6 +12,12 @@
         @apply bg-zinc-900;
     }
 
+    main {
+        position: relative;
+        top: 48px;
+        height: calc(100vh - 48px);
+    }
+
     #__next {
         @apply h-full;
     }

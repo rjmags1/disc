@@ -22,16 +22,16 @@ function Dashboard() {
         const termName = Object.keys(term)[0]
         const termCourses = term[termName].courses
         termSections.push(
-            <TermSection key={termName} term={ termName } courses={ termCourses } />
+            <TermSection key={termName} 
+                term={ termName } courses={ termCourses } />
         )
     }
 
     return (
         <div data-testid="dashboard-container"
-            className="text-white w-full h-full md:mt-24">
-            <div className="flex flex-col justify-center items-center">
-                { termSections }
-            </div>
+            className="text-white w-full flex flex-col
+                justify-center items-center md:py-24">
+            { termSections }
         </div>
     )
 }
