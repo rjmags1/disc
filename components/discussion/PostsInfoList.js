@@ -48,8 +48,8 @@ function PostsInfoList() {
     )
 
     return (
-        <div data-testid="post-listings-container"
-            className="w-full" >
+        <div data-testid="post-listings-container" id="post-listings-container"
+            className="w-full overflow-auto" >
             { loadingPostsInfo ? <Loading /> : postInfoListings }
         </div>
     )
