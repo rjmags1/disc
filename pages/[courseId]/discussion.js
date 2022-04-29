@@ -5,19 +5,12 @@ import PostListingsPane from '../../components/discussion/PostListingsPane'
 import Post from '../../components/discussion/Post'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import { useRef, useLayoutEffect } from 'react'
+import { useRef } from 'react'
 import { useUser, useCourse } from '../../lib/hooks'
 
 function Discussion() {
     const router = useRouter()
     const catPaneRef = useRef(null)
-
-    useLayoutEffect(() => {
-        document.body.style.overflow = "hidden"
-        return () => {
-            document.body.style.overflow = ""
-        }
-    }, [])
 
     const {
         user,
