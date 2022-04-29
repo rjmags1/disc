@@ -88,6 +88,7 @@ const processRow = (row) => ({
     isAnnouncement: row.is_announcement,
     authorId: row.user_id,
     author: `${row.f_name} ${row.l_name}`,
+    private: row.private,
     starred: Boolean(row.star_id),
     watched: Boolean(row.watch_id),
     lastViewedAt: row.last_viewed_at ? 
@@ -116,12 +117,12 @@ const bigPaginatedCourseInfoQueryText = `
     SELECT
         post_id, title, category_name, category_id, created_at, pinned,
         is_question, resolved, answered, endorsed, is_announcement,
-        f_name, l_name, user_id,
+        f_name, l_name, user_id, private,
         star_id, watch_id, last_viewed_at, likes, comments
     FROM
         (SELECT category_id, name as category_name 
             FROM post_category WHERE course = $1) AS course_categories
-        JOIN (SELECT * FROM post WHERE NOT private AND created_at <= $5) 
+        JOIN (SELECT * FROM post WHERE (NOT private OR author = $2) AND created_at <= $5) 
             AS displayed_posts
             ON displayed_posts.category = category_id
         JOIN (SELECT user_id, f_name, l_name FROM person
