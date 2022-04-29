@@ -11,11 +11,12 @@ const PostsInfoList = React.memo(function() {
 
     const [postsInfoApiPage, setPostsInfoApiPage] = useState(1)
     const [postsInfo, setPostsInfo] = useState([])
+    const [initialLoadTime] = useState(Date.now())
 
     const { 
         paginatedPostsInfo, 
         loading: loadingPostsInfo
-    } = usePostsInfo(courseId, postsInfoApiPage)
+    } = usePostsInfo(courseId, postsInfoApiPage, initialLoadTime)
 
     useEffect(() => {
         if (!paginatedPostsInfo?.posts) return

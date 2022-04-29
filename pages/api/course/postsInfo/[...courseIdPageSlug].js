@@ -14,14 +14,18 @@ export default withIronSessionApiRoute(async function(req, resp) {
         resp.status(200).json({ paginatedPostsInfo: {} })
         return
     }
-    const [courseId, page, ...shouldBeEmpty] = req.query.courseIdPageSlug
-    if (shouldBeEmpty.length > 0 || !courseId || !page) {
+    const [courseId, page, onlyLoadAfter, 
+            ...shouldBeEmpty] = req.query.courseIdPageSlug
+    if (shouldBeEmpty.length > 0 || !courseId || !page || !onlyLoadAfter) {
         resp.status(400).json({ message: "invalid number of url params" })
         return
     }
     const parsedCourseId = parseInt(courseId, 10)
     const parsedPage = parseInt(page, 10)
-    if (!Number.isInteger(parsedCourseId) || !Number.isInteger(parsedPage)) {
+    const parsedTimeCutoff = parseInt(onlyLoadAfter, 10)
+    if (![parsedCourseId, parsedPage, parsedTimeCutoff].every(
+        parsedQueryParam => Number.isInteger(parsedQueryParam)
+    )) {
         resp.status(400).json({ message: "bad url - non numeric params" })
         return
     }
@@ -37,9 +41,10 @@ export default withIronSessionApiRoute(async function(req, resp) {
     // retrieve info about pageth-25 most recent posts from db
     let paginatedPostsInfoQuery
     try {
+        const cutoffTimestamp = new Date(parsedTimeCutoff)
         const offset = (page - 1) * POSTS_PER_PAGE
         const paginatedPostsInfoQueryParams = [
-            courseId, userId, POSTS_PER_PAGE + 1, offset]
+            courseId, userId, POSTS_PER_PAGE + 1, offset, cutoffTimestamp]
         // use + 1 on posts per page to determine 
         // if there are any more pages of data
         // that could possibly be loaded from the db by the endpoint
@@ -116,7 +121,8 @@ const bigPaginatedCourseInfoQueryText = `
     FROM
         (SELECT category_id, name as category_name 
             FROM post_category WHERE course = $1) AS course_categories
-        JOIN (SELECT * FROM post WHERE NOT private) AS displayed_posts
+        JOIN (SELECT * FROM post WHERE NOT private AND created_at <= $5) 
+            AS displayed_posts
             ON displayed_posts.category = category_id
         JOIN (SELECT user_id, f_name, l_name FROM person
             JOIN person_course on user_id = person_course.person
