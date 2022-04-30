@@ -1,9 +1,11 @@
 import Loading from '../lib/Loading'
+import PostsLoading from '../lib/ButtonLoading'
 import { useRouter } from 'next/router'
-import React, { useState, useEffect, useRef, forwardRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { usePostsInfo } from '../../lib/hooks'
 import PostInfo from './PostInfo'
 import ObservedPostInfo from './ObservedPostInfo'
+
 
 const PostsInfoList = React.memo(function() {
     const router = useRouter()
@@ -12,62 +14,88 @@ const PostsInfoList = React.memo(function() {
     const [postsInfoApiPage, setPostsInfoApiPage] = useState(1)
     const [postsInfo, setPostsInfo] = useState([])
     const [initialLoadTime] = useState(Date.now())
-
-    const observedRef = useRef(null)
-    const observerRef = useRef(new IntersectionObserver(
-        (entries) => {
-            if (entries.length === 0) return // do nothing on observer init
-
-            if (entries[entries.length - 1].isIntersecting) {
-                console.log(entries[entries.length - 1].target.innerText)
-                setPostsInfoApiPage(postsInfoApiPage => postsInfoApiPage + 1)
-            }
-        })
-    )
-
+    const [loadedAllPosts, setLoadedAllPosts] = useState(false)
 
     const { 
         paginatedPostsInfo, 
         loading: loadingPostsInfo
     } = usePostsInfo(courseId, postsInfoApiPage, initialLoadTime)
 
+    const observedRef = useRef(null)
+    const observerRef = useRef(new IntersectionObserver(
+        (observedPostInfos) => {
+            // do nothing on observer init
+            if (observedPostInfos.length === 0) return 
 
+            // only ever observe one post info at a time -- the last loaded one
+            if (observedPostInfos[0].isIntersecting) {
+                setPostsInfoApiPage(postsInfoApiPage => postsInfoApiPage + 1)
+            }
+        })
+    )
+    
     // whenever we load more posts, update postsInfo state
     useEffect(() => { 
         if (!paginatedPostsInfo?.posts) return
 
-        const { posts: loadedPosts } = paginatedPostsInfo
+        const { posts: loadedPosts, nextPage } = paginatedPostsInfo
         const didntLoadNewApiPage = 
             (postsInfo.length > 0 ? postsInfo[0] : null) === loadedPosts[0]
         if (didntLoadNewApiPage) return
 
         setPostsInfo([...postsInfo, ...loadedPosts])
+        setLoadedAllPosts(nextPage === null)
     }, [paginatedPostsInfo])
 
-    // whenever we display new post info, observe new last post
+    // whenever we display new post info, observe new last post or 
+    // disconnect observer if all posts loaded to prevent firing request
     useEffect(() => {  
-        if (!observedRef.current) return
-
+        if (!observedRef.current || !postsInfo) return
         const observer = observerRef.current
+
+        if (loadedAllPosts) {
+            observer.disconnect()
+            return
+        }
+
         const needsToBeObserved = observedRef.current
         observer.observe(needsToBeObserved)
     }, [postsInfo])
 
 
-    //if (postsInfo.length > 0) console.log(postsInfo)
-    const postInfoListings = postsInfo.map(
+    const postInfoListings = useMemo(() => postsInfo.map(
         (postInfo, i) => {
+            if (i === postsInfo.length - 1) {
+                const observer = observerRef.current
+                const prevObserved = observedRef.current
+                if (observer && prevObserved) observer.unobserve(prevObserved)
+            }
             return i < postsInfo.length - 1 ?
                 <PostInfo info={ postInfo } key={ postInfo.postId } />
                 : <ObservedPostInfo ref={ observedRef } 
                     info={ postInfo } key={ postInfo.postId } />
         }
-    )
+    ), [postsInfo])
+
+
 
     return (
         <div data-testid="post-listings-container" id="post-listings-container"
             className="w-full overflow-auto" >
-            { loadingPostsInfo && !postsInfo ? <Loading /> : postInfoListings }
+            { loadingPostsInfo && postsInfo.length === 0 ?
+            <Loading /> : postInfoListings }
+            { loadingPostsInfo && postsInfo.length > 0 ? 
+            <div className="w-full h-[48px] border-y border-gray-500 
+                border-r flex items-center justify-center">
+                <PostsLoading />
+            </div> : <></> 
+            }
+            { loadedAllPosts && 
+            <div className="h-max text-center py-2 bg-zinc-900
+                border-t border-gray-500 border-r">
+                No more posts!
+            </div>
+            }
         </div>
     )
 })
