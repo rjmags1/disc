@@ -41,7 +41,7 @@ function PostListingsPane({ catPaneRef }) {
     return (
         <>
             <div data-testid="post-listings-pane-container" ref={ listingsPane }
-                className={ `flex-none bg-zinc-600 flex justify-between 
+                className={ `flex-none bg-zinc-700 flex justify-between 
                     w-[${ INITIAL_LISTING_PANE_WIDTH }px]` }>
                 <PostsInfoList />
                 <div data-testid="right-divider"
