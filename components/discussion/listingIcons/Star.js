@@ -1,7 +1,7 @@
 function Star() {
     return (
-        <div className="w-fit h-[20px] flex items-center 
-            justify-center mr-2">
+        <div className="w-[20px] h-[20px] flex items-center 
+            justify-center mr-1.5">
             <img src="/star.png" width="15" className="mb-0.5"/>
         </div>
     )
