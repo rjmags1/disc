@@ -13,6 +13,7 @@ import PrivateBanner from "./listingIcons/PrivateBanner"
 import StaffBanner from "./listingIcons/StaffBanner"
 import CategoryLabel from "./listingIcons/CategoryLabel"
 import Timestamp from "./listingIcons/Timestamp"
+import UnreadDot from "./listingIcons/UnreadDot"
 
 const PostInfo = React.memo(function ({ info, categoryColor }) {
 
@@ -22,6 +23,8 @@ const PostInfo = React.memo(function ({ info, categoryColor }) {
                 border-r flex flex-col p-2 justify-between">
             <div className="flex justify-between">
                 <div className="flex justify-center items-center">
+                    { Date.parse(info.mostRecentCommentTime) > 
+                    Date.parse(info.lastViewedAt) ? <UnreadDot /> : null}
                     { info.isQuestion ? <QuestionMark /> : <RegularPost /> }
                     { info.isAnnouncement && <Announcement /> }
                 </div>

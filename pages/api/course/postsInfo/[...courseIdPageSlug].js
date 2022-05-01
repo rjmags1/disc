@@ -94,6 +94,8 @@ const processRow = (row) => ({
     watched: Boolean(row.watch_id),
     lastViewedAt: row.last_viewed_at ? 
         fixNodePgUTCTimeInterpretation(row.last_viewed_at) : null,
+    mostRecentCommentTime: row.latest_comment_time ? 
+        fixNodePgUTCTimeInterpretation(row.latest_comment_time) : null,
     likes: parseInt(row.likes, 10),
     comments: parseInt(row.comments, 10)
 })
@@ -119,7 +121,7 @@ const bigPaginatedCourseInfoQueryText = `
         post_id, title, category_name, category_id, created_at, pinned,
         is_question, resolved, answered, endorsed, is_announcement,
         f_name, l_name, user_id, private, author_is_staff, author_is_instructor,
-        star_id, watch_id, last_viewed_at, likes, comments
+        star_id, watch_id, last_viewed_at, likes, comments, latest_comment_time
     FROM
         (SELECT category_id, name as category_name 
             FROM post_category WHERE course = $1) AS course_categories
@@ -147,8 +149,7 @@ const bigPaginatedCourseInfoQueryText = `
                 post_id AS interacted_post, 
                 COUNT(DISTINCT liker) AS likes, 
                 COUNT(DISTINCT comment_id) AS comments
-            FROM (
-                    (SELECT category_id FROM post_category WHERE course = $1) 
+            FROM ((SELECT category_id FROM post_category WHERE course = $1) 
                     AS course_categories
                     JOIN post
                         ON post.category = category_id
@@ -163,6 +164,23 @@ const bigPaginatedCourseInfoQueryText = `
                 GROUP BY post_id
         ) AS post_interactions
         ON interacted_post = post_id
+        LEFT JOIN (
+            SELECT post_id AS commented_post, 
+                max(comment_created_at) AS latest_comment_time
+            FROM ((SELECT category_id FROM post_category WHERE course = $1)
+                AS course_categories
+                JOIN post 
+                    ON post.category = category_id
+            ) AS course_posts
+            LEFT JOIN (
+                SELECT comment_id, post AS commented_post, 
+                created_at AS comment_created_at FROM comment
+                WHERE NOT deleted
+            ) AS displayed_comments 
+            ON commented_post = post_id
+            GROUP BY post_id
+        ) AS latest_comments
+        ON commented_post = post_id
 
     ORDER BY created_at DESC 
     LIMIT $3
