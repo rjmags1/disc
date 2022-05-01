@@ -2,9 +2,10 @@ import Loading from '../lib/Loading'
 import PostsLoading from '../lib/ButtonLoading'
 import { useRouter } from 'next/router'
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-import { usePostsInfo } from '../../lib/hooks'
+import { usePostsInfo, useCategories } from '../../lib/hooks'
 import PostInfo from './PostInfo'
 import ObservedPostInfo from './ObservedPostInfo'
+import { LIGHT_RAINBOW_HEX } from'../../lib/colors'
 
 
 const PostsInfoList = React.memo(function() {
@@ -15,6 +16,11 @@ const PostsInfoList = React.memo(function() {
     const [postsInfo, setPostsInfo] = useState([])
     const [initialLoadTime] = useState(Date.now())
     const [loadedAllPosts, setLoadedAllPosts] = useState(false)
+
+    const {
+        categories: categoriesInfo,
+        loading: loadingCategories
+    } = useCategories(courseId)
 
     const { 
         paginatedPostsInfo, 
@@ -62,6 +68,16 @@ const PostsInfoList = React.memo(function() {
         observer.observe(needsToBeObserved)
     }, [postsInfo])
 
+    const categoriesToLightRainbowHex = useMemo(() => {
+        if (!categoriesInfo) return
+
+        const mapped = {}
+        for (let i = 0; i < categoriesInfo.length; i++) {
+            const { category } = categoriesInfo[i]
+            mapped[category] = LIGHT_RAINBOW_HEX[i % LIGHT_RAINBOW_HEX.length]
+        }
+        return mapped
+    }, [categoriesInfo])
 
     const postInfoListings = useMemo(() => postsInfo.map(
         (postInfo, i) => {
@@ -70,20 +86,23 @@ const PostsInfoList = React.memo(function() {
                 const prevObserved = observedRef.current
                 if (observer && prevObserved) observer.unobserve(prevObserved)
             }
+
+            const categoryColor = categoriesToLightRainbowHex[postInfo.category]
             return i < postsInfo.length - 1 ?
-                <PostInfo info={ postInfo } key={ postInfo.postId } />
-                : <ObservedPostInfo ref={ observedRef } 
-                    info={ postInfo } key={ postInfo.postId } />
+                <PostInfo info={ postInfo } key={ postInfo.postId } 
+                    categoryColor={ categoryColor } />
+                : <ObservedPostInfo ref={ observedRef } key={ postInfo.postId }
+                    info={ postInfo } categoryColor={ categoryColor } />
         }
     ), [postsInfo])
 
-
+    const loadingDataHooks = 
+        loadingCategories || (loadingPostsInfo && postsInfo.length === 0)
 
     return (
         <div data-testid="post-listings-container" id="post-listings-container"
             className="w-full overflow-auto" >
-            { loadingPostsInfo && postsInfo.length === 0 ?
-            <Loading /> : postInfoListings }
+            { loadingDataHooks ? <Loading /> : postInfoListings }
             { loadingPostsInfo && postsInfo.length > 0 ? 
             <div className="w-full h-[48px] border-y border-gray-500 
                 border-r flex items-center justify-center">
