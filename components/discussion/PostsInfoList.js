@@ -69,7 +69,7 @@ const PostsInfoList = React.memo(function() {
     }, [postsInfo])
 
     const categoriesToLightRainbowHex = useMemo(() => {
-        if (!categoriesInfo) return
+        if (!categoriesInfo) return {}
 
         const mapped = {}
         for (let i = 0; i < categoriesInfo.length; i++) {

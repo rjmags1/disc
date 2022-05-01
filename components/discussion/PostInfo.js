@@ -12,9 +12,10 @@ import RegularPost from "./listingIcons/RegularPost"
 import PrivateBanner from "./listingIcons/PrivateBanner"
 import StaffBanner from "./listingIcons/StaffBanner"
 import CategoryLabel from "./listingIcons/CategoryLabel"
+import Timestamp from "./listingIcons/Timestamp"
 
 const PostInfo = React.memo(function ({ info, categoryColor }) {
-    
+
     return (
         <div data-testid="post-info-container"
             className="w-full h-[90px] border-y border-gray-500 
@@ -43,6 +44,7 @@ const PostInfo = React.memo(function ({ info, categoryColor }) {
                     <CategoryLabel category={ info.category } color={ categoryColor } />
                     { info.author }
                     { info.authorIsStaffOrInstructor && <StaffBanner /> }
+                    <Timestamp createdAt={ new Date(info.createdAt) } />
                 </span>
                 <div className="flex items-center justify-center">
                     { info.likes > 0 && <Hearts numHearts={ info.likes } /> }
