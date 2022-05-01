@@ -124,25 +124,35 @@ const bigPaginatedCourseInfoQueryText = `
         star_id, watch_id, last_viewed_at, likes, comments, latest_comment_time
     FROM
         (SELECT category_id, name as category_name 
-            FROM post_category WHERE course = $1) AS course_categories
-        JOIN (SELECT * FROM post WHERE (NOT private OR author = $2) AND created_at <= $5) 
-            AS displayed_posts
+            FROM post_category WHERE course = $1) 
+        AS course_categories
+        JOIN (SELECT * FROM post 
+            WHERE (NOT private OR author = $2) AND created_at <= $5) 
+        AS displayed_posts
             ON displayed_posts.category = category_id
-        JOIN (SELECT user_id, f_name, l_name, 
+        JOIN (
+            SELECT user_id, f_name, l_name, 
                 person.is_staff AS author_is_staff, 
                 person.is_instructor AS author_is_instructor
                 FROM person
-            JOIN person_course on user_id = person_course.person
-            WHERE person_course.course = $1) AS course_enrollees 
+            JOIN (SELECT person AS enrolled_person, course AS enrolled_course 
+                FROM person_course WHERE course = $1) 
+            AS course_enrollments
+                ON user_id = enrolled_person
+            WHERE enrolled_course = $1) 
+        AS course_enrollees 
             ON displayed_posts.author = user_id
         LEFT JOIN (SELECT star_id, post as starred_post FROM post_star
-            WHERE starrer = $2) AS starred_posts 
+            WHERE starrer = $2) 
+        AS starred_posts 
             ON starred_post = post_id
         LEFT JOIN (SELECT watch_id, post as watched_post FROM post_watch
-            WHERE watcher = $2) AS watched_posts 
+            WHERE watcher = $2) 
+        AS watched_posts 
             ON watched_post = post_id
         LEFT JOIN (SELECT last_viewed_at, post as viewed_post FROM post_view
-            WHERE viewer = $2) AS viewed_posts 
+            WHERE viewer = $2) 
+        AS viewed_posts 
             ON viewed_post = post_id
         JOIN (
             SELECT 
@@ -162,7 +172,8 @@ const bigPaginatedCourseInfoQueryText = `
                 ) AS displayed_comments
                     ON commented_post = post_id
                 GROUP BY post_id
-        ) AS post_interactions
+        ) 
+        AS post_interactions
         ON interacted_post = post_id
         LEFT JOIN (
             SELECT post_id AS commented_post, 
