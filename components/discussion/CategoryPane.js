@@ -51,7 +51,7 @@ function CategoryPane({ catPaneRef }) {
 
     return (
         <div data-testid="category-pane-container" ref={ catPaneRef }
-            className={ `hidden lg:flex bg-zinc-700 text-white justify-between
+            className={ `hidden lg:flex bg-zinc-800 text-white justify-between
                 w-[${ INITIAL_CAT_PANE_WIDTH }px]` } >
             <div data-testid="category-headers-container"
                 className="w-full flex flex-col items-center justify-start 

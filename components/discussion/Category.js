@@ -12,7 +12,7 @@ function Category({ info, bulletColor }) {
         // perform post filtering
 
         containerRef.current.style.backgroundColor = selected ?
-            "#27272A" : ""
+            "#18181b" : ""
     }, [selected, containerRef])
 
     useEffect(() => {
