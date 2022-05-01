@@ -88,6 +88,7 @@ const processRow = (row) => ({
     isAnnouncement: row.is_announcement,
     authorId: row.user_id,
     author: `${row.f_name} ${row.l_name}`,
+    authorIsStaffOrInstructor: row.author_is_staff || row.author_is_instructor,
     private: row.private,
     starred: Boolean(row.star_id),
     watched: Boolean(row.watch_id),
@@ -117,7 +118,7 @@ const bigPaginatedCourseInfoQueryText = `
     SELECT
         post_id, title, category_name, category_id, created_at, pinned,
         is_question, resolved, answered, endorsed, is_announcement,
-        f_name, l_name, user_id, private,
+        f_name, l_name, user_id, private, author_is_staff, author_is_instructor,
         star_id, watch_id, last_viewed_at, likes, comments
     FROM
         (SELECT category_id, name as category_name 
@@ -125,7 +126,10 @@ const bigPaginatedCourseInfoQueryText = `
         JOIN (SELECT * FROM post WHERE (NOT private OR author = $2) AND created_at <= $5) 
             AS displayed_posts
             ON displayed_posts.category = category_id
-        JOIN (SELECT user_id, f_name, l_name FROM person
+        JOIN (SELECT user_id, f_name, l_name, 
+                person.is_staff AS author_is_staff, 
+                person.is_instructor AS author_is_instructor
+                FROM person
             JOIN person_course on user_id = person_course.person
             WHERE person_course.course = $1) AS course_enrollees 
             ON displayed_posts.author = user_id

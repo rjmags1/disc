@@ -42,7 +42,7 @@ const PostInfo = React.memo(function ({ info, categoryColor }) {
                     { info.private && <PrivateBanner /> }
                     <CategoryLabel category={ info.category } color={ categoryColor } />
                     { info.author }
-                    <StaffBanner />
+                    { info.authorIsStaffOrInstructor && <StaffBanner /> }
                 </span>
                 <div className="flex items-center justify-center">
                     { info.likes > 0 && <Hearts numHearts={ info.likes } /> }
