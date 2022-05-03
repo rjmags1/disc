@@ -2,7 +2,7 @@ import Loading from '../lib/Loading'
 import PostsLoading from '../lib/ButtonLoading'
 import { useRouter } from 'next/router'
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-import { usePostsInfo, useCategories } from '../../lib/hooks'
+import { usePostsInfo, useCourse } from '../../lib/hooks'
 import PostInfo from './PostInfo'
 import ObservedPostInfo from './ObservedPostInfo'
 import { LIGHT_RAINBOW_HEX } from'../../lib/colors'
@@ -18,9 +18,9 @@ const PostsInfoList = React.memo(function() {
     const [loadedAllPosts, setLoadedAllPosts] = useState(false)
 
     const {
-        categories: categoriesInfo,
-        loading: loadingCategories
-    } = useCategories(courseId)
+        course,
+        loading: loadingCourse
+    } = useCourse(courseId)
 
     const { 
         paginatedPostsInfo, 
@@ -69,15 +69,17 @@ const PostsInfoList = React.memo(function() {
     }, [postsInfo])
 
     const categoriesToLightRainbowHex = useMemo(() => {
-        if (!categoriesInfo) return {}
+        if (!course?.categories) return {}
 
         const mapped = {}
-        for (let i = 0; i < categoriesInfo.length; i++) {
-            const { category } = categoriesInfo[i]
+        const { categories } = course
+        for (let i = 0; i < categories.length; i++) {
+            const { category } = categories[i]
             mapped[category] = LIGHT_RAINBOW_HEX[i % LIGHT_RAINBOW_HEX.length]
         }
+
         return mapped
-    }, [categoriesInfo])
+    }, [course])
 
     const postInfoListings = useMemo(() => postsInfo.map(
         (postInfo, i) => {
@@ -96,13 +98,13 @@ const PostsInfoList = React.memo(function() {
         }
     ), [postsInfo])
 
-    const loadingDataHooks = 
-        loadingCategories || (loadingPostsInfo && postsInfo.length === 0)
+    const initialLoad = loadingCourse || 
+        (loadingPostsInfo && postsInfo.length === 0)
 
     return (
         <div data-testid="post-listings-container" id="post-listings-container"
             className="w-full overflow-auto" >
-            { loadingDataHooks ? <Loading /> : postInfoListings }
+            { initialLoad ? <Loading /> : postInfoListings }
             { loadingPostsInfo && postsInfo.length > 0 ? 
             <div className="w-full h-[48px] border-y border-gray-500 
                 border-r flex items-center justify-center">

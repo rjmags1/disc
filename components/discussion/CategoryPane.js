@@ -1,5 +1,5 @@
 import { useState, useLayoutEffect } from 'react'
-import { useCategories } from '../../lib/hooks'
+import { useCourse } from '../../lib/hooks'
 import { useRouter } from 'next/router'
 import Loading from '../lib/Loading'
 import Category from './Category'
@@ -19,10 +19,7 @@ function CategoryPane({ catPaneRef }) {
         catPaneRef.current.style.width = `${ catPaneWidth }px`
     })
 
-    const {
-        categories: categoriesInfo,
-        loading: loadingCategories
-    } = useCategories(courseId)
+    const { course, loading: loadingCourse } = useCourse(courseId)
 
     const handleLeftDividerMouseDown = () => {
         document.body.style.userSelect = "none"
@@ -41,10 +38,9 @@ function CategoryPane({ catPaneRef }) {
         document.removeEventListener('mouseup', handleLeftDividerMouseUp)
     }
 
-    const categories = loadingCategories ? [] : categoriesInfo.map(
-        (categoryInfo, i) => {
-            const { categoryId } = categoryInfo
-            return <Category info={ categoryInfo } key={ categoryId } 
+    const categories = !course?.categories ? [] : course.categories.map(
+        (category, i) => {
+            return <Category name={ category } key={ i } 
                         bulletColor={ RAINBOW_HEX[i % RAINBOW_HEX.length] }/>
         }
     )
@@ -60,7 +56,7 @@ function CategoryPane({ catPaneRef }) {
                         text-left px-4">
                     CATEGORIES
                 </h3>
-                { loadingCategories ? <Loading /> : categories }
+                { loadingCourse ? <Loading /> : categories }
             </div>
             <div className="w-1 bg-zinc-500 hover:cursor-ew-resize"
                 onMouseDown={ handleLeftDividerMouseDown }

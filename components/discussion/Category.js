@@ -1,7 +1,7 @@
 import DeselectCategoryButton from './DeselectCategoryButton'
 import { useRef, useEffect, useState } from 'react'
 
-function Category({ info, bulletColor }) {
+function Category({ name, bulletColor }) {
     const [selected, setSelected] = useState(null)
     const containerRef = useRef(null)
 
@@ -23,7 +23,7 @@ function Category({ info, bulletColor }) {
                 mr-2 shrink-0" style={{ backgroundColor: bulletColor }} />
             <h4 className="shrink-1 grow whitespace-nowrap 
                     overflow-hidden mr-2 text-ellipsis select-none">
-                { info.category }
+                { name }
             </h4>
             { selected && <DeselectCategoryButton /> }
         </div>

@@ -25,8 +25,15 @@ export default withIronSessionApiRoute(async function(req, resp) {
                 term.name AS term_name,
                 course.name,
                 course.code,
-                course.section
-            FROM course JOIN term ON course.term = term.term_id
+                course.section,
+                categories
+            FROM course 
+            JOIN term ON course.term = term.term_id
+            JOIN (SELECT course, ARRAY_AGG(name) AS categories 
+                FROM post_category WHERE course = $1
+                GROUP BY (course)) 
+                AS course_categories
+                ON course = course_id
             WHERE course.course_id = $1;`
         const courseQueryParams = [courseId]
         courseQueryResult = await query(courseQueryText, courseQueryParams)
@@ -44,7 +51,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
 
     const { 
-        course_id, year, term_name, name, code, section 
+        course_id, year, term_name, name, code, section, categories 
     } = courseQueryResult.rows[0]
     const courseName = name.split(' ').map(
         s => s.slice(0, 1).toUpperCase() + s.slice(1).toLowerCase()
@@ -52,9 +59,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
     const courseInfo = {
         courseId: course_id,
         termName: `${ term_name } ${ year }`,
-        courseName: courseName,
-        code: code,
-        section: section
+        courseName, code, section, categories 
     }
 
 
