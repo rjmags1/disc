@@ -24,7 +24,7 @@ function Timestamp({ createdAt }) {
     }
 
     return (
-        <div className="ml-2 italic">
+        <div className="mx-2 italic truncate">
             { toTimestampString(createdAt) }
         </div>
     )
