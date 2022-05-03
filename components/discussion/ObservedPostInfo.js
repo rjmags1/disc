@@ -1,10 +1,9 @@
 import React from "react"
+import PostInfo from "./PostInfo"
 
 const ObservedPostInfo = React.forwardRef((props, ref) => (
-    <div data-testid="observed-post-info-container" ref={ ref }
-        className="w-full h-[72px] border-y border-gray-500 border-r">
-        { props.info.postId }
-        { props.children }
+    <div data-testid="observe-post-info-container" ref={ ref } >
+        <PostInfo info={ props.info } categoryColor={ props.categoryColor } />
     </div>
 ))
 
