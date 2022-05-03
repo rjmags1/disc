@@ -5,12 +5,13 @@ import PostListingsPane from '../../components/discussion/PostListingsPane'
 import Post from '../../components/discussion/Post'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useUser, useCourse } from '../../lib/hooks'
 
 function Discussion() {
     const router = useRouter()
     const catPaneRef = useRef(null)
+    const [categoryFilter, setCategoryFilter] = useState(new Set())
 
     const {
         user,
@@ -21,6 +22,14 @@ function Discussion() {
         course,
         loading: loadingCourse
     } = useCourse(router.query.courseId)
+
+    const changeFilter = (add, category) => {
+        const newFilter = new Set(categoryFilter)
+        if (add) newFilter.add(category)
+        else newFilter.delete(category)
+
+        setCategoryFilter(newFilter)
+    }
     
     if (loadingUser || !user.authenticated || loadingCourse) return <Loading />
 
@@ -30,9 +39,12 @@ function Discussion() {
         <>
             <Head><title>{ title }</title></Head>
             <div data-testid="discussion-container" className="flex h-full">
-                <CategoryPane catPaneRef={ catPaneRef }/>
-                <div className="flex-auto text-white flex" data-testid="posts-section">
-                    <PostListingsPane catPaneRef={ catPaneRef } />
+                <CategoryPane catPaneRef={ catPaneRef } 
+                    changeCategoryFilter={ changeFilter } />
+                <div className="flex-auto text-white flex" 
+                    data-testid="posts-section">
+                    <PostListingsPane catPaneRef={ catPaneRef } 
+                        categoryFilter={ categoryFilter } />
                     <Post />
                 </div>
             </div>

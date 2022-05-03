@@ -5,7 +5,7 @@ import Loading from '../lib/Loading'
 import Category from './Category'
 import { RAINBOW_HEX } from '../../lib/colors'
 
-function CategoryPane({ catPaneRef }) {
+function CategoryPane({ catPaneRef, changeCategoryFilter }) {
     const MAX_CAT_PANE_WIDTH = 400
     const INITIAL_CAT_PANE_WIDTH = 250
     const router = useRouter()
@@ -41,6 +41,7 @@ function CategoryPane({ catPaneRef }) {
     const categories = !course?.categories ? [] : course.categories.map(
         (category, i) => {
             return <Category name={ category } key={ i } 
+                        changeFilter={ changeCategoryFilter }
                         bulletColor={ RAINBOW_HEX[i % RAINBOW_HEX.length] }/>
         }
     )

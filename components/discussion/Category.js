@@ -1,15 +1,14 @@
 import DeselectCategoryButton from './DeselectCategoryButton'
-import { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 
-function Category({ name, bulletColor }) {
+const Category = React.memo(function({ name, bulletColor, changeFilter }) {
     const [selected, setSelected] = useState(null)
     const containerRef = useRef(null)
 
     useEffect(() => {
         if (!containerRef.current) return
 
-        // perform post filtering
-
+        changeFilter(selected, name)
         containerRef.current.style.backgroundColor = selected ?
             "#18181b" : ""
     }, [selected, containerRef])
@@ -28,6 +27,6 @@ function Category({ name, bulletColor }) {
             { selected && <DeselectCategoryButton /> }
         </div>
     )
-}
+})
 
 export default Category

@@ -1,7 +1,7 @@
 import { useState, useRef, useLayoutEffect } from 'react'
 import PostsInfoList from './PostsInfoList'
 
-function PostListingsPane({ catPaneRef }) {
+function PostListingsPane({ catPaneRef, categoryFilter }) {
     const MAX_LISTING_PANE_WIDTH = 450
     const MIN_LISTING_PANE_WIDTH = 250
     const INITIAL_LISTING_PANE_WIDTH = 400
@@ -43,7 +43,7 @@ function PostListingsPane({ catPaneRef }) {
             <div data-testid="post-listings-pane-container" ref={ listingsPane }
                 className={ `flex-none bg-zinc-700 flex justify-between 
                     w-[${ INITIAL_LISTING_PANE_WIDTH }px]` }>
-                <PostsInfoList />
+                <PostsInfoList categoryFilter={ categoryFilter } />
                 <div data-testid="right-divider"
                     onMouseDown={ handleRightDividerMouseDown }
                     className="w-1 bg-zinc-500 hover:cursor-ew-resize" />
