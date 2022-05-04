@@ -74,7 +74,8 @@ const PostListingsPane = React.memo(function({ catPaneRef, categoryFilter }) {
                 {showDropdown && 
                 <OutsideClickHandler onOutsideClick={ handleOutsideClick } >
                     <div className="absolute w-[160px] text-right pb-1 
-                        bg-zinc-900 right-0 top-12 rounded-b-lg shadow-2xl">
+                        bg-zinc-900 right-1 top-12 rounded-b-lg shadow-2xl border 
+                        border-zinc-600 border-t-0 border-r-0">
                         { ATTRIBUTES.map(attr => <PostAttribute attribute={ attr } 
                             selected={ attributeFilter === attr } key={ attr }
                             hideDropdown={ () => setShowDropdown(false) }
