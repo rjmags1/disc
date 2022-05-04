@@ -8,7 +8,7 @@ import ObservedPostInfo from './ObservedPostInfo'
 import { LIGHT_RAINBOW_HEX } from'../../lib/colors'
 
 
-const PostsInfoList = React.memo(function({ categoryFilter }) {
+const PostsInfoList = React.memo(function({ categoryFilter, filterText }) {
     const router = useRouter()
     const { courseId } = router.query
 
@@ -81,9 +81,19 @@ const PostsInfoList = React.memo(function({ categoryFilter }) {
         return mapped
     }, [course])
 
+    const filterTest = (postInfo) => {
+        const re = new RegExp(filterText, "i")
+        const { author, category, title } = postInfo
+        const textFields = [author, category, title]
+        
+        return (
+            (!categoryFilter.size || categoryFilter.has(postInfo.category)) &&
+            (!filterText || textFields.some(textField => re.test(textField))) 
+        )
+    }
+
     const postInfoListings = useMemo(() => postsInfo.
-        filter(postInfo =>
-                !categoryFilter.size || categoryFilter.has(postInfo.category)).
+        filter(postInfo => filterTest(postInfo)).
         map((postInfo, i) => {
             if (i === postsInfo.length - 1) {
                 const observer = observerRef.current
@@ -98,7 +108,7 @@ const PostsInfoList = React.memo(function({ categoryFilter }) {
                 : <ObservedPostInfo ref={ observedRef } key={ postInfo.postId }
                     info={ postInfo } categoryColor={ categoryColor } />
         }
-    ), [postsInfo, categoryFilter])
+    ), [postsInfo, categoryFilter, filterText])
 
     const initialLoad = loadingCourse || 
         (loadingPostsInfo && postsInfo.length === 0)
