@@ -1,75 +1,21 @@
 import Loading from '../lib/Loading'
 import PostsLoading from '../lib/ButtonLoading'
 import { useRouter } from 'next/router'
-import React, { useState, useEffect, useRef, useMemo } from 'react'
-import { usePostsInfo, useCourse } from '../../lib/hooks'
+import React, { useState, useEffect, useMemo } from 'react'
+import { useCourse, useUser } from '../../lib/hooks'
 import PostInfo from './PostInfo'
-import ObservedPostInfo from './ObservedPostInfo'
+import LoadMoreButton from './LoadMoreButton'
 import { LIGHT_RAINBOW_HEX } from'../../lib/colors'
+import { filterTest } from '../../lib/filter'
 
 
-const PostsInfoList = React.memo(function({ categoryFilter, filterText }) {
+const PostsInfoList = React.memo(function({ categoryFilter, filterText, attributeFilter }) {
     const router = useRouter()
     const { courseId } = router.query
-
-    const [postsInfoApiPage, setPostsInfoApiPage] = useState(1)
-    const [postsInfo, setPostsInfo] = useState([])
-    const [initialLoadTime] = useState(Date.now())
-    const [loadedAllPosts, setLoadedAllPosts] = useState(false)
-
-    const {
-        course,
-        loading: loadingCourse
-    } = useCourse(courseId)
-
-    const { 
-        paginatedPostsInfo, 
-        loading: loadingPostsInfo
-    } = usePostsInfo(courseId, postsInfoApiPage, initialLoadTime)
-
-    const observedRef = useRef(null)
-    const observerRef = useRef(new IntersectionObserver(
-        (observedPostInfos) => {
-            // do nothing on observer init
-            if (observedPostInfos.length === 0) return 
-
-            // only ever observe one post info at a time -- the last loaded one
-            if (observedPostInfos[0].isIntersecting) {
-                setPostsInfoApiPage(postsInfoApiPage => postsInfoApiPage + 1)
-            }
-        })
-    )
-    
-    // whenever we load more posts, update postsInfo state
-    useEffect(() => { 
-        if (!paginatedPostsInfo?.posts) return
-
-        const { posts: loadedPosts, nextPage } = paginatedPostsInfo
-        const didntLoadNewApiPage = 
-            (postsInfo.length > 0 ? postsInfo[0] : null) === loadedPosts[0]
-        if (didntLoadNewApiPage) return
-
-        setPostsInfo([...postsInfo, ...loadedPosts])
-        setLoadedAllPosts(nextPage === null)
-    }, [paginatedPostsInfo])
-
-    // whenever we display new post info, observe new last post or 
-    // disconnect observer if all posts loaded to prevent firing request
-    useEffect(() => {  
-        if (!observedRef.current || !postsInfo) return
-        const observer = observerRef.current
-
-        if (loadedAllPosts) {
-            observer.disconnect()
-            return
-        }
-
-        const needsToBeObserved = observedRef.current
-        observer.observe(needsToBeObserved)
-    }, [postsInfo])
-
+    const { course } = useCourse(courseId)
+    const { user } = useUser()
     const categoriesToLightRainbowHex = useMemo(() => {
-        if (!course?.categories) return {}
+        if (!course?.categories) return null
 
         const mapped = {}
         const { categories } = course
@@ -77,52 +23,64 @@ const PostsInfoList = React.memo(function({ categoryFilter, filterText }) {
             const category = categories[i]
             mapped[category] = LIGHT_RAINBOW_HEX[i % LIGHT_RAINBOW_HEX.length]
         }
-
         return mapped
     }, [course])
 
-    const filterTest = (postInfo) => {
-        const re = new RegExp(filterText, "i")
-        const { author, category, title } = postInfo
-        const textFields = [author, category, title]
+    const [loadedAllPosts, setLoadedAllPosts] = useState(false)
+    const [loadingMorePosts, setLoadingMorePosts] = useState(false)
+    const [apiPage, setApiPage] = useState(1)
+    const [initialLoadTime] = useState(Date.now())
+    const [allPosts, setAllPosts] = useState([])
+    const [displayedPosts, setDisplayedPosts] = useState([])
+
+
+    useEffect(async () => {
+        if (!categoriesToLightRainbowHex) return
         
-        return (
-            (!categoryFilter.size || categoryFilter.has(postInfo.category)) &&
-            (!filterText || textFields.some(textField => re.test(textField))) 
+        setLoadingMorePosts(apiPage > 1)
+        const response = await fetch(
+            `/api/course/postsInfo/${ courseId }/${ apiPage }/${ initialLoadTime }`
         )
-    }
 
-    const postInfoListings = useMemo(() => postsInfo.
-        filter(postInfo => filterTest(postInfo)).
-        map((postInfo, i) => {
-            if (i === postsInfo.length - 1) {
-                const observer = observerRef.current
-                const prevObserved = observedRef.current
-                if (observer && prevObserved) observer.unobserve(prevObserved)
-            }
+        const { nextPage, posts: newPostInfo } = await response.json()
+        setLoadedAllPosts(nextPage === null)
 
-            const categoryColor = categoriesToLightRainbowHex[postInfo.category]
-            return i < postsInfo.length - 1 ?
-                <PostInfo info={ postInfo } key={ postInfo.postId } 
-                    categoryColor={ categoryColor } />
-                : <ObservedPostInfo ref={ observedRef } key={ postInfo.postId }
-                    info={ postInfo } categoryColor={ categoryColor } />
-        }
-    ), [postsInfo, categoryFilter, filterText])
+        const newPosts = newPostInfo.map((postInfo, i) => {
+            const catColor = categoriesToLightRainbowHex[postInfo.category]
+            const component = (
+                <PostInfo info={ postInfo } categoryColor={ catColor } key={i + allPosts.length } />)
+            return { i, postInfo, component }
+        })
+        setAllPosts([...allPosts, ...newPosts])
+    }, [apiPage, categoriesToLightRainbowHex])
 
-    const initialLoad = loadingCourse || 
-        (loadingPostsInfo && postsInfo.length === 0)
+    useEffect(() => {
+        if (!user) return
+
+        const filters = [categoryFilter, filterText, attributeFilter]
+        const filtered = allPosts.filter(
+            post => filterTest(post.postInfo, user, filters)).map(
+                filteredPost => filteredPost.component)
+        setDisplayedPosts(filtered)
+        setLoadingMorePosts(false)
+    }, [allPosts, categoryFilter, filterText, attributeFilter, user])
+
 
     return (
         <div data-testid="post-listings-container" id="post-listings-container"
             className="w-full overflow-auto" >
-            { initialLoad ? <Loading /> : postInfoListings }
-            { loadingPostsInfo && postsInfo.length > 0 ? 
-            <div className="w-full h-[48px] border-y border-gray-500 
-                border-r flex items-center justify-center">
+            { displayedPosts.length === 0 ? <Loading /> : displayedPosts }
+
+            { (displayedPosts.length > 0 && !loadedAllPosts && !loadingMorePosts) 
+            && <LoadMoreButton handleClick={
+                () => setApiPage(apiPage => apiPage + 1) } /> }
+
+            { (displayedPosts.length > 0 && !loadedAllPosts && loadingMorePosts) 
+            && 
+            <div className="w-full h-[60px] flex items-center justify-center">
                 <PostsLoading />
-            </div> : <></> 
-            }
+            </div>}
+
             { loadedAllPosts && 
             <div className="h-max text-center py-2 bg-zinc-900
                 border-t border-gray-500 border-r">
