@@ -17,14 +17,16 @@ import UnreadDot from "./listingIcons/UnreadDot"
 
 const PostInfo = React.memo(function ({ info, categoryColor }) {
 
+    const unreadDot = !info.lastViewedAt || 
+        Date.parse(info.mostRecentCommentTime) > Date.parse(info.lastViewedAt)
+
     return (
         <div data-testid="post-info-container"
             className="w-full h-[90px] border-y border-gray-500 
                 border-r flex flex-col p-2 justify-between">
             <div className="flex justify-between">
                 <div className="flex justify-center items-center">
-                    { Date.parse(info.mostRecentCommentTime) > 
-                    Date.parse(info.lastViewedAt) ? <UnreadDot /> : null}
+                    { unreadDot ? <UnreadDot /> : null}
                     { info.isQuestion ? <QuestionMark /> : <RegularPost /> }
                     { info.isAnnouncement && <Announcement /> }
                 </div>
