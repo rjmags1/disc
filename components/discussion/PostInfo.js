@@ -46,14 +46,16 @@ const PostInfo = React.memo(function ({ info, categoryColor }) {
                 <span className="w-full truncate text-xs font-extralight
                     py-1 flex justify-start items-center">
                     { info.private && <PrivateBanner /> }
-                    <CategoryLabel category={ info.category } color={ categoryColor } />
+                    <CategoryLabel category={ info.category } 
+                        color={ categoryColor } />
                     { info.author }
                     { info.authorIsStaffOrInstructor && <StaffBanner /> }
                     <Timestamp createdAt={ new Date(info.createdAt) } />
                 </span>
                 <div className="flex items-center justify-center">
                     { info.likes > 0 && <Hearts numHearts={ info.likes } /> }
-                    { info.comments > 0 && <Comments numComments={ info.comments } /> }
+                    { info.comments > 0 && 
+                    <Comments numComments={ info.comments } /> }
                 </div>
             </div>
         </div>
