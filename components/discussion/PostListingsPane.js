@@ -54,7 +54,7 @@ const PostListingsPane = React.memo(function({ catPaneRef, categoryFilter }) {
     }
 
     const buttonStyles = `${ showDropdown ? "rotate-180" : "" } 
-        mr-1 opacity-40 hover:cursor-pointer`
+        mr-2 opacity-40 hover:cursor-pointer`
 
     const handleOutsideClick = (e) => {
         if (e.target.getAttribute("data-testid") === "toggler") return
@@ -65,8 +65,7 @@ const PostListingsPane = React.memo(function({ catPaneRef, categoryFilter }) {
         <>
             <div data-testid="filter-container" ref={ filter } 
                 className={ `fixed w-[${ INITIAL_LISTING_PANE_WIDTH }px] z-10
-                border-0 h-12 border-r flex p-1 border-zinc-500 items-center
-                justify-center` }>
+                flex items-center justify-center` }>
                 <PostInfoTextSearchFilter setFilterText={ setFilterText }/>
                 <div className={ buttonStyles } onClick={ 
                     () => setShowDropdown(!showDropdown) }>
@@ -74,16 +73,19 @@ const PostListingsPane = React.memo(function({ catPaneRef, categoryFilter }) {
                 </div>
                 {showDropdown && 
                 <OutsideClickHandler onOutsideClick={ handleOutsideClick } >
-                <div className="absolute w-[160px] text-right pb-1 
-                    bg-zinc-900 right-0 top-12 rounded-b-lg shadow-2xl">
-                    { ATTRIBUTES.map(attr => <PostAttribute attribute={ attr } 
-                        selected={ attributeFilter === attr } key={ attr }
-                        hideDropdown={ () => setShowDropdown(false) }
-                        changeAttribute={ (newFilter) => {
-                            setAttributeFilter(newFilter)
-                            setShowDropdown(false) }} />) }
-                </div></OutsideClickHandler>
+                    <div className="absolute w-[160px] text-right pb-1 
+                        bg-zinc-900 right-0 top-12 rounded-b-lg shadow-2xl">
+                        { ATTRIBUTES.map(attr => <PostAttribute attribute={ attr } 
+                            selected={ attributeFilter === attr } key={ attr }
+                            hideDropdown={ () => setShowDropdown(false) }
+                            changeAttribute={ (newFilter) => {
+                                setAttributeFilter(newFilter)
+                                setShowDropdown(false) }} />) }
+                    </div>
+                </OutsideClickHandler>
                 }
+                <div data-testid="right-divider" onMouseDown={ handleRightDividerMouseDown }
+                    className="flex-none w-1 bg-zinc-500 hover:cursor-ew-resize h-[48px]" />
             </div>
             <div data-testid="post-listings-pane-container" ref={ listingsPane }
                 className={ `flex-none bg-zinc-700 flex justify-between h-[calc(100%-3rem)] 
