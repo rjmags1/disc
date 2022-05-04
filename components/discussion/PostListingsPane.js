@@ -3,13 +3,15 @@ import PostsInfoList from './PostsInfoList'
 import PostInfoTextSearchFilter from './PostInfoTextSearchFilter'
 import PostAttributesDropdownButton from './PostAttributesDropdownButton'
 import PostAttributesDropdown from './PostAttributesDropdown'
+import CategoryHamburger from './CategoryHamburger'
 
 const MAX_LISTING_PANE_WIDTH = 450
 const MIN_LISTING_PANE_WIDTH = 250
 const INITIAL_LISTING_PANE_WIDTH = 400
 
 
-const PostListingsPane = React.memo(function({ catPaneRef, categoryFilter }) {
+const PostListingsPane = React.memo(function(props) {
+    const { catPaneRef, categoryFilter, toggleCatPane } = props
     const [filterText, setFilterText] = useState("")
     const [attributeFilter, setAttributeFilter] = useState("All")
     const [showDropdown, setShowDropdown] = useState(false)
@@ -58,6 +60,7 @@ const PostListingsPane = React.memo(function({ catPaneRef, categoryFilter }) {
             <div data-testid="filter-container" ref={ filter } 
                 className={ `fixed w-[${ INITIAL_LISTING_PANE_WIDTH }px] z-10
                 flex items-center justify-center` }>
+                <CategoryHamburger toggleCatPane={ toggleCatPane } />
                 <PostInfoTextSearchFilter setFilterText={ setFilterText }/>
                 <PostAttributesDropdownButton show={ showDropdown } 
                     handleClick={ () => setShowDropdown(!showDropdown) } />

@@ -5,13 +5,14 @@ import PostListingsPane from '../../components/discussion/PostListingsPane'
 import Post from '../../components/discussion/Post'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useUser, useCourse } from '../../lib/hooks'
 
 function Discussion() {
     const router = useRouter()
     const catPaneRef = useRef(null)
     const [categoryFilter, setCategoryFilter] = useState(new Set())
+    const [showHiddenPane, setShowHiddenPane] = useState(false)
 
     const {
         user,
@@ -22,6 +23,17 @@ function Discussion() {
         course,
         loading: loadingCourse
     } = useCourse(router.query.courseId)
+
+    useEffect(() => {
+        if (!catPaneRef.current) return
+
+        catPaneRef.current.style.display = showHiddenPane ? "flex" : ""
+        catPaneRef.current.style.position = showHiddenPane ? "fixed" : ""
+        catPaneRef.current.style.zIndex = showHiddenPane ? "500" : ""
+        catPaneRef.current.style.top = showHiddenPane ? "96px" : ""
+        catPaneRef.current.style.height = showHiddenPane ? "100%" : ""
+
+    }, [catPaneRef, showHiddenPane])
 
     const changeFilter = (add, category) => {
         const newFilter = new Set(categoryFilter)
@@ -43,7 +55,8 @@ function Discussion() {
                     changeCategoryFilter={ changeFilter } />
                 <div className="flex-auto text-white flex" 
                     data-testid="posts-section">
-                    <PostListingsPane catPaneRef={ catPaneRef } 
+                    <PostListingsPane catPaneRef={ catPaneRef }
+                        toggleCatPane={ () => setShowHiddenPane(!showHiddenPane) }
                         categoryFilter={ categoryFilter } />
                     <Post />
                 </div>

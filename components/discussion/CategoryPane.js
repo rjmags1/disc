@@ -59,7 +59,7 @@ function CategoryPane({ catPaneRef, changeCategoryFilter }) {
                 </h3>
                 { loadingCourse ? <Loading /> : categories }
             </div>
-            <div className="w-1 bg-zinc-500 hover:cursor-ew-resize"
+            <div className="w-1 bg-zinc-500 hover:cursor-ew-resize hidden lg:block"
                 onMouseDown={ handleLeftDividerMouseDown }
                 data-testid="left-divider" />
         </div>
