@@ -1,6 +1,7 @@
 function ButtonLoading() {
     return (
-        <div className="bg-inherit ml-3 mr-1" id="button-loading">  
+        <div className="bg-inherit ml-3 mr-1" id="button-loading"
+            data-testid="small-loading">  
             <svg className="animate-spin -ml-1 h-5 w-5 text-white" 
                 fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" 
