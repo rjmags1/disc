@@ -1,4 +1,4 @@
-import React, { useState, useRef, useLayoutEffect } from 'react'
+import React, { useState, useRef, useLayoutEffect, useEffect } from 'react'
 import PostsInfoList from './PostsInfoList'
 import PostInfoTextSearchFilter from './PostInfoTextSearchFilter'
 import PostAttributesDropdownButton from './PostAttributesDropdownButton'
@@ -15,6 +15,7 @@ const PostListingsPane = React.memo(function(props) {
     const [filterText, setFilterText] = useState("")
     const [attributeFilter, setAttributeFilter] = useState("All")
     const [showDropdown, setShowDropdown] = useState(false)
+    const [resized, setResized] = useState(false)
     const [listingPaneWidth, setListingPaneWidth] = useState(
         INITIAL_LISTING_PANE_WIDTH
     )
@@ -22,12 +23,29 @@ const PostListingsPane = React.memo(function(props) {
     const listingsPane = useRef(null)
     const filter = useRef(null)
 
-    useLayoutEffect(() => {
-        if (!listingsPane.current) return
+    useEffect(() => {
+        window.addEventListener('resize', () => {
+            if ((!listingsPane.current.style.width && 
+                window.innerWidth >= 1024)  ||
+                (listingsPane.current.style.width && 
+                    window.innerWidth < 1024)) {
+                
+                setResized(true)
+            }
+        })
+    }, [])
 
-        listingsPane.current.style.width = `${ listingPaneWidth }px`
-        filter.current.style.width = `${ listingPaneWidth }px`
-    }, [listingPaneWidth])
+    useLayoutEffect(() => {
+        if (!listingsPane.current || !filter.current) return
+
+        const windowWidth = window.innerWidth
+        listingsPane.current.style.width = windowWidth >= 1024 ?
+            `${ listingPaneWidth }px` : ""
+        filter.current.style.width = windowWidth >= 1024 ? 
+            `${ listingPaneWidth }px` : ""
+
+        setResized(false)
+    }, [listingPaneWidth, resized])
 
 
     const handleRightDividerMouseDown = () => {
@@ -58,8 +76,8 @@ const PostListingsPane = React.memo(function(props) {
     return (
         <>
             <div data-testid="filter-container" ref={ filter } 
-                className={ `fixed w-[${ INITIAL_LISTING_PANE_WIDTH }px] z-10
-                flex items-center justify-center` }>
+                className={ `fixed w-full md:w-[calc(100%-250px)] lg:w-[${ INITIAL_LISTING_PANE_WIDTH }px] z-10
+                flex items-center justify-start` }>
                 <CategoryHamburger toggleCatPane={ toggleCatPane } />
                 <PostInfoTextSearchFilter setFilterText={ setFilterText }/>
                 <PostAttributesDropdownButton show={ showDropdown } 
@@ -71,18 +89,18 @@ const PostListingsPane = React.memo(function(props) {
                     changeAttribute={ (attr) => setAttributeFilter(attr) } />
                 }
                 <div data-testid="top-right-divider" className="flex-none w-1 
-                    bg-zinc-500 hover:cursor-ew-resize h-[48px]"
+                    bg-zinc-500 hover:cursor-ew-resize h-[48px] opacity-0 lg:opacity-100"
                     onMouseDown={ handleRightDividerMouseDown } />
             </div>
             <div data-testid="post-listings-pane-container" ref={ listingsPane }
                 className={ `flex-none bg-zinc-700 flex justify-between 
-                    h-[calc(100%-3rem)] w-[${ INITIAL_LISTING_PANE_WIDTH }px] 
+                    h-[calc(100%-3rem)] w-full lg:w-[${ INITIAL_LISTING_PANE_WIDTH }px] 
                     relative top-12` }>
                 <PostsInfoList attributeFilter={ attributeFilter }
                     categoryFilter={ categoryFilter } filterText={ filterText } />
                 <div data-testid="lower-right-divider"
                     onMouseDown={ handleRightDividerMouseDown }
-                    className="w-1 bg-zinc-500 hover:cursor-ew-resize" />
+                    className="w-0.5 lg:w-1 bg-zinc-500 hover:cursor-ew-resize" />
             </div>
         </>
     )

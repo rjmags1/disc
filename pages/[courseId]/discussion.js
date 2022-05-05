@@ -50,7 +50,7 @@ function Discussion() {
     return (
         <>
             <Head><title>{ title }</title></Head>
-            <div data-testid="discussion-container" className="flex h-full">
+            <div data-testid="discussion-container" className="flex h-screen sm:h-[calc(100vh-48px)] w-full">
                 <CategoryPane catPaneRef={ catPaneRef } 
                     changeCategoryFilter={ changeFilter } />
                 <div className="flex-auto text-white flex" 
