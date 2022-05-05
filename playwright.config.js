@@ -2,9 +2,10 @@ const { devices } =  require('@playwright/test')
 
 const config = {
     timeout: 5 * 1000,
-    retries: 0,
+    retries: 1,
     testDir: './e2e',
     globalSetup: './e2e.setup.js',
+    outputDir: './e2e/testOutput',
 
     webServer: {
         command: 'npm run dev',
@@ -13,7 +14,7 @@ const config = {
         reuseExistingServer: !process.env.CI,
     },
 
-    use: { trace: 'retry-with-trace', },
+    use: { trace: 'on-first-retry', },
 
     projects: [
     {
