@@ -95,15 +95,17 @@ const PostsInfoList = React.memo(function(props) {
     const clickedLoadMore = (
         displayedPosts.length > 0 && !loadedAllPosts && loadingMorePosts)
 
+    const filters = [categoryFilter, filterText, attributeFilter]
+
     return (
         <div data-testid="post-listings-container" id="post-listings-container"
             className="w-full overflow-auto" >
             { (!initialLoad && pinnedInfo.length > 0) && 
-            <Pinned pinnedPostsInfo={ pinnedInfo } 
-                catColors={ categoriesToLightRainbowHex } /> }
+            <Pinned pinnedPostsInfo={ pinnedInfo } filters={ filters }
+                user={ user } catColors={ categoriesToLightRainbowHex } /> }
             { (!initialLoad && announcementsInfo.length > 0) && 
             <Announcements announcementsInfo={ announcementsInfo } 
-                catColors={ categoriesToLightRainbowHex } /> }
+                user={ user } catColors={ categoriesToLightRainbowHex } filters={ filters } /> }
             { initialLoad ? <Loading /> : displayedPosts }
             { notLoadingMorePosts && 
             <LoadMoreButton 
