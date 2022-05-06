@@ -2,11 +2,13 @@ import Loading from '../lib/Loading'
 import PostsLoading from '../lib/ButtonLoading'
 import { useRouter } from 'next/router'
 import React, { useState, useEffect, useMemo } from 'react'
-import { useCourse, useUser } from '../../lib/hooks'
+import { useAnnouncementsPinned, useCourse, useUser } from '../../lib/hooks'
 import PostInfo from './PostInfo'
 import LoadMoreButton from './LoadMoreButton'
 import { LIGHT_RAINBOW_HEX } from'../../lib/colors'
 import { filterTest } from '../../lib/filter'
+import Pinned from './Pinned'
+import Announcements from './Announcements'
 
 
 const PostsInfoList = React.memo(function(props) {
@@ -36,6 +38,13 @@ const PostsInfoList = React.memo(function(props) {
     const [displayedPosts, setDisplayedPosts] = useState([])
 
 
+    const {
+        announcements: announcementsInfo,
+        pinned: pinnedInfo,
+        loading: loadingAnnouncementsPinned
+    } = useAnnouncementsPinned(courseId)
+
+
     // fetch more posts on apiPage change (initial load or load more btn click)
     useEffect(async () => {
         if (!categoriesToLightRainbowHex) return
@@ -49,13 +58,13 @@ const PostsInfoList = React.memo(function(props) {
         setLoadedAllPosts(nextPage === null)
 
         // post freshly loaded posts into allPosts
-        const newPosts = newPostInfo.map((postInfo, i) => {
+        const newPosts = newPostInfo.map((postInfo) => {
             const catColor = categoriesToLightRainbowHex[postInfo.category]
             const component = (
                 <PostInfo info={ postInfo } categoryColor={ catColor } 
-                    key={i + allPosts.length } />
+                    key={ postInfo.postId } />
             )
-            return { i, postInfo, component }
+            return { postInfo, component }
         })
         setAllPosts([...allPosts, ...newPosts])
 
@@ -77,8 +86,9 @@ const PostsInfoList = React.memo(function(props) {
 
 
     const initialLoad = (
-        (displayedPosts.length === 0 || allPosts.length === 0) && 
-        !(displayedPosts.length === 0 && allPosts.length > 0)
+        ((displayedPosts.length === 0 || allPosts.length === 0) && 
+        !(displayedPosts.length === 0 && allPosts.length > 0))
+        || loadingAnnouncementsPinned
     )
     const notLoadingMorePosts = (
         displayedPosts.length > 0 && !loadedAllPosts && !loadingMorePosts)
@@ -88,6 +98,12 @@ const PostsInfoList = React.memo(function(props) {
     return (
         <div data-testid="post-listings-container" id="post-listings-container"
             className="w-full overflow-auto" >
+            { (!initialLoad && pinnedInfo.length > 0) && 
+            <Pinned pinnedPostsInfo={ pinnedInfo } 
+                catColors={ categoriesToLightRainbowHex } /> }
+            { (!initialLoad && announcementsInfo.length > 0) && 
+            <Announcements announcementsInfo={ announcementsInfo } 
+                catColors={ categoriesToLightRainbowHex } /> }
             { initialLoad ? <Loading /> : displayedPosts }
             { notLoadingMorePosts && 
             <LoadMoreButton 

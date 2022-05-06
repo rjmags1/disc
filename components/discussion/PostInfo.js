@@ -28,13 +28,13 @@ const PostInfo = React.memo(function ({ info, categoryColor }) {
                 <div className="flex justify-center items-center">
                     { unreadDot ? <UnreadDot /> : null}
                     { info.isQuestion ? <QuestionMark /> : <RegularPost /> }
+                    { info.pinned && <Pinned /> }
                     { info.isAnnouncement && <Announcement /> }
                 </div>
                 <div className="flex h-[20px]">
                     { info.watched && <Watching /> }
                     { info.starred && <Star /> }
                     { info.endorsed && <Endorsed /> }
-                    { info.pinned && <Pinned /> }
                     { (info.answered || info.resolved) &&  <Checkmark /> }
                     <div className="-mr-2"/>
                 </div>

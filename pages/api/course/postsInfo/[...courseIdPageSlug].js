@@ -1,6 +1,7 @@
 import { query } from '../../../../db/index'
 import { sessionOptions } from '../../../../lib/session'
 import { withIronSessionApiRoute } from 'iron-session/next'
+import { fixNodePgUTCTimeInterpretation } from '../../../../lib/time'
 
 const POSTS_PER_PAGE = 25
 
@@ -80,12 +81,10 @@ const processRow = (row) => ({
     category: row.category_name,
     createdAt: 
         fixNodePgUTCTimeInterpretation(row.created_at),
-    pinned: row.pinned,
     isQuestion: row.is_question,
     [row.is_question ? "answered" : "resolved"] : 
         row.is_question ? row.answered : row.resolved,
     endorsed: row.endorsed,
-    isAnnouncement: row.is_announcement,
     authorId: row.user_id,
     author: `${row.f_name} ${row.l_name}`,
     authorIsStaffOrInstructor: row.author_is_staff || row.author_is_instructor,
@@ -101,33 +100,19 @@ const processRow = (row) => ({
 })
 
 
-const fixNodePgUTCTimeInterpretation = (badDateObj) => {
-    const dateInfo = [
-        badDateObj.getFullYear(),
-        badDateObj.getMonth(),
-        badDateObj.getDate(),
-        badDateObj.getHours(),
-        badDateObj.getMinutes(),
-        badDateObj.getSeconds(),
-        badDateObj.getMilliseconds()
-    ]
-
-    return new Date(Date.UTC(...dateInfo))
-}
-
-
 const bigPaginatedCourseInfoQueryText = `
     SELECT
-        post_id, title, category_name, category_id, created_at, pinned,
-        is_question, resolved, answered, endorsed, is_announcement,
+        post_id, title, category_name, category_id, created_at,
+        is_question, resolved, answered, endorsed,
         f_name, l_name, user_id, private, author_is_staff, author_is_instructor,
         star_id, watch_id, last_viewed_at, likes, comments, latest_comment_time
     FROM
         (SELECT category_id, name as category_name 
             FROM post_category WHERE course = $1) 
         AS course_categories
-        JOIN (SELECT * FROM post 
-            WHERE (NOT private OR author = $2) AND created_at <= $5) 
+        JOIN (SELECT * FROM post WHERE 
+            (NOT private OR author = $2) AND 
+            created_at <= $5 AND NOT pinned AND NOT is_announcement) 
         AS displayed_posts
             ON displayed_posts.category = category_id
         JOIN (
