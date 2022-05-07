@@ -50,10 +50,11 @@ function Discussion() {
     return (
         <>
             <Head><title>{ title }</title></Head>
-            <div data-testid="discussion-container" className="flex h-screen sm:h-[calc(100vh-48px)] w-full">
+            <div data-testid="discussion-container" 
+                className="flex h-screen sm:h-[calc(100vh-48px)] w-full">
                 <CategoryPane catPaneRef={ catPaneRef } 
                     changeCategoryFilter={ changeFilter } />
-                <div className="flex-auto text-white flex" 
+                <div className="flex-auto text-white flex w-full" 
                     data-testid="posts-section">
                     <PostListingsPane catPaneRef={ catPaneRef }
                         toggleCatPane={ () => setShowHiddenPane(!showHiddenPane) }

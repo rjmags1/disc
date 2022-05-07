@@ -7,6 +7,7 @@ function Hamburger() {
     const [displayDropdown, setDisplayDropdown] = useState(false)
 
     return (
+        <div className="ml-auto">
         <OutsideClickHandler onOutsideClick={ () => setDisplayDropdown(false) } >
             <div data-testid="hamburger-container"
                 className="sm:hidden w-[25px] h-[20px] mr-1 flex 
@@ -17,7 +18,7 @@ function Hamburger() {
                 <div className="w-full h-[4px] bg-white rounded"/>
             </div>
             { displayDropdown && <DropdownMenu /> }
-        </ OutsideClickHandler>
+        </ OutsideClickHandler></div>
     )
 }
 

@@ -76,8 +76,9 @@ const PostListingsPane = React.memo(function(props) {
     return (
         <>
             <div data-testid="filter-container" ref={ filter } 
-                className={ `fixed w-full md:w-[calc(100%-250px)] lg:w-[${ INITIAL_LISTING_PANE_WIDTH }px] z-10
-                flex items-center justify-start` }>
+                className={ `fixed w-full md:w-[calc(100%-180px)] 
+                lg:w-[${ INITIAL_LISTING_PANE_WIDTH }px] z-10
+                flex items-center justify-start bg-zinc-900` }>
                 <CategoryHamburger toggleCatPane={ toggleCatPane } />
                 <PostInfoTextSearchFilter setFilterText={ setFilterText }/>
                 <PostAttributesDropdownButton show={ showDropdown } 

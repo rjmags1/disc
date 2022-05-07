@@ -7,13 +7,15 @@ import Hamburger from './Hamburger'
 
 function Navbar({ pageName }) {
     return (
-        <nav className='h-[48px] flex flex-row 
-            bg-purple items-center px-2 fixed w-full z-10'>
+        <nav className='h-[48px] flex 
+            bg-purple items-center px-2 fixed w-full z-50'>
             <LogoLink/>
             <PageHeader pageName={ pageName }/>
-            <HomeButton />
-            <NotificationsButton />
-            <ProfileButton />
+            <div className="sm:w-full flex items-center justify-end">
+                <HomeButton />
+                <NotificationsButton />
+                <ProfileButton />
+            </div>
             <Hamburger />
         </nav>
     )

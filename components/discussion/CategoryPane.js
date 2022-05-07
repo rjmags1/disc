@@ -15,6 +15,7 @@ function CategoryPane({ catPaneRef, changeCategoryFilter }) {
 
     useLayoutEffect(() => {
         if (!catPaneRef.current) return
+        if (window.innerWidth < 1024) return
 
         catPaneRef.current.style.width = `${ catPaneWidth }px`
     })
@@ -49,7 +50,7 @@ function CategoryPane({ catPaneRef, changeCategoryFilter }) {
     return (
         <div data-testid="category-pane-container" ref={ catPaneRef }
             className={ `hidden md:flex bg-zinc-800 text-white justify-between
-                w-[${ INITIAL_CAT_PANE_WIDTH }px]` } >
+               w-[180px] flex-none lg:w-[${ INITIAL_CAT_PANE_WIDTH }px]` } >
             <div data-testid="category-headers-container"
                 className="w-full flex flex-col items-center justify-start 
                     overflow-hidden my-2">
