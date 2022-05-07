@@ -1,5 +1,6 @@
 exports.TESTUSER_REGISTERED = {
     userId: 2,
+    fullName: "Harry Potter",
     email: "harry-potter@hogwarts.edu",
     password: "harryspassword",
     organization: "Hogwarts",

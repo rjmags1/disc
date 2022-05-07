@@ -1,4 +1,4 @@
-export const fixNodePgUTCTimeInterpretation = (badDateObj) => {
+const fixNodePgUTCTimeInterpretation = (badDateObj) => {
     const dateInfo = [
         badDateObj.getFullYear(),
         badDateObj.getMonth(),
@@ -13,7 +13,7 @@ export const fixNodePgUTCTimeInterpretation = (badDateObj) => {
 }
 
 
-export const toTimestampString = (createdAt) => {
+const toTimestampString = (createdAt) => {
     // now would just be new Date(Date.now()) in real scenario
     const now = new Date(new Date(Date.UTC(2003, 11, 17, 21, 59, 30)))
     const yearDiff = now.getUTCFullYear() - createdAt.getUTCFullYear()
@@ -35,4 +35,9 @@ export const toTimestampString = (createdAt) => {
     }
     const minuteDiff = now.getUTCMinutes() - createdAt.getUTCMinutes()
     return `${ minuteDiff } minute${ minuteDiff > 1 ? "s" : "" } ago`
+}
+
+module.exports = {
+    fixNodePgUTCTimeInterpretation,
+    toTimestampString
 }
