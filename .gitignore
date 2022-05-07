@@ -3,5 +3,5 @@ node_modules/
 .next/
 **.env*
 makeHashFromPassword.js
-e2e/results
+e2e/testOutput
 db/dml.sample*
