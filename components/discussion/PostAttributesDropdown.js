@@ -23,7 +23,8 @@ function PostAttributesDropdown(props) {
 
     return (
         <OutsideClickHandler onOutsideClick={ handleOutsideClick } >
-            <div className="absolute w-[160px] text-right pb-1 
+            <div data-testid="post-attributes-dropdown-container" 
+                className="absolute w-[160px] text-right pb-1 
                 bg-zinc-900 right-1 top-12 rounded-b-lg shadow-2xl border 
                 border-zinc-600 border-t-0 border-r-0" onClick={ hideDropdown }>
                 { attributes }

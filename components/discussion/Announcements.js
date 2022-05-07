@@ -6,6 +6,8 @@ const Announcements = React.memo(function(props) {
     const { announcementsInfo, catColors, filters, user } = props
     const filtered = announcementsInfo.filter(
         ann => filterTest(ann, user, filters))
+        
+    if (filtered.length === 0) return null
     return (
         <div data-testid="announcements-container">
             <h6 className="font-thin bg-zinc-900 p-1 border 
