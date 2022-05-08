@@ -14,7 +14,7 @@ const Category = React.memo(function({ name, bulletColor, changeFilter }) {
     }, [selected, containerRef])
 
     return (
-        <div data-testid="category-header-container" ref={ containerRef }
+        <li data-testid="category-header-container" ref={ containerRef }
             className="w-full py-1 font-mono text-sm flex items-center 
                 hover:cursor-pointer px-4"
             onClick={ () => setSelected(!selected) }>
@@ -25,7 +25,7 @@ const Category = React.memo(function({ name, bulletColor, changeFilter }) {
                 { name }
             </h4>
             { selected && <DeselectCategoryButton /> }
-        </div>
+        </li>
     )
 })
 
