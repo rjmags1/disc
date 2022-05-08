@@ -9,7 +9,7 @@ function ProfileButton() {
 
     return (
         <OutsideClickHandler onOutsideClick={ () => setDisplayDropdown(false) }>
-            <div data-testid="profile-button-container" 
+            <button data-testid="profile-button-container" 
                 className="hidden sm:flex flex-col items-center 
                     mx-1 hover:cursor-pointer"
                 onClick={() => { setDisplayDropdown(!displayDropdown) }}>
@@ -19,7 +19,7 @@ function ProfileButton() {
                     layout="fixed" data-testid="profile-button-arrow"
                     className={ displayDropdown ? "rotate-180" : "" }/>
                 { displayDropdown && <DropdownMenu /> }
-            </div>
+            </button>
         </OutsideClickHandler>
     )
 }

@@ -30,14 +30,14 @@ function DropdownButton({ label, last, href, hamburgerItem=false }) {
         else if (href) router.push(href)
     }
 
-    const baseStyles = "w-full hover:bg-violet-500 px-4 py-1"
+    const baseStyles = "w-full hover:bg-violet-500 px-4 py-1 text-right"
     if (hamburgerItem) baseStyles += " sm:hidden"
     const styles = last ? baseStyles + " rounded-b-md" : baseStyles
     return (
-        <div data-testid="dropdown-button-container"
+        <li data-testid="dropdown-button-container"
             className={ styles } onClick={ handleClick }>
-            <button className="w-full text-right">{ label }</button>
-        </div>
+            <a href="#">{ label }</a>
+        </li>
     )
 }
 
