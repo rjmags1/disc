@@ -52,7 +52,8 @@ const PostInfo = React.memo(function ({ info, categoryColor }) {
                     { info.authorIsStaffOrInstructor && <StaffBanner /> }
                     <Timestamp createdAt={ new Date(info.createdAt) } />
                 </span>
-                <div className="flex items-center justify-center">
+                <div className="flex items-center justify-end 
+                    flex-none w-fit pl-1 overflow-hidden mr-1">
                     { info.likes > 0 && <Hearts numHearts={ info.likes } /> }
                     { info.comments > 0 && 
                     <Comments numComments={ info.comments } /> }
