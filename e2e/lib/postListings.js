@@ -1,6 +1,5 @@
-const { TEST_COURSE_INFO } = require('../lib/course')
-const { TESTUSER_REGISTERED } = require('../lib/auth')
-const { query } = require('../lib/db')
+const { TESTUSER_REGISTERED } = require('./auth')
+const { query } = require('./db')
 const { expect } = require('@playwright/test')
 
 const getDbCoursePostsRevChronOrder = async (courseId) => {
@@ -20,10 +19,13 @@ const getDbCoursePostsRevChronOrder = async (courseId) => {
 }
 
 const getPinnedFromDbRows = rows => rows.filter(row => row.pinned)
+
 const getAnnouncementsFromDbRows = rows => rows.filter(
     row => row.is_announcement)
+
 const getNonPinnedNonAnnouncementFromDbRows = rows => (
     rows.filter(row => !row.pinned && !row.is_announcement))
+
 const dbPrivateFilter = (row, userId) => !row.private || row.user_id === userId
 
 const timeUnitPriority = {
@@ -47,76 +49,6 @@ const timestamp1LteTimestamp2 = (t1, t2) => {
     return false
 }
 
-const getDbCourseCategories = async () => {
-    const categoriesQueryText = `
-        SELECT name FROM post_category WHERE course = $1;`
-    const categoriesQueryParams = [TEST_COURSE_INFO.courseId]
-    const categoriesQuery = await query(
-        categoriesQueryText, categoriesQueryParams)
-
-    const dbCategories = categoriesQuery.rows.map(row => row.name)
-
-    if (dbCategories.length === 0) {
-        throw new Error("dbCategories.length === 0")
-    }
-    return dbCategories
-}
-
-const getPageCourseCategories = async (paneLocator) => {
-    const numCategories = await paneLocator.locator(
-        "[data-testid=category-header-container]").count()
-    
-    const categoriesPromises = []
-    for (let i = 0; i < numCategories; i++) {
-        const categoryPromise = paneLocator.locator(
-            `[data-testid=category-header-container] >> nth=${ i }`).innerText()
-        categoriesPromises.push(categoryPromise)
-    }
-    const categories = await Promise.all(categoriesPromises)
-
-    return categories.map(
-        category => /\n/i.test(category) ? category.slice(0, -1) : category)
-}
-
-const hexToRgbStr = (hexStr) => {
-    const red = parseInt(hexStr.slice(1, 3), 16) 
-    const green = parseInt(hexStr.slice(3, 5), 16)
-    const blue = parseInt(hexStr.slice(5, 7), 16)
-    return `rgb(${ red }, ${ green }, ${ blue })`
-}
-
-const showCategoryPaneIfNecessary = async (page) => {
-    const categoryPaneLocator = page.locator(
-        "[data-testid=category-pane-container]")
-    const hamburgerLocator = page.locator(
-        "[data-testid=category-menu-hamburger]")
-    
-    const paneVisible = await categoryPaneLocator.isVisible()
-    const hamburgerVisible = await hamburgerLocator.isVisible()
-    if (!paneVisible && hamburgerVisible) {
-        await Promise.all([
-            hamburgerLocator.click(),
-            categoryPaneLocator.waitFor({ state: "visible" })
-        ])
-    }
-}
-
-const hideCategoryPaneIfPossible = async (page) => {
-    const categoryPaneLocator = page.locator(
-        "[data-testid=category-pane-container]")
-    const hamburgerLocator = page.locator(
-        "[data-testid=category-menu-hamburger]")
-    
-    const paneVisible = await categoryPaneLocator.isVisible()
-    const hamburgerVisible = await hamburgerLocator.isVisible()
-    if (paneVisible && hamburgerVisible) {
-        await Promise.all([
-            hamburgerLocator.click(),
-            categoryPaneLocator.waitFor({ state: "hidden" })
-        ])
-    }
-}
-
 const loadAllPosts = async (page) => {
     const postInfoLocator = page.locator("[data-testid=post-info-container]")
     const loadMorePostsBtnLocator = page.locator(
@@ -137,74 +69,6 @@ const loadAllPosts = async (page) => {
         }
         loadingPosts = !noMorePostsIcon
         postsLoaded = newPostsLoaded
-    }
-}
-
-const testEachCategoryFilter = async (page, categories, counts) => {
-    const categoryHeaderLocator = page.locator(
-        "[data-testid=category-header-container]")
-    const deselectCategoryButtonLocator = page.locator(
-        "[data-testid=deselect-button-container]")
-    const postInfoLocator = page.locator("[data-testid=post-info-container]")
-
-    for (const category of categories) {
-        const thisCategoryLocator = categoryHeaderLocator.locator(
-            `text=${ category }`)
-        await Promise.all([
-            thisCategoryLocator.click(),
-            deselectCategoryButtonLocator.waitFor()
-        ])
-
-        await hideCategoryPaneIfPossible(page)
-
-        // count posts
-        const allFilteredPosts = await postInfoLocator.count()
-        const correctlyFilteredPosts = await postInfoLocator.locator(
-            `text=${ category }`).count()
-        expect(allFilteredPosts).toBe(correctlyFilteredPosts)
-        expect(allFilteredPosts).toBe(counts[category])
-
-        await showCategoryPaneIfNecessary(page)
-
-        // deselect selected category
-        await Promise.all([
-            thisCategoryLocator.click(),
-            deselectCategoryButtonLocator.waitFor({ state: 'hidden' })
-        ])
-    }
-}
-
-const testGroupedCategoryFilters = async (page, categories, counts) => {
-    const categoryHeaderLocator = page.locator(
-        "[data-testid=category-header-container]")
-    const deselectCategoryButtonLocator = page.locator(
-        "[data-testid=deselect-button-container]")
-    const postInfoLocator = page.locator("[data-testid=post-info-container]")
-    let prevFiltered = 0
-    for (let i = 0; i < categories.length; i++) {
-        const category = categories[i]
-        await showCategoryPaneIfNecessary(page)
-
-        // select another category
-        const thisCategoryLocator = categoryHeaderLocator.nth(i)
-        const thisDeselectLocator = deselectCategoryButtonLocator.nth(i)
-        await thisCategoryLocator.click()
-        let appliedFilter = false
-        while (!appliedFilter) {
-            const filteredWhen1 = await thisDeselectLocator.count()
-            appliedFilter = filteredWhen1 === 1
-        }
-
-        await hideCategoryPaneIfPossible(page)
-        
-        // assert on newly filtered posts
-        const newFilteredPosts = await postInfoLocator.locator(
-            `text=${ category }`).count()
-        const allFilteredPosts = await postInfoLocator.count()
-        expect(newFilteredPosts).toBe(counts[category])
-        expect(allFilteredPosts - prevFiltered).toBe(newFilteredPosts)
-
-        prevFiltered += newFilteredPosts
     }
 }
 
@@ -257,6 +121,28 @@ const selectAnAttribute = async (attribute, page) => {
 
 const dbUnreadContent = (row) => (!row.last_viewed_at || (
     Date.parse(row.latest_comment_time) > Date.parse(row.last_viewed_at)))
+
+const postOrderPinnedOrAnnBreak = async (postInfoLocator, i) => {
+    const currPinned = await postInfoLocator.nth(i).locator(
+        "[data-testid=pinned-icon]").isVisible()
+    const currIsAnnouncement = await postInfoLocator.nth(i).locator(
+        "[data-testid=announcement-icon]").isVisible()
+    const nextIsAnnouncement = await postInfoLocator.nth(i + 1).locator(
+        "[data-testid=announcement-icon]").isVisible()
+    
+    const orderBreak = (
+        (currPinned && nextIsAnnouncement) || 
+        (currIsAnnouncement && !nextIsAnnouncement))
+    
+    return orderBreak
+}
+
+const pluralTimeUnit = (timeUnit) => {
+    if (timeUnit[timeUnit.length - 1] !== 's') {
+        timeUnit += "s"
+    }
+    return timeUnit
+}
 
 const bigPostsQueryText = `
 SELECT
@@ -336,14 +222,7 @@ FROM
 ORDER BY created_at DESC;`
 
 module.exports = {
-    getDbCourseCategories,
-    getPageCourseCategories,
-    hexToRgbStr,
-    showCategoryPaneIfNecessary,
-    hideCategoryPaneIfPossible,
     loadAllPosts,
-    testEachCategoryFilter,
-    testGroupedCategoryFilters,
     getDbCoursePostsRevChronOrder,
     getPinnedFromDbRows,
     getAnnouncementsFromDbRows,
@@ -353,5 +232,7 @@ module.exports = {
     getAllNonDeletedDbPostsInPageOrder,
     checkIfAttributeSelected,
     selectAnAttribute,
-    dbUnreadContent
+    dbUnreadContent,
+    postOrderPinnedOrAnnBreak,
+    pluralTimeUnit
 }
