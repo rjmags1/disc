@@ -10,14 +10,18 @@ const Pinned = React.memo(function(props) {
     if (filtered.length === 0) return null
     return (
         <div data-testid="pinned-posts-container">
-            <h6 className="font-thin bg-zinc-900 p-1 border 
-                border-l-0 border-gray-500">
-                PINNED
-            </h6>
+            <header>
+                <h6 className="font-thin bg-zinc-900 p-1 border 
+                    border-l-0 border-gray-500">
+                    PINNED
+                </h6>
+            </header>
+            <ul>
             { filtered.map((postInfo) => (
                 <PostInfo info={ postInfo } key={ postInfo.postId }
                 categoryColor={ catColors[postInfo.category] } />
             ))}
+            </ul>
         </div>
     )
 })

@@ -1,8 +1,8 @@
 function CategoryLabel({ category, color }) {
     return (
-        <div className="mr-2" style={{ color: color }}>
+        <label className="mr-2" style={{ color: color }}>
             { category }
-        </div>
+        </label>
     )
 }
 

@@ -15,6 +15,7 @@ const PostsInfoList = React.memo(function(props) {
     const { categoryFilter, filterText, attributeFilter } = props
     const router = useRouter()
     const { courseId } = router.query
+
     const { course } = useCourse(courseId)
     const { user } = useUser()
     const categoriesToLightRainbowHex = useMemo(() => {
@@ -57,7 +58,7 @@ const PostsInfoList = React.memo(function(props) {
         const { nextPage, posts: newPostInfo } = await response.json()
         setLoadedAllPosts(nextPage === null)
 
-        // post freshly loaded posts into allPosts
+        // put freshly loaded posts into allPosts
         const newPosts = newPostInfo.map((postInfo) => {
             const catColor = categoriesToLightRainbowHex[postInfo.category]
             const component = (
@@ -71,7 +72,7 @@ const PostsInfoList = React.memo(function(props) {
     }, [apiPage, categoriesToLightRainbowHex])
 
 
-    // filter loaded posts according to ui-set filter ui
+    // filter loaded posts according to user-set filter ui
     useEffect(() => {
         if (!user) return
 
@@ -94,30 +95,35 @@ const PostsInfoList = React.memo(function(props) {
         displayedPosts.length > 0 && !loadedAllPosts && !loadingMorePosts)
     const clickedLoadMore = (
         displayedPosts.length > 0 && !loadedAllPosts && loadingMorePosts)
-
     const filters = [categoryFilter, filterText, attributeFilter]
-
     return (
         <div data-testid="post-listings-container" id="post-listings-container"
             className="w-full overflow-auto" >
             { (!initialLoad && pinnedInfo.length > 0) && 
             <Pinned pinnedPostsInfo={ pinnedInfo } filters={ filters }
-                user={ user } catColors={ categoriesToLightRainbowHex } /> }
+                user={ user } catColors={ categoriesToLightRainbowHex } /> 
+            }
             { (!initialLoad && announcementsInfo.length > 0) && 
             <Announcements announcementsInfo={ announcementsInfo } 
-                user={ user } catColors={ categoriesToLightRainbowHex } filters={ filters } /> }
-            { initialLoad ? <Loading /> : displayedPosts }
+                user={ user } catColors={ categoriesToLightRainbowHex } 
+                filters={ filters } /> 
+            }
+            { initialLoad ? 
+            <Loading /> : <ul>{ displayedPosts }</ul> 
+            }
             { notLoadingMorePosts && 
             <LoadMoreButton 
-                handleClick={ () => setApiPage(apiPage => apiPage + 1) } /> }
+                handleClick={ () => setApiPage(apiPage => apiPage + 1) } /> 
+            }
             { clickedLoadMore && 
             <div className="w-full h-[60px] flex items-center justify-center">
                 <PostsLoading />
-            </div>}
+            </div>
+            }
             { loadedAllPosts && 
             <div className="h-max text-center py-2 bg-zinc-900
                 border-t border-gray-500 border-r">
-                No more posts!
+                <header><h3>No more posts!</h3></header>
             </div>}
         </div>
     )

@@ -21,7 +21,7 @@ const PostInfo = React.memo(function ({ info, categoryColor }) {
         Date.parse(info.mostRecentCommentTime) > Date.parse(info.lastViewedAt)
 
     return (
-        <div data-testid="post-info-container"
+        <li data-testid="post-info-container"
             className="w-full h-[90px] border-y border-gray-500 
                 border-r flex flex-col p-2 justify-between">
             <div className="flex justify-between">
@@ -48,7 +48,7 @@ const PostInfo = React.memo(function ({ info, categoryColor }) {
                     { info.private && <PrivateBanner /> }
                     <CategoryLabel category={ info.category } 
                         color={ categoryColor } />
-                    { info.author }
+                    <span className="w-min truncate">{ info.author }</span>
                     { info.authorIsStaffOrInstructor && <StaffBanner /> }
                     <Timestamp createdAt={ new Date(info.createdAt) } />
                 </span>
@@ -59,7 +59,7 @@ const PostInfo = React.memo(function ({ info, categoryColor }) {
                     <Comments numComments={ info.comments } /> }
                 </div>
             </div>
-        </div>
+        </li>
     )
 })
 

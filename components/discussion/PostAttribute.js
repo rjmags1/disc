@@ -1,7 +1,7 @@
 function PostAttribute({ attribute, selected, changeAttribute }) {
 
     return (
-        <div className="hover:bg-zinc-500 hover:cursor-pointer font-thin
+        <li className="hover:bg-zinc-500 hover:cursor-pointer font-thin
             flex justify-between px-2" data-testid="post-attribute-container"
             onClick={ () => changeAttribute(attribute) } >
             { selected && 
@@ -9,7 +9,7 @@ function PostAttribute({ attribute, selected, changeAttribute }) {
             <p className="text-right w-full pr-1" data-testid="post-attribute">
                 { attribute }
             </p>
-        </div>
+        </li>
     )
 }
 

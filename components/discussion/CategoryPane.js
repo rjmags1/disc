@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import Loading from '../lib/Loading'
 import Category from './Category'
 import { RAINBOW_HEX } from '../../lib/colors'
+import { LARGE_MEDIA_BREAKPOINT } from '../../lib/layout'
 
 function CategoryPane({ catPaneRef, changeCategoryFilter }) {
     const MAX_CAT_PANE_WIDTH = 400
@@ -16,7 +17,7 @@ function CategoryPane({ catPaneRef, changeCategoryFilter }) {
 
     useLayoutEffect(() => {
         if (!catPaneRef.current) return
-        if (window.innerWidth < 1024) return
+        if (window.innerWidth < LARGE_MEDIA_BREAKPOINT) return
 
         catPaneRef.current.style.width = `${ catPaneWidth }px`
     })
