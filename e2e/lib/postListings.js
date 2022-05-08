@@ -1,6 +1,7 @@
 const { TESTUSER_REGISTERED } = require('./auth')
 const { query } = require('./db')
 const { expect } = require('@playwright/test')
+const time = require('../lib/time')
 
 const getDbCoursePostsRevChronOrder = async (courseId) => {
     try {
@@ -38,8 +39,10 @@ const timeUnitPriority = {
     "years": 7
 }
 const timestamp1LteTimestamp2 = (t1, t2) => {
-    const [units1, timeUnit1] = t1
-    const [units2, timeUnit2] = t2
+    let [units1, timeUnit1] = t1
+    let [units2, timeUnit2] = t2
+    timeUnit1 = pluralTimeUnit(timeUnit1)
+    timeUnit2 = pluralTimeUnit(timeUnit2)
     if (timeUnitPriority[timeUnit1] < timeUnitPriority[timeUnit2]) {
         return true
     }
@@ -144,6 +147,99 @@ const pluralTimeUnit = (timeUnit) => {
     return timeUnit
 }
 
+const assertDbRowMatchPagePostText = async (dbRow, pagePostInnerText) => {
+    const timestampFromFixedDbTime = time.toTimestampString(
+        time.fixNodePgUTCTimeInterpretation(dbRow.created_at))
+    expect(pagePostInnerText).toMatch(
+        new RegExp(`${ timestampFromFixedDbTime }`))
+    expect(pagePostInnerText).toMatch(new RegExp(`${ dbRow.title }`))
+    expect(pagePostInnerText).toMatch(
+        new RegExp(`${ dbRow.category_name }`))
+    expect(pagePostInnerText).toMatch(
+        new RegExp(`${ dbRow.f_name } ${ dbRow.l_name }`))
+}
+
+const assertDbRowMatchPagePost_St_AR_En_Wa_Pi_An = (
+    async (dbRow, postInfoLocator) => {
+    const starVisible = await postInfoLocator.locator(
+        "[data-testid=star-icon]").isVisible()
+    const checkmarkVisible = await postInfoLocator.locator(
+        "[data-testid=green-checkmark-icon]").isVisible()
+    const endorsedVisible = await postInfoLocator.locator(
+        "[data-testid=endorsed-icon]").isVisible()
+    const watchingVisible = await postInfoLocator.locator(
+        "[data-testid=watching-icon]").isVisible()
+    const pinnedVisible = await postInfoLocator.locator(
+        "[data-testid=pinned-icon]").isVisible()
+    const announcementVisible = await postInfoLocator.locator(
+        "[data-testid=announcement-icon]").isVisible()
+
+    expect(starVisible).toBe(Boolean(dbRow.star_id))
+    expect(checkmarkVisible).toBe(dbRow.resolved || dbRow.answered)
+    expect(endorsedVisible).toBe(dbRow.endorsed)
+    expect(watchingVisible).toBe(Boolean(dbRow.watch_id))
+    expect(pinnedVisible).toBe(dbRow.pinned)
+    expect(announcementVisible).toBe(dbRow.is_announcement)
+})
+
+const assertDbRowMatchesPagePostLikesComments = (
+    async (dbRow, postInfoLocator) => {
+    const commentsIconLocator = postInfoLocator.locator(
+        "[data-testid=comments-icon]")
+    const likesIconLocator = postInfoLocator.locator(
+        "[data-testid=likes-icon]")
+
+    const dbComments = parseInt(dbRow.comments, 10)
+    if (dbComments === 0) {
+        const commentsIconVisible = await commentsIconLocator.isVisible()
+        expect(commentsIconVisible).toBe(false)
+    }
+    else {
+        const numPageComments = await commentsIconLocator.innerText()
+        expect(parseInt(numPageComments, 10)).toBe(dbComments)
+    }
+    const dbLikes = parseInt(dbRow.likes, 10)
+    if (dbLikes === 0) {
+        const likesIconVisible = await likesIconLocator.isVisible()
+        expect(likesIconVisible).toBe(false)
+    }
+    else {
+        const numPageLikes = await likesIconLocator.innerText()
+        expect(parseInt(numPageLikes, 10)).toBe(dbLikes)
+    }
+})
+
+const getDbRowsDisplayedToUser = async (courseId, userId) => {
+    const dbRowsInPageOrder = (
+        await getAllNonDeletedDbPostsInPageOrder(courseId))
+    return dbRowsInPageOrder.filter(
+        row => dbPrivateFilter(row, userId))
+}
+
+const openAttributeFilter = async (page) => {
+    const attributeFilterButtonLocator = page.locator(
+        "[data-testid=attributes-dropdown-button]")
+    const dropdownLocator = page.locator(
+        "[data-testid=post-attributes-dropdown-container]")
+    let dropdownShowing = await dropdownLocator.isVisible()
+    expect(dropdownShowing).toBe(false)
+    await attributeFilterButtonLocator.click()
+    dropdownShowing = await dropdownLocator.isVisible()
+    expect(dropdownShowing).toBe(true)
+}
+
+const closeAttributeFilter = async (page) => {
+    const attributeFilterButtonLocator = page.locator(
+        "[data-testid=attributes-dropdown-button]")
+    const dropdownLocator = page.locator(
+        "[data-testid=post-attributes-dropdown-container]")
+    let dropdownShowing = await dropdownLocator.isVisible()
+    expect(dropdownShowing).toBe(true)
+    await attributeFilterButtonLocator.click()
+    dropdownShowing = await dropdownLocator.isVisible()
+    expect(dropdownShowing).toBe(false)
+}
+
 const bigPostsQueryText = `
 SELECT
     post_id, title, category_name, created_at,
@@ -234,5 +330,11 @@ module.exports = {
     selectAnAttribute,
     dbUnreadContent,
     postOrderPinnedOrAnnBreak,
-    pluralTimeUnit
+    pluralTimeUnit,
+    assertDbRowMatchPagePostText,
+    assertDbRowMatchPagePost_St_AR_En_Wa_Pi_An,
+    assertDbRowMatchesPagePostLikesComments,
+    getDbRowsDisplayedToUser,
+    openAttributeFilter,
+    closeAttributeFilter
 }

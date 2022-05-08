@@ -8,12 +8,11 @@ const {
     hexToRgbStr,
     showCategoryPaneIfNecessary,
     hideCategoryPaneIfPossible, 
-    loadAllPosts,
     testEachCategoryFilter,
-    testGroupedCategoryFilters
-} = require('./lib')
-
-const TOTAL_POSTS = 132
+    testGroupedCategoryFilters,
+    toggleCategoryStyleAssert
+} = require('../lib/categories')
+const { loadAllPosts } = require('../lib/postListings')
 
 
 test.beforeEach(async ({ page }) => {
@@ -97,29 +96,7 @@ test.describe('categories pane filter action', async () => {
             const categoryHeaderLocator = categoryPaneLocator.locator(
                 `[data-testid=category-header-container] >> nth=${ i }`)
 
-            const preClick1Style = await categoryHeaderLocator.getAttribute("style")
-            const preClick1DeselectPresent = await categoryHeaderLocator.locator(
-                "[data-testid=deselect-button-container]").isVisible()
-            expect(preClick1Style === null ||
-                !(preClick1Style.includes("background-color"))).toBe(true)
-            expect(preClick1DeselectPresent).toBe(false)
-            
-            await categoryHeaderLocator.click()
-
-            const postClick1Style = await categoryHeaderLocator.getAttribute("style")
-            const postClick1DeselectPresent = await categoryHeaderLocator.locator(
-                "[data-testid=deselect-button-container]").isVisible()
-            expect(postClick1Style.includes("background-color")).toBe(true)
-            expect(postClick1DeselectPresent).toBe(true)
-
-            await categoryHeaderLocator.click()
-
-            const postClick2Style = await categoryHeaderLocator.getAttribute("style")
-            const postClick2DeselectPresent =  await categoryHeaderLocator.locator(
-                "[data-testid=deselect-button-container]").isVisible()
-            expect(postClick2Style === null ||
-                !(postClick2Style.includes("background-color"))).toBe(true)
-            expect(postClick2DeselectPresent).toBe(false)
+            await toggleCategoryStyleAssert(categoryHeaderLocator)
         }
     })
 
