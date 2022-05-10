@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect } from 'react'
+import { useState, useLayoutEffect, useEffect } from 'react'
 import { useCourse } from '../../../lib/hooks'
 import { useRouter } from 'next/router'
 import Loading from '../../lib/Loading'
@@ -12,15 +12,27 @@ function CategoryPane({ catPaneRef, changeCategoryFilter }) {
     const router = useRouter()
     const { courseId } = router.query    
     const [catPaneWidth, setCatPaneWidth] = useState(INITIAL_CAT_PANE_WIDTH)
+    const [resize, setResize] = useState(false)
 
     const { course, loading: loadingCourse } = useCourse(courseId)
 
+    useEffect(() => {
+        window.addEventListener('resize',
+        () => {
+            if (window.innerWidth < LARGE_MEDIA_BREAKPOINT) setResize(true)
+            else setResize(false)
+        })
+    }, [])
+
     useLayoutEffect(() => {
         if (!catPaneRef.current) return
-        if (window.innerWidth < LARGE_MEDIA_BREAKPOINT) return
+        if (window.innerWidth < LARGE_MEDIA_BREAKPOINT) {
+            catPaneRef.current.style.width = `180px`
+            return
+        }
 
         catPaneRef.current.style.width = `${ catPaneWidth }px`
-    })
+    }, [resize])
 
     const handleLeftDividerMouseDown = () => {
         document.body.style.userSelect = "none"
