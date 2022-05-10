@@ -32,7 +32,7 @@ function CategoryPane({ catPaneRef, changeCategoryFilter }) {
         }
 
         catPaneRef.current.style.width = `${ catPaneWidth }px`
-    }, [resize])
+    }, [catPaneWidth, resize])
 
     const handleLeftDividerMouseDown = () => {
         document.body.style.userSelect = "none"
