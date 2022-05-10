@@ -1,0 +1,3 @@
+module.exports.LARGE_MEDIA_BREAKPOINT = 1024
+module.exports.MEDIUM_MEDIA_BREAKPOINT = 768
+module.exports.SMALL_MEDIA_BREAKPOINT = 640

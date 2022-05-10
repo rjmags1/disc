@@ -22,7 +22,7 @@ test.beforeEach(async ({ page }) => {
     const { term, code, section, name: testCourseName } = TEST_COURSE_INFO
     await Promise.all([
         page.locator(`text=/${ testCourseName }/i`).click(),
-        page.waitForSelector(`text=/${ term } ${ testCourseName }/i`)
+        page.waitForSelector(`text=/${ testCourseName } - ${ term }/i`)
     ])
     const title = await page.title()
     expect(title).toMatch(new RegExp(
