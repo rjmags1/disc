@@ -1,10 +1,10 @@
 import { useState, useLayoutEffect } from 'react'
-import { useCourse } from '../../lib/hooks'
+import { useCourse } from '../../../lib/hooks'
 import { useRouter } from 'next/router'
-import Loading from '../lib/Loading'
+import Loading from '../../lib/Loading'
 import Category from './Category'
-import { RAINBOW_HEX } from '../../lib/colors'
-import { LARGE_MEDIA_BREAKPOINT } from '../../lib/layout'
+import { RAINBOW_HEX } from '../../../lib/colors'
+import { LARGE_MEDIA_BREAKPOINT } from '../../../lib/layout'
 
 function CategoryPane({ catPaneRef, changeCategoryFilter }) {
     const MAX_CAT_PANE_WIDTH = 400

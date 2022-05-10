@@ -1,4 +1,4 @@
-import { toTimestampString } from "../../../lib/time"
+import { toTimestampString } from "../../../../lib/time"
 
 function Timestamp({ createdAt }) {
     return (

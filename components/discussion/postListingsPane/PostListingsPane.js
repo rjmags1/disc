@@ -3,8 +3,8 @@ import PostsInfoList from './PostsInfoList'
 import PostInfoTextSearchFilter from './PostInfoTextSearchFilter'
 import PostAttributesDropdownButton from './PostAttributesDropdownButton'
 import PostAttributesDropdown from './PostAttributesDropdown'
-import CategoryHamburger from './CategoryHamburger'
-import { LARGE_MEDIA_BREAKPOINT } from '../../lib/layout'
+import CategoryHamburger from '../categoryPane/CategoryHamburger'
+import { LARGE_MEDIA_BREAKPOINT } from '../../../lib/layout'
 
 const MAX_LISTING_PANE_WIDTH = 450
 const MIN_LISTING_PANE_WIDTH = 250

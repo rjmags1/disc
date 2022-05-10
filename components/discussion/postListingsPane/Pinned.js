@@ -1,19 +1,19 @@
 import PostInfo from "./PostInfo"
 import React from "react"
-import { filterTest } from "../../lib/filter"
+import { filterTest } from "../../../lib/filter"
 
-const Announcements = React.memo(function(props) {
-    const { announcementsInfo, catColors, filters, user } = props
-    const filtered = announcementsInfo.filter(
-        ann => filterTest(ann, user, filters))
+const Pinned = React.memo(function(props) {
+    const { pinnedPostsInfo, catColors, filters, user } = props
+    const filtered = pinnedPostsInfo.filter(
+        pinned => filterTest(pinned, user, filters))
         
     if (filtered.length === 0) return null
     return (
-        <div data-testid="announcements-container">
+        <div data-testid="pinned-posts-container">
             <header>
                 <h6 className="font-thin bg-zinc-900 p-1 border 
                     border-l-0 border-gray-500">
-                    ANNOUNCEMENTS
+                    PINNED
                 </h6>
             </header>
             <ul>
@@ -26,4 +26,4 @@ const Announcements = React.memo(function(props) {
     )
 })
 
-export default Announcements
+export default Pinned

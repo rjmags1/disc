@@ -1,6 +1,6 @@
 import Layout from '../../components/layout/Layout'
-import CategoryPane from '../../components/discussion/CategoryPane'
-import PostListingsPane from '../../components/discussion/PostListingsPane'
+import CategoryPane from '../../components/discussion/categoryPane/CategoryPane'
+import PostListingsPane from '../../components/discussion/postListingsPane/PostListingsPane'
 import Post from '../../components/discussion/Post'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
