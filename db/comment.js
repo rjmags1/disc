@@ -272,9 +272,10 @@ const genComments = async function() {
                     display_content,
                     deleted,
                     anonymous,
-                    parent_comment)
+                    parent_comment,
+                    ancestor_comment)
                 VALUES
-                    ($1, $2, $3, $4, $5, $6 ,$7, $8)
+                    ($1, $2, $3, $4, $5, $6 ,$7, $8, $9)
                 RETURNING comment_id, created_at;`
     for (let _ = 0; _ < 50; _++) {
         const randomCommenter = getRandomCommenter(commenterIds)
@@ -293,21 +294,35 @@ const genComments = async function() {
             displayContent,
             _ % 10 === 0 && _ < 30, // mark 3 of the comments as deleted
             _ > 0 && _ < 42 && _ % 7 === 0, // mark 5 non deleted as anonymous
+            null,
             null
         ])
 
         const parentCommentInfo = newTopLevelCommentQuery.rows[0]
         const nestedReplies = Math.floor(Math.random() * 6)
         await genNestedComments(
-            nestedReplies, queryText, parentCommentInfo, commenterIds, latestPost)
+            nestedReplies, 
+            queryText, 
+            parentCommentInfo, 
+            parentCommentInfo, 
+            commenterIds, 
+            latestPost)
     }
 
     pool.end(() => {})
 }
 
 const genNestedComments = (
-    async (nestedCommentsLeft, queryText, parentCommentInfo, commenters, post) => {
+    async (
+        nestedCommentsLeft, 
+        queryText, 
+        parentCommentInfo, 
+        ancestorCommentInfo, 
+        commenters, 
+        post) => {
     if (nestedCommentsLeft === 0) return
+
+    const { comment_id: ancestorComment } = ancestorCommentInfo
 
     let { 
         comment_id: parentComment, 
@@ -324,7 +339,7 @@ const genNestedComments = (
 
         const queryParams = [
             randomCommenter, post, commentCreationTime, editContent,
-            displayContent, false, false, parentComment
+            displayContent, false, false, parentComment, ancestorComment
         ]
         const nestedCommentQuery = await query(queryText, queryParams)
 
