@@ -259,7 +259,7 @@ const genComments = async function() {
 
 
 
-    // comment 50 times on latest post that isnt private
+    // comment 50 times on latest post that isnt private, 0-5 nested replies per
     queryText = `SELECT post_id FROM post WHERE NOT private 
                     ORDER BY created_at DESC LIMIT 1;`
     const latestPostQuery = await query(queryText)
@@ -271,9 +271,11 @@ const genComments = async function() {
                     edit_content,
                     display_content,
                     deleted,
-                    anonymous)
+                    anonymous,
+                    parent_comment)
                 VALUES
-                    ($1, $2, $3, $4, $5, $6 ,$7);`
+                    ($1, $2, $3, $4, $5, $6 ,$7, $8)
+                RETURNING comment_id, created_at;`
     for (let _ = 0; _ < 50; _++) {
         const randomCommenter = getRandomCommenter(commenterIds)
         const comment = faker.lorem.sentence() + '\n'
@@ -283,20 +285,55 @@ const genComments = async function() {
         const latestPostCreationTime = await getPostCreatedAtTime(latestPost)
         const commentCreationTime = getRandomTimeAfter(latestPostCreationTime)
         
-        await query(queryText, [
+        const newTopLevelCommentQuery = await query(queryText, [
             randomCommenter,
             latestPost,
             commentCreationTime,
             editContent,
             displayContent,
             _ % 10 === 0 && _ < 30, // mark 3 of the comments as deleted
-            _ > 0 && _ < 42 && _ % 7 === 0 // mark 5 non deleted as anonymous
+            _ > 0 && _ < 42 && _ % 7 === 0, // mark 5 non deleted as anonymous
+            null
         ])
-    }
 
+        const parentCommentInfo = newTopLevelCommentQuery.rows[0]
+        const nestedReplies = Math.floor(Math.random() * 6)
+        await genNestedComments(
+            nestedReplies, queryText, parentCommentInfo, commenterIds, latestPost)
+    }
 
     pool.end(() => {})
 }
+
+const genNestedComments = (
+    async (nestedCommentsLeft, queryText, parentCommentInfo, commenters, post) => {
+    if (nestedCommentsLeft === 0) return
+
+    let { 
+        comment_id: parentComment, 
+        created_at: parentCreatedAt 
+    } = parentCommentInfo
+    
+    while (nestedCommentsLeft > 0) {
+        const randomCommenter = getRandomCommenter(commenters)
+        const comment = faker.lorem.sentence() + '\n'
+        const editContent = new Delta([])
+        editContent.insert(comment)
+        const displayContent = `<p>${ comment }</p>`
+        const commentCreationTime = getRandomTimeAfter(parentCreatedAt)
+
+        const queryParams = [
+            randomCommenter, post, commentCreationTime, editContent,
+            displayContent, false, false, parentComment
+        ]
+        const nestedCommentQuery = await query(queryText, queryParams)
+
+        const justInsertedInfo = nestedCommentQuery.rows[0]
+        parentComment = justInsertedInfo.comment_id
+        parentCreatedAt = justInsertedInfo.created_at
+        nestedCommentsLeft--
+    }
+})
 
 const query = async function (queryText, queryParams) {
     try {

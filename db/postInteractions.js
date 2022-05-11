@@ -27,7 +27,6 @@ const genInteractions = async function() {
         if (i % 2 === 0) continue
 
         const { post_id: postId, created_at: postCreatedAt } = postsQuery.rows[i]
-        console.log(postId)
         const queryParams = [postId, harryId]
         for (const queryText of QUERIES) {
             if (queryText === VIEW_QUERY) {
