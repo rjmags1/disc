@@ -15,7 +15,7 @@ const fixNodePgUTCTimeInterpretation = (badDateObj) => {
 
 const toTimestampString = (createdAt) => {
     // now would just be new Date(Date.now()) in real scenario
-    const now = new Date(new Date(Date.UTC(2003, 11, 17, 21, 59, 30)))
+    const now = new Date(new Date(Date.UTC(2003, 11, 18, 21, 59, 30)))
     const yearDiff = now.getUTCFullYear() - createdAt.getUTCFullYear()
     if (yearDiff) {
         return `${ yearDiff } year${ yearDiff > 1 ? "s" : "" } ago`
