@@ -14,8 +14,9 @@ require('dotenv').config({
 const pool = new Pool()
 const { faker } = require('@faker-js/faker')
 const Delta = require('quill-delta') // delta constructor
+const { fixNodePgUTCTimeInterpretation } = require('../e2e/lib/time')
 
-const THREAD_ID_ZERO_PAD = 9
+const THREAD_ID_ZERO_PAD = 5
 
 
 // 12/18/2003 EON UTC, fall 2003 term end
@@ -69,15 +70,6 @@ const genComments = async function() {
         ([_, statusObj]) => statusObj.isStaff
     )[0][0]
 
-    // get harry. harry is used for development, and ensuring that he
-    // is the author of a few comments will allow distinction between
-    // logged in user authored comments and other peoples comments
-    queryText = `SELECT user_id FROM person WHERE
-                    f_name = 'Harry' AND l_name = 'Potter';`
-    const harryQuery = await query(queryText)
-    const harryId = harryQuery.rows[0].user_id
-
-
 
     // comment on all non private 
     // resolved posts once, marking the comment as resolving
@@ -112,7 +104,6 @@ const genComments = async function() {
             displayContent
         ])
         const { comment_id: commentId } = justInserted.rows[0]
-        await insertTopLevelThreadId(commentId)
     }
 
 
@@ -151,7 +142,6 @@ const genComments = async function() {
             displayContent
         ])
         const { comment_id: commentId } = justInserted.rows[0]
-        await insertTopLevelThreadId(commentId)
     }
 
     
@@ -195,7 +185,6 @@ const genComments = async function() {
             answered
         ])
         const { comment_id: commentId } = justInserted.rows[0]
-        await insertTopLevelThreadId(commentId)
     }
 
 
@@ -233,7 +222,6 @@ const genComments = async function() {
             displayContent
         ])
         const { comment_id: commentId } = justInserted.rows[0]
-        await insertTopLevelThreadId(commentId)
     }
 
 
@@ -270,7 +258,6 @@ const genComments = async function() {
                 displayContent
             ])
             const { comment_id: commentId } = justInserted.rows[0]
-            await insertTopLevelThreadId(commentId)
         }
     }
 
@@ -281,6 +268,7 @@ const genComments = async function() {
                     ORDER BY created_at DESC LIMIT 1;`
     const latestPostQuery = await query(queryText)
     const latestPost = latestPostQuery.rows[0].post_id
+    const latestPostCreationTime = await getPostCreatedAtTime(latestPost)
     queryText = `INSERT INTO comment
                     (author,
                     post,
@@ -299,7 +287,6 @@ const genComments = async function() {
         const editContent = new Delta([])
         editContent.insert(comment)
         const displayContent = `<p>${ comment }</p>`
-        const latestPostCreationTime = await getPostCreatedAtTime(latestPost)
         const commentCreationTime = getRandomTimeAfter(latestPostCreationTime)
         
         const justInserted = await query(queryText, [
@@ -316,12 +303,11 @@ const genComments = async function() {
             comment_id: commentId, 
             created_at: createAfter 
         } = justInserted.rows[0]
-        const threadId = await insertTopLevelThreadId(commentId)
 
         const nestedReplies = Math.floor(Math.random() * 10)
         await genNestedComments(
             nestedReplies, commenterIds, latestPost, 
-            threadId, createAfter, queryText, commentId)
+            createAfter, queryText, commentId)
     }
 
     pool.end(() => {})
@@ -332,13 +318,12 @@ const genNestedComments = (
         nestedCommentsLeft, 
         commenters, 
         post,
-        ancestorThreadId,
         createAfter,
         queryText,
         ancestorCommentId) => {
-    if (nestedCommentsLeft === 0) return
-    
-    let parentThreadId = ancestorThreadId
+
+    let parentThreadId = null, parentCreatedAt = createAfter
+    let youngestSiblingThreadId = null, siblingCreatedAt = null
     while (nestedCommentsLeft > 0) {
         const randomCommenter = getRandomCommenter(commenters)
         const comment = faker.lorem.sentence() + '\n'
@@ -347,27 +332,64 @@ const genNestedComments = (
         const displayContent = `<p>${ comment }</p>`
         const commentCreationTime = getRandomTimeAfter(createAfter)
 
-        const queryParams = [
+        const nestedCommentQuery = await query(queryText, [
             randomCommenter, post, commentCreationTime, editContent,
             displayContent, false, false, ancestorCommentId
-        ]
-        const nestedCommentQuery = await query(queryText, queryParams)
+        ])
         const {
-             comment_id: commentId, 
+             comment_id: justInsertedCommentId, 
              created_at: justInsertedCreatedAt 
         } = nestedCommentQuery.rows[0]
 
-        const justInsertedThreadId = (
-            await insertLowerLevelThreadId(parentThreadId, commentId))
+        const newThreadId = genNewThreadId(
+            parentThreadId, youngestSiblingThreadId)
 
-        const goDeeper = Math.random() > 0.5
-        if (goDeeper) {
-            createAfter = justInsertedCreatedAt
-            parentThreadId = justInsertedThreadId
-        }
+        await query(
+            "UPDATE comment SET thread_id = $1 WHERE comment_id = $2;",
+            [newThreadId, justInsertedCommentId])
+
+        const goDeeper = Math.random() < 0.5
+        parentThreadId = goDeeper ? newThreadId : parentThreadId
+        youngestSiblingThreadId = goDeeper ? null : newThreadId
+        parentCreatedAt = goDeeper ? justInsertedCreatedAt : parentCreatedAt
+        siblingCreatedAt = goDeeper ? null : justInsertedCreatedAt
+        createAfter = goDeeper ? parentCreatedAt : siblingCreatedAt
+
         nestedCommentsLeft--
     }
 })
+
+const genNewThreadId = (parentThreadId, youngestSiblingThreadId) => {
+    let newThreadId
+    if (parentThreadId === null) {
+        newThreadId = (youngestSiblingThreadId !== null ? 
+            incThreadId(youngestSiblingThreadId)
+            : zeroPad("1"))
+    }
+    else {
+        newThreadId = (youngestSiblingThreadId !== null ? 
+            incThreadId(youngestSiblingThreadId)
+            : parentThreadId + "." + zeroPad("1"))
+    }
+    
+    return newThreadId
+}
+
+const incThreadId = (threadId) => {
+    const tokens = threadId.split('.')
+    const lastToken = tokens[tokens.length - 1]
+    const incLastToken = zeroPad(
+        (parseInt(lastToken, 10) + 1).toString())
+    tokens.pop()
+    tokens.push(incLastToken)
+    return tokens.join('.')
+}
+
+const zeroPad = (stringInt) => {
+    const zeroes = new Array(
+        THREAD_ID_ZERO_PAD - stringInt.length).fill('0').join('')
+    return zeroes + stringInt
+}
 
 const query = async function (queryText, queryParams) {
     try {
@@ -398,57 +420,5 @@ const getPostCreatedAtTime = async (postId) => {
 
 const getRandomCommenter = (commenterIds) => 
     commenterIds[Math.floor(Math.random() * commenterIds.length)]
-
-const insertTopLevelThreadId = async (commentId) => {
-    const toStr = commentId.toString()
-    const zeroes = new Array(
-        THREAD_ID_ZERO_PAD - toStr.length).fill('0').join('')
-    const threadId = zeroes + toStr
-    await query(
-        "UPDATE comment SET thread_id = $1 WHERE comment_id = $2;",
-        [threadId, commentId]
-    )
-
-    return threadId
-}
-
-const insertLowerLevelThreadId = async (parentThreadId, commentId) => {
-    const nestingTokens = parentThreadId.split(".")
-    const lastToken = nestingTokens[nestingTokens.length - 1]
-    const paddedIncLastToken = incThreadIdToken(lastToken)
-    const rightBoundThreadTokens = nestingTokens.slice(0, nestingTokens.length - 1)
-    rightBoundThreadTokens.push(paddedIncLastToken)
-    const rightBoundThreadId = rightBoundThreadTokens.join(".")
-    const youngestSiblingQuery = await query(`
-        SELECT thread_id FROM comment 
-        WHERE thread_id > $1 AND thread_id < $2
-        ORDER BY thread_id DESC LIMIT 1`,
-        [parentThreadId, rightBoundThreadId]
-    )
-    
-    let diffToken
-    if (youngestSiblingQuery.rows.length === 0) {
-        diffToken = new Array(THREAD_ID_ZERO_PAD - 1).fill('0').join('') + '1'
-    }
-    else {
-        const { thread_id: prevThreadId } = youngestSiblingQuery.rows[0]
-        const tokens = prevThreadId.split(".")
-        diffToken = incThreadIdToken(tokens[tokens.length - 1])
-    }
-    nestingTokens.push(diffToken)
-    const newThreadId = nestingTokens.join(".")
-
-    await query(
-        "UPDATE comment SET thread_id = $1 WHERE comment_id = $2;",
-        [newThreadId, commentId])
-    return newThreadId
-}
-
-const incThreadIdToken = (token) => {
-    const incToken = (parseInt(token) + 1).toString()
-    const zeroes = new Array(
-        THREAD_ID_ZERO_PAD - incToken.length).fill('0').join('')
-    return zeroes + incToken
-}
 
 genComments()
