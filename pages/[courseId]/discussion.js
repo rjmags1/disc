@@ -1,17 +1,22 @@
 import Layout from '../../components/layout/Layout'
 import CategoryPane from '../../components/discussion/categoryPane/CategoryPane'
 import PostListingsPane from '../../components/discussion/postListingsPane/PostListingsPane'
-import Post from '../../components/discussion/Post'
+import Post from '../../components/discussion/post/Post'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import { useLayoutEffect, useRef, useState } from 'react'
+import React, { useLayoutEffect, useRef, useState } from 'react'
 import { useUser, useCourse } from '../../lib/hooks'
+
+export const PostContext = React.createContext(null)
 
 function Discussion() {
     const router = useRouter()
     const catPaneRef = useRef(null)
     const [categoryFilter, setCategoryFilter] = useState(new Set())
     const [showHiddenPane, setShowHiddenPane] = useState(false)
+    const [currentPost, setCurrentPost] = useState(null)
+
+    const postContext = { currentPost, setCurrentPost }
 
     const { user, loading: loadingUser } = useUser({ redirectTo: '/login' })
     const { course, loading: loadingCourse } = useCourse(router.query.courseId)
@@ -46,13 +51,15 @@ function Discussion() {
                 className="flex h-[calc(100vh-48px)] w-full">
                 <CategoryPane catPaneRef={ catPaneRef } 
                     changeCategoryFilter={ changeFilter } />
-                <section className="flex-auto text-white flex w-full" 
-                    data-testid="posts-section">
-                    <PostListingsPane catPaneRef={ catPaneRef }
-                        toggleCatPane={ () => setShowHiddenPane(!showHiddenPane) }
-                        categoryFilter={ categoryFilter } />
-                    <Post />
-                </section>
+                <PostContext.Provider value={ postContext }>
+                    <section className="flex-auto text-white flex w-full" 
+                        data-testid="posts-section">
+                        <PostListingsPane catPaneRef={ catPaneRef }
+                            toggleCatPane={ () => setShowHiddenPane(!showHiddenPane) }
+                            categoryFilter={ categoryFilter } />
+                        <Post />
+                    </section>
+                </PostContext.Provider>
             </div>
         </>
     )

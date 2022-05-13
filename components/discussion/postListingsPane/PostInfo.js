@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useContext } from "react"
 import QuestionMark from "./listingIcons/QuestionMark"
 import Announcement from "./listingIcons/Announcement"
 import Watching from "./listingIcons/Watching"
@@ -14,16 +14,20 @@ import StaffBanner from "./listingIcons/StaffBanner"
 import CategoryLabel from "./listingIcons/CategoryLabel"
 import Timestamp from "./listingIcons/Timestamp"
 import UnreadDot from "./listingIcons/UnreadDot"
+import { PostContext } from "../../../pages/[courseId]/discussion"
+
 
 const PostInfo = React.memo(function ({ info, categoryColor }) {
+    const { setCurrentPost } = useContext(PostContext)
 
     const unreadDot = !info.lastViewedAt || 
         Date.parse(info.mostRecentCommentTime) > Date.parse(info.lastViewedAt)
 
     return (
-        <li data-testid="post-info-container"
+        <li data-testid="post-info-container" 
+            onClick={ () => setCurrentPost(info) }
             className="w-full h-[90px] border-y border-gray-500 
-                border-r flex flex-col p-2 justify-between">
+                border-r flex flex-col p-2 justify-between hover:cursor-pointer">
             <div className="flex justify-between">
                 <div className="flex justify-center items-center">
                     { unreadDot ? <UnreadDot /> : null}
