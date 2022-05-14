@@ -15,15 +15,16 @@ export default withIronSessionApiRoute(async function(req, resp) {
         resp.status(200).json({ paginatedPostsInfo: {} })
         return
     }
-    const [courseId, page, onlyLoadAfter, 
+    const [courseId, page, onlyLoadBefore, 
             ...shouldBeEmpty] = req.query.courseIdPageSlug
-    if (shouldBeEmpty.length > 0 || !courseId || !page || !onlyLoadAfter) {
+    console.log(onlyLoadBefore)
+    if (shouldBeEmpty.length > 0 || !courseId || !page || !onlyLoadBefore) {
         resp.status(400).json({ message: "invalid number of url params" })
         return
     }
     const parsedCourseId = parseInt(courseId, 10)
     const parsedPage = parseInt(page, 10)
-    const parsedTimeCutoff = parseInt(onlyLoadAfter, 10)
+    const parsedTimeCutoff = parseInt(onlyLoadBefore, 10)
     if (![parsedCourseId, parsedPage, parsedTimeCutoff].every(
         parsedQueryParam => Number.isInteger(parsedQueryParam)
     )) {
