@@ -1,7 +1,7 @@
 import Loading from '../../lib/Loading'
 import PostsLoading from '../../lib/ButtonLoading'
 import { useRouter } from 'next/router'
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useContext } from 'react'
 import { useAnnouncementsPinned, useCourse, useUser } from '../../../lib/hooks'
 import PostInfo from './PostInfo'
 import LoadMoreButton from './LoadMoreButton'
@@ -9,12 +9,14 @@ import { LIGHT_RAINBOW_HEX } from'../../../lib/colors'
 import { filterTest } from '../../../lib/filter'
 import Pinned from './Pinned'
 import Announcements from './Announcements'
+import { TimeContext } from '../../../pages/[courseId]/discussion'
 
 
 const PostsInfoList = React.memo(function(props) {
     const { categoryFilter, filterText, attributeFilter } = props
     const router = useRouter()
     const { courseId } = router.query
+    const initialLoadTime = useContext(TimeContext)
 
     const { course } = useCourse(courseId)
     const { user } = useUser()
@@ -34,7 +36,6 @@ const PostsInfoList = React.memo(function(props) {
     const [loadedAllPosts, setLoadedAllPosts] = useState(false)
     const [loadingMorePosts, setLoadingMorePosts] = useState(false)
     const [apiPage, setApiPage] = useState(1)
-    const [initialLoadTime] = useState(Date.now())
     const [allPosts, setAllPosts] = useState([])
     const [displayedPosts, setDisplayedPosts] = useState([])
 
