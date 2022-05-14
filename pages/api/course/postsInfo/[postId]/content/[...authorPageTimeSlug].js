@@ -52,11 +52,37 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
         if (pageNumber === 1) {
             const postContentQueryText = (userId === authorId ?
-                `SELECT display_content, edit_content FROM post 
-                    WHERE post_id = $1;`
-                : "SELECT display_content FROM post WHERE post_id = $1;")
+                `SELECT display_content, edit_content, avatar_url 
+                FROM (
+                        SELECT display_content, edit_content, author 
+                        FROM post 
+                        WHERE post_id = $1)
+                    AS post
+                    JOIN (
+                        SELECT user_id, avatar_url AS avatar
+                        FROM person
+                        WHERE user_id = $2)
+                    AS person
+                    ON author = user_id
+                    JOIN avatar_url 
+                    ON avatar_url_id = person.avatar;`
+                : 
+                `SELECT display_content, avatar_url 
+                FROM (
+                    SELECT display_content, author 
+                    FROM post 
+                    WHERE post_id = $1)
+                AS post
+                JOIN (
+                    SELECT user_id, avatar_url AS avatar
+                    FROM person
+                    WHERE user_id = $2)
+                AS person
+                ON author = user_id
+                JOIN avatar_url 
+                ON avatar_url_id = person.avatar;`)
             postContentQuery = (
-                await clientQuery(dbClient, postContentQueryText, [postId]))
+                await clientQuery(dbClient, postContentQueryText, [postId, authorId]))
         }
         else postContentQuery = null
         
@@ -86,13 +112,16 @@ export default withIronSessionApiRoute(async function(req, resp) {
         const ancestorCommentIds = ancestorCommentQuery.rows.map(
             row => row.comment_id).slice(0, 20)
         
-        const descendantCommentQueryText = (
-            descendantQueryTextFromAncestors(ancestorCommentIds.length))
-        descendantCommentQuery = (
-            await clientQuery(dbClient, descendantCommentQueryText, [
-                postId, ...ancestorCommentIds
-            ])
-        )
+        if (ancestorCommentIds.length > 0) {
+            const descendantCommentQueryText = (
+                descendantQueryTextFromAncestors(ancestorCommentIds.length))
+            descendantCommentQuery = (
+                await clientQuery(dbClient, descendantCommentQueryText, [
+                    postId, ...ancestorCommentIds
+                ])
+            )
+        }
+        else descendantCommentQuery = { rows: [] }
     }
     catch (error) {
         transactionFailed = true
@@ -111,6 +140,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
             pageNumber + 1 : null)
     const postInfo = postContentQuery === null ? undefined : {}
     if (postContentQuery !== null) {
+        postInfo.avatarUrl = postContentQuery.rows[0].avatar_url
         postInfo.displayContent = postContentQuery.rows[0].display_content
         postInfo.editContent = postContentQuery.rows[0].edit_content
     }
@@ -118,7 +148,6 @@ export default withIronSessionApiRoute(async function(req, resp) {
     const ancestorRows = ancestorCommentQuery.rows
     const ancestorInfo = processAncestorCommentRows(ancestorRows.length === 21 ? 
         ancestorRows.slice(0, ancestorRows.length - 1) : ancestorRows)
-    console.log(descendantCommentQuery.rows.length)
     const descendantInfo = processDescendantCommentRows(descendantCommentQuery.rows)
 
 
@@ -129,11 +158,12 @@ export default withIronSessionApiRoute(async function(req, resp) {
 }, sessionOptions)
 
 const processDescendantCommentRows = (rows, userId) => {
+    if (rows.length === 0) return null
+
     const processed = []
     let relatedCount = 0
     let prevAncestor = null
     for (const row of rows) {
-        console.log(row.ancestor_comment, relatedCount, prevAncestor)
         if (prevAncestor === row.ancestor_comment) {
             relatedCount++
             if (relatedCount >= INITIAL_NESTED_COMMENTS + 1) {
@@ -164,7 +194,15 @@ const processDescendantCommentRows = (rows, userId) => {
         })
     }
 
-    return processed
+    const ancestorToDesc = {}
+    processed.forEach((desc) => {
+        const { ancestorComment } = desc
+        if (!(ancestorComment in ancestorToDesc)) {
+            ancestorToDesc[ancestorComment] = []
+        }
+        ancestorToDesc[ancestorComment].push(desc)
+    })
+    return ancestorToDesc
 }
 
 const processAncestorCommentRows = (rows, userId) => rows.map(
