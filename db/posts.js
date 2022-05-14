@@ -122,9 +122,9 @@ const genPosts = async function() {
                     Math.floor(Math.random() * 5)
                 )
                 editContents.push(paragraph)
-                displayContentTags.push(`<p>${ paragraph }</p>\n<p><br></p>`)
+                displayContentTags.push(`<p>${ paragraph }</p><p><br></p>`)
             }
-            const displayContent = displayContentTags.join()
+            const displayContent = displayContentTags.join("")
             const editContent = new Delta([])
             const insertThis = editContents.join('\n\n') + '\n'
             editContent.insert(insertThis)
