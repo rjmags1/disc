@@ -77,13 +77,14 @@ export default withIronSessionApiRoute(async function(req, resp) {
             LEFT JOIN (SELECT user_id, f_name, l_name, avatar_url AS avatar FROM person)
             AS people 
             ON user_id = author
-            LEFT JOIN avatar_url ON avatar_url_id = people.avatar;`
+            LEFT JOIN avatar_url ON avatar_url_id = people.avatar
+            ORDER BY created_at ASC;`
         ancestorCommentQuery = (
             await clientQuery(
                 dbClient, ancestorCommentQueryText, [
                     postId, new Date(parsedTimeCutoff)]))
         const ancestorCommentIds = ancestorCommentQuery.rows.map(
-            row => row.comment_id)
+            row => row.comment_id).slice(0, 20)
         
         const descendantCommentQueryText = (
             descendantQueryTextFromAncestors(ancestorCommentIds.length))
@@ -113,8 +114,12 @@ export default withIronSessionApiRoute(async function(req, resp) {
         postInfo.displayContent = postContentQuery.rows[0].display_content
         postInfo.editContent = postContentQuery.rows[0].edit_content
     }
-    const ancestorInfo = processCommentRows(ancestorCommentQuery.rows)
-    const descendantInfo = processCommentRows(descendantCommentQuery.rows)
+    
+    const ancestorRows = ancestorCommentQuery.rows
+    const ancestorInfo = processAncestorCommentRows(ancestorRows.length === 21 ? 
+        ancestorRows.slice(0, ancestorRows.length - 1) : ancestorRows)
+    console.log(descendantCommentQuery.rows.length)
+    const descendantInfo = processDescendantCommentRows(descendantCommentQuery.rows)
 
 
 
@@ -123,7 +128,46 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
 }, sessionOptions)
 
-const processCommentRows = (rows, userId) => rows.map(
+const processDescendantCommentRows = (rows, userId) => {
+    const processed = []
+    let relatedCount = 0
+    let prevAncestor = null
+    for (const row of rows) {
+        console.log(row.ancestor_comment, relatedCount, prevAncestor)
+        if (prevAncestor === row.ancestor_comment) {
+            relatedCount++
+            if (relatedCount >= INITIAL_NESTED_COMMENTS + 1) {
+                processed[processed.length - 1].loadMoreButtonBelow = true
+                continue
+            }
+        }
+        else {
+            prevAncestor = row.ancestor_comment
+            relatedCount = 1
+        }
+
+        processed.push({
+            commentId: row.comment_id,
+            author: `${ row.f_name } ${ row.l_name }`,
+            avatarUrl: row.avatar_url,
+            editContent: row.user_id === userId ? row.edit_content : null,
+            displayContent: row.display_content,
+            createdAt: row.created_at,
+            threadId: row.thread_id,
+            isResolving: row.is_resolving,
+            isAnswer: row.is_answer,
+            endorsed: row.endorsed,
+            deleted: row.deleted,
+            anonymous: row.anonymous,
+            ancestorComment: row.ancestor_comment,
+            loadMoreButtonBelow: false
+        })
+    }
+
+    return processed
+}
+
+const processAncestorCommentRows = (rows, userId) => rows.map(
     row => ({
         commentId: row.comment_id,
         author: `${ row.f_name } ${ row.l_name }`,
@@ -150,7 +194,7 @@ const descendantQueryTextFromAncestors = (ancestorComments) => {
             SELECT comment_id FROM comment 
             WHERE post = $1 AND ancestor_comment = $${ i + 2 }
             ORDER BY thread_id 
-            LIMIT ${ INITIAL_NESTED_COMMENTS })`)
+            LIMIT ${ INITIAL_NESTED_COMMENTS + 1 })`)
 
         if (i < ancestorComments - 1) tokens.push(" UNION ")
     }
