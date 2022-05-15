@@ -37,10 +37,10 @@ export default withIronSessionApiRoute(async function(req, resp) {
         params = [parsedPostId, userId]
     }
     else if (boolInteraction === "watch") {
-        checkQueryText = `SELECT star_id FROM post_star 
-            WHERE post = $1 AND starrer = $2;`
-        insertQueryText = `INSERT INTO post_star (post, starrer) VALUES ($1, $2);`
-        deleteQueryText = `DELETE FROM post_star WHERE post = $1 AND starrer = $2;`
+        checkQueryText = `SELECT watch_id FROM post_watch 
+            WHERE post = $1 AND watcher = $2;`
+        insertQueryText = `INSERT INTO post_watch (post, watcher) VALUES ($1, $2);`
+        deleteQueryText = `DELETE FROM post_watch WHERE post = $1 AND watcher = $2;`
         params = [parsedPostId, userId]
     }
 
