@@ -4,6 +4,7 @@ import Loading from '../../lib/Loading'
 import NoPostSelected from './NoPostSelected'
 import { usePostContent } from '../../../lib/hooks'
 import PostContentSection from './PostContentSection'
+import PostControlPanel from './PostControlPanel'
 
 function Post() {
     const [apiPage, setApiPage] = useState(1)
@@ -18,7 +19,7 @@ function Post() {
     useEffect(() => {
         if (!content) return
 
-        console.log(content.descendantInfo)
+        //console.log(content.descendantInfo)
         //console.log(content.ancestorInfo, content.descendantInfo)
         //const newThreads = content.ancestorInfo.map()
         //setThreads([...threads, ...newThreads])
@@ -26,12 +27,14 @@ function Post() {
 
     return (
         <div data-testid="post-container"
-            className="hidden lg:flex w-full flex-auto bg-light-gray">
+            className="hidden lg:flex flex-col w-full flex-auto bg-light-gray py-[4%] px-[7%]">
             { !currentPost && <NoPostSelected /> }
             { apiPage === 1 && loadingPostContent && !content && <Loading /> }
-            { !!content && apiPage === 1 && 
+            { !!content && apiPage === 1 && <>
             <PostContentSection 
-                content={{ ...currentPost, ...content.postInfo }} /> }
+                content={{ ...currentPost, ...content.postInfo }} /> 
+            <PostControlPanel />
+            </>}
         </div>
     )
 }
