@@ -12,9 +12,9 @@ function PostContentSection({ content }) {
                 <section className="flex justify-between my-4 h-[55px] whitespace-nowrap" 
                     data-testid="post-stats-bar">
                     <div className="flex flex-none pr-4">
-                        <img src={ content.avatarUrl } width="55" className="rounded-full"/>
+                        <img src={ content.anonymous ? "/profile-button-img.png" : content.avatarUrl } width="55" className="rounded-full"/>
                         <div className="flex flex-col justify-center h-full">
-                            <h4 className="ml-2.5 font-normal">{ content.author }</h4>
+                            <h4 className="ml-2.5 font-normal">{ content.anonymous ? "Anonymous" : content.author }</h4>
                             <h5 className="text-xs py-1">
                                 <Timestamp createdAt={ new Date(content.createdAt) }/>
                                 <span className="-ml-1">in { content.category }</span>

@@ -52,8 +52,8 @@ const PostInfo = React.memo(function ({ info, categoryColor }) {
                     { info.private && <PrivateBanner /> }
                     <CategoryLabel category={ info.category } 
                         color={ categoryColor } />
-                    <span className="w-min truncate">{ info.author }</span>
-                    { info.authorIsStaffOrInstructor && <StaffBanner /> }
+                    <span className="w-min truncate">{ info.anonymous ? "Anonymous" : info.author }</span>
+                    { !info.anonymous && info.authorIsStaffOrInstructor && <StaffBanner /> }
                     <Timestamp createdAt={ new Date(info.createdAt) } />
                 </span>
                 <div className="flex items-center justify-end 

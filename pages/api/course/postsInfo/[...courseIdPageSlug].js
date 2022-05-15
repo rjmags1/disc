@@ -78,6 +78,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
 const processRow = (row) => ({
     postId: row.post_id,
     title: row.title,
+    anonymous: row.anonymous,
     categoryId: row.category_id,
     category: row.category_name,
     createdAt: 
@@ -104,7 +105,7 @@ const processRow = (row) => ({
 const bigPaginatedCourseInfoQueryText = `
     SELECT
         post_id, title, category_name, category_id, created_at,
-        is_question, resolved, answered, endorsed,
+        is_question, resolved, answered, endorsed, anonymous,
         f_name, l_name, user_id, private, author_is_staff, author_is_instructor,
         star_id, watch_id, last_viewed_at, likes, comments, latest_comment_time
     FROM
