@@ -7,7 +7,6 @@ function LikeButton({ liked }) {
     const { currentPost } = useContext(PostContext)
     const [status, setStatus] = useState(liked)
     const [loading, setLoading] = useState(false)
-    console.log(currentPost)
 
     useEffect(() => {
         if (!buttonRef.current) return
