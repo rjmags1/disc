@@ -20,13 +20,18 @@ function LikeButton({ liked }) {
         if (loading) return
 
         const newStatus = !status
-        setStatus(prevStatus => !prevStatus)
+        setStatus(newStatus)
         setLoading(true)
-        await fetch(
-            `/api/course/postsInfo/${ currentPost.postId }/like/${ newStatus }`,
-            { method: 'PUT' })
-        setLoading(false)
+        try {
+            const resp = await fetch(
+                `/api/course/postsInfo/${ currentPost.postId }/like/${ newStatus }`,
+                { method: 'PUT' })
+            if (!resp.ok) setStatus(!newStatus)
+        }
+        catch (error) { setStatus(!newStatus) }
+        finally { setLoading(false) }
     }
+
 
     return (
         <div data-testid="like-button-container" className="h-[40px] w-[30%]">
