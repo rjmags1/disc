@@ -3,7 +3,7 @@ import React from "react"
 import { filterTest } from "../../../lib/filter"
 
 const Pinned = React.memo(function(props) {
-    const { pinnedPostsInfo, catColors, filters, user } = props
+    const { pinnedPostsInfo, catColors, filters, user, setCurrentPost } = props
     const filtered = pinnedPostsInfo.filter(
         pinned => filterTest(pinned, user, filters))
         
@@ -19,7 +19,8 @@ const Pinned = React.memo(function(props) {
             <ul>
             { filtered.map((postInfo) => (
                 <PostInfo info={ postInfo } key={ postInfo.postId }
-                categoryColor={ catColors[postInfo.category] } />
+                categoryColor={ catColors[postInfo.category] } 
+                setCurrentPost={ setCurrentPost } />
             ))}
             </ul>
         </div>

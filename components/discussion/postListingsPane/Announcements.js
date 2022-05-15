@@ -3,7 +3,7 @@ import React from "react"
 import { filterTest } from "../../../lib/filter"
 
 const Announcements = React.memo(function(props) {
-    const { announcementsInfo, catColors, filters, user } = props
+    const { announcementsInfo, catColors, filters, user, setCurrentPost } = props
     const filtered = announcementsInfo.filter(
         ann => filterTest(ann, user, filters))
         
@@ -19,7 +19,8 @@ const Announcements = React.memo(function(props) {
             <ul>
             { filtered.map((postInfo) => (
                 <PostInfo info={ postInfo } key={ postInfo.postId }
-                categoryColor={ catColors[postInfo.category] } />
+                categoryColor={ catColors[postInfo.category] } 
+                setCurrentPost={ setCurrentPost } />
             ))}
             </ul>
         </div>

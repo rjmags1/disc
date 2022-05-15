@@ -104,12 +104,13 @@ const PostsInfoList = React.memo(function(props) {
             className="w-full overflow-auto" >
             { (!initialLoad && pinnedInfo.length > 0) && 
             <Pinned pinnedPostsInfo={ pinnedInfo } filters={ filters }
-                user={ user } catColors={ categoriesToLightRainbowHex } /> 
+                user={ user } catColors={ categoriesToLightRainbowHex } 
+                setCurrentPost={ setCurrentPost } /> 
             }
             { (!initialLoad && announcementsInfo.length > 0) && 
             <Announcements announcementsInfo={ announcementsInfo } 
                 user={ user } catColors={ categoriesToLightRainbowHex } 
-                filters={ filters } /> 
+                filters={ filters } setCurrentPost={ setCurrentPost } /> 
             }
             { initialLoad ? 
             <Loading /> : <ul>{ displayedPosts }</ul> 
