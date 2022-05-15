@@ -4,7 +4,7 @@ function PostContentSection({ content }) {
     // fetch views and add 
     const views = 100
     return (
-        <div data-testid="post-content-container" className="w-full py-[7%] px-[12%] font-thin">
+        <div data-testid="post-content-container" className="w-full font-thin">
             <header>
                 <h3 data-testid="post-title" className="text-3xl font-medium">
                     { content.title }
