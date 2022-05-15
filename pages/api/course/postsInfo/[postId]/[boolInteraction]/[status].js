@@ -36,6 +36,13 @@ export default withIronSessionApiRoute(async function(req, resp) {
         deleteQueryText = `DELETE FROM post_like WHERE post = $1 AND liker = $2;`
         params = [parsedPostId, userId]
     }
+    else if (boolInteraction === "watch") {
+        checkQueryText = `SELECT star_id FROM post_star 
+            WHERE post = $1 AND starrer = $2;`
+        insertQueryText = `INSERT INTO post_star (post, starrer) VALUES ($1, $2);`
+        deleteQueryText = `DELETE FROM post_star WHERE post = $1 AND starrer = $2;`
+        params = [parsedPostId, userId]
+    }
 
     let client, queryFailure
     try {
@@ -74,6 +81,6 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
 
 
-    resp.status(200).json({ parsedPostId, boolInteraction, status })
+    resp.status(200).json({ parsedPostId, boolInteraction, status, userId })
 
 }, sessionOptions)
