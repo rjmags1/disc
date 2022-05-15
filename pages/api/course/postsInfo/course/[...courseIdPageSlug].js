@@ -1,7 +1,7 @@
-import { query } from '../../../../db/index'
-import { sessionOptions } from '../../../../lib/session'
+import { query } from '../../../../../db/index'
+import { sessionOptions } from '../../../../../lib/session'
 import { withIronSessionApiRoute } from 'iron-session/next'
-import { fixNodePgUTCTimeInterpretation } from '../../../../lib/time'
+import { fixNodePgUTCTimeInterpretation } from '../../../../../lib/time'
 
 const POSTS_PER_PAGE = 25
 
@@ -97,14 +97,15 @@ const processRow = (row) => ({
     mostRecentCommentTime: row.latest_comment_time ? 
         fixNodePgUTCTimeInterpretation(row.latest_comment_time) : null,
     likes: parseInt(row.likes, 10),
-    comments: parseInt(row.comments, 10)
+    comments: parseInt(row.comments, 10),
+    liked: !!row.liker
 })
 
 
 const bigPaginatedCourseInfoQueryText = `
     SELECT
         post_id, title, category_name, category_id, created_at,
-        is_question, resolved, answered, endorsed, anonymous,
+        is_question, resolved, answered, endorsed, anonymous, liker,
         f_name, l_name, user_id, private, author_is_staff, author_is_instructor,
         star_id, watch_id, last_viewed_at, likes, comments, latest_comment_time
     FROM
@@ -178,6 +179,11 @@ const bigPaginatedCourseInfoQueryText = `
             GROUP BY post_id
         ) AS latest_comments
         ON commented_post = post_id
+        LEFT JOIN (
+            SELECT post AS liked_post, liker FROM post_like
+            WHERE liker = $2
+        ) AS user_liked_posts
+        ON liked_post = post_id
 
     ORDER BY created_at DESC 
     LIMIT $3

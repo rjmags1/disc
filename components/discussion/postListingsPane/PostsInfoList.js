@@ -54,7 +54,7 @@ const PostsInfoList = React.memo(function(props) {
         // render loading post icon if not initial load
         setLoadingMorePosts(apiPage > 1) 
         const response = await fetch(
-            `/api/course/postsInfo/${ courseId }/${ apiPage }/${ initialLoadTime }`
+            `/api/course/postsInfo/course/${ courseId }/${ apiPage }/${ initialLoadTime }`
         )
         const { nextPage, posts: newPostInfo } = await response.json()
         setLoadedAllPosts(nextPage === null)
