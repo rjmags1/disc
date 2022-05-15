@@ -6,7 +6,6 @@ import WatchButton from './controlPanelButtons/WatchButton'
 
 function PostControlPanel() {
     const { currentPost } = useContext(PostContext)
-    console.log(currentPost)
 
     return (
         <section data-testid="post-control-panel-container" 
