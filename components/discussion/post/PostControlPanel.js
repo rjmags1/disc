@@ -14,8 +14,8 @@ function PostControlPanel() {
             <div data-testid="like-watch-star-container" 
                 className="flex w-full justify-between">
                 <LikeButton liked={ currentPost.liked } />
-                <WatchButton watched={ currentPost.starred }/>
-                <StarButton starred={ currentPost.watched } />
+                <WatchButton watched={ currentPost.watched }/>
+                <StarButton starred={ currentPost.starred } />
             </div>
             <div data-testid="privileged-interactions-container"></div>
             <div data-testid="comment-container"></div>
