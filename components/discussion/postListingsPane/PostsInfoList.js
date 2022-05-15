@@ -13,13 +13,13 @@ import { TimeContext, PostListingsComponentsContext } from '../../../pages/[cour
 
 
 const PostsInfoList = React.memo(function(props) {
-    const { categoryFilter, filterText, attributeFilter } = props
+    const { categoryFilter, filterText, attributeFilter, setCurrentPost } = props
     const router = useRouter()
     const { courseId } = router.query
     const initialLoadTime = useContext(TimeContext)
     const { postListingComponents, setPostListingComponents } = useContext(
         PostListingsComponentsContext)
-    //console.log(postListingComponents)
+    console.log("asdf")
 
     const { course } = useCourse(courseId)
     const { user } = useUser()
@@ -66,7 +66,7 @@ const PostsInfoList = React.memo(function(props) {
             const catColor = categoriesToLightRainbowHex[postInfo.category]
             const component = (
                 <PostInfo info={ postInfo } categoryColor={ catColor } 
-                    key={ postInfo.postId } />
+                    key={ postInfo.postId } setCurrentPost={ setCurrentPost }/>
             )
             return { postInfo, component }
         })

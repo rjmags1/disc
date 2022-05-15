@@ -65,7 +65,7 @@ function Discussion() {
                                 data-testid="posts-section">
                                 <PostListingsPane catPaneRef={ catPaneRef }
                                     toggleCatPane={ () => setShowHiddenPane(!showHiddenPane) }
-                                    categoryFilter={ categoryFilter } />
+                                    categoryFilter={ categoryFilter } setCurrentPost={ setCurrentPost }/>
                                 <Post />
                             </section>
                         </PostContext.Provider>

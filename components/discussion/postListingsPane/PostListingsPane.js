@@ -12,7 +12,7 @@ const INITIAL_LISTING_PANE_WIDTH = 400
 
 
 const PostListingsPane = React.memo(function(props) {
-    const { catPaneRef, categoryFilter, toggleCatPane } = props
+    const { catPaneRef, categoryFilter, toggleCatPane, setCurrentPost } = props
     const [filterText, setFilterText] = useState("")
     const [attributeFilter, setAttributeFilter] = useState("All")
     const [showDropdown, setShowDropdown] = useState(false)
@@ -99,7 +99,7 @@ const PostListingsPane = React.memo(function(props) {
                 className={ `flex-none bg-zinc-700 flex justify-between 
                     h-[calc(100%-3rem)] w-full lg:w-[${ INITIAL_LISTING_PANE_WIDTH }px] 
                     relative top-12` }>
-                <PostsInfoList attributeFilter={ attributeFilter }
+                <PostsInfoList attributeFilter={ attributeFilter } setCurrentPost={ setCurrentPost }
                     categoryFilter={ categoryFilter } filterText={ filterText } />
                 <div data-testid="lower-right-divider"
                     onMouseDown={ handleRightDividerMouseDown }

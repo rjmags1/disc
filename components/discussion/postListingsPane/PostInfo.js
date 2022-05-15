@@ -14,12 +14,11 @@ import StaffBanner from "./listingIcons/StaffBanner"
 import CategoryLabel from "./listingIcons/CategoryLabel"
 import Timestamp from "./listingIcons/Timestamp"
 import UnreadDot from "./listingIcons/UnreadDot"
-import { PostContext } from "../../../pages/[courseId]/discussion"
 
 
-const PostInfo = React.memo(function ({ info, categoryColor }) {
-    const { setCurrentPost } = useContext(PostContext)
+const PostInfo = React.memo(function ({ info, categoryColor, setCurrentPost }) {
     const [clicked, setClicked] = useState(false)
+    console.log("qwer")
 
     let unreadDot = !clicked && (!info.lastViewedAt || 
         Date.parse(info.mostRecentCommentTime) > Date.parse(info.lastViewedAt))
