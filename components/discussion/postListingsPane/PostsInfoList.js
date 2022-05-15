@@ -9,7 +9,7 @@ import { LIGHT_RAINBOW_HEX } from'../../../lib/colors'
 import { filterTest } from '../../../lib/filter'
 import Pinned from './Pinned'
 import Announcements from './Announcements'
-import { TimeContext } from '../../../pages/[courseId]/discussion'
+import { TimeContext, PostListingsComponentsContext } from '../../../pages/[courseId]/discussion'
 
 
 const PostsInfoList = React.memo(function(props) {
@@ -17,6 +17,9 @@ const PostsInfoList = React.memo(function(props) {
     const router = useRouter()
     const { courseId } = router.query
     const initialLoadTime = useContext(TimeContext)
+    const { postListingComponents, setPostListingComponents } = useContext(
+        PostListingsComponentsContext)
+    //console.log(postListingComponents)
 
     const { course } = useCourse(courseId)
     const { user } = useUser()
@@ -36,7 +39,6 @@ const PostsInfoList = React.memo(function(props) {
     const [loadedAllPosts, setLoadedAllPosts] = useState(false)
     const [loadingMorePosts, setLoadingMorePosts] = useState(false)
     const [apiPage, setApiPage] = useState(1)
-    const [allPosts, setAllPosts] = useState([])
     const [displayedPosts, setDisplayedPosts] = useState([])
 
 
@@ -59,7 +61,7 @@ const PostsInfoList = React.memo(function(props) {
         const { nextPage, posts: newPostInfo } = await response.json()
         setLoadedAllPosts(nextPage === null)
 
-        // put freshly loaded posts into allPosts
+        // put freshly loaded posts into postListingComponents
         const newPosts = newPostInfo.map((postInfo) => {
             const catColor = categoriesToLightRainbowHex[postInfo.category]
             const component = (
@@ -68,7 +70,7 @@ const PostsInfoList = React.memo(function(props) {
             )
             return { postInfo, component }
         })
-        setAllPosts([...allPosts, ...newPosts])
+        setPostListingComponents([...postListingComponents, ...newPosts])
 
     }, [apiPage, categoriesToLightRainbowHex])
 
@@ -78,18 +80,18 @@ const PostsInfoList = React.memo(function(props) {
         if (!user) return
 
         const filters = [categoryFilter, filterText, attributeFilter]
-        const filtered = allPosts.filter(
+        const filtered = postListingComponents.filter(
             post => filterTest(post.postInfo, user, filters)).map(
                 filteredPost => filteredPost.component)
         setDisplayedPosts(filtered)
         setLoadingMorePosts(false)
 
-    }, [allPosts, categoryFilter, filterText, attributeFilter, user])
+    }, [postListingComponents, categoryFilter, filterText, attributeFilter, user])
 
 
     const initialLoad = (
-        ((displayedPosts.length === 0 || allPosts.length === 0) && 
-        !(displayedPosts.length === 0 && allPosts.length > 0))
+        ((displayedPosts.length === 0 || postListingComponents.length === 0) && 
+        !(displayedPosts.length === 0 && postListingComponents.length > 0))
         || loadingAnnouncementsPinned
     )
     const notLoadingMorePosts = (

@@ -9,6 +9,7 @@ import { useUser, useCourse } from '../../lib/hooks'
 
 export const PostContext = React.createContext(null)
 export const TimeContext = React.createContext(null)
+export const PostListingsComponentsContext = React.createContext(null)
 
 function Discussion() {
     const router = useRouter()
@@ -16,9 +17,12 @@ function Discussion() {
     const [categoryFilter, setCategoryFilter] = useState(new Set())
     const [showHiddenPane, setShowHiddenPane] = useState(false)
     const [currentPost, setCurrentPost] = useState(null)
+    const [postListingComponents, setPostListingComponents] = useState([])
     const [initialLoadTime] = useState(Date.now())
 
     const postContext = { currentPost, setCurrentPost }
+    const postListingsComponentsContext = { 
+        postListingComponents, setPostListingComponents }
 
     const { user, loading: loadingUser } = useUser({ redirectTo: '/login' })
     const { course, loading: loadingCourse } = useCourse(router.query.courseId)
@@ -54,15 +58,18 @@ function Discussion() {
                 className="flex h-[calc(100vh-48px)] w-full">
                     <CategoryPane catPaneRef={ catPaneRef } 
                         changeCategoryFilter={ changeFilter } />
-                    <PostContext.Provider value={ postContext }>
-                        <section className="flex-auto text-white flex w-full" 
-                            data-testid="posts-section">
-                            <PostListingsPane catPaneRef={ catPaneRef }
-                                toggleCatPane={ () => setShowHiddenPane(!showHiddenPane) }
-                                categoryFilter={ categoryFilter } />
-                            <Post />
-                        </section>
-                    </PostContext.Provider>
+                    <PostListingsComponentsContext.Provider 
+                        value={ postListingsComponentsContext } >
+                        <PostContext.Provider value={ postContext }>
+                            <section className="flex-auto text-white flex w-full" 
+                                data-testid="posts-section">
+                                <PostListingsPane catPaneRef={ catPaneRef }
+                                    toggleCatPane={ () => setShowHiddenPane(!showHiddenPane) }
+                                    categoryFilter={ categoryFilter } />
+                                <Post />
+                            </section>
+                        </PostContext.Provider>
+                    </PostListingsComponentsContext.Provider>
                 </div>
             </TimeContext.Provider>
         </>
