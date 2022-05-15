@@ -12,12 +12,11 @@ export default withIronSessionApiRoute(async function(req, resp) {
         return
     }
     if (!req.session?.user) {
-        resp.status(200).json({ paginatedPostsInfo: {} })
+        resp.status(200).json({ message: "not logged in" })
         return
     }
     const [courseId, page, onlyLoadBefore, 
             ...shouldBeEmpty] = req.query.courseIdPageSlug
-    console.log(onlyLoadBefore)
     if (shouldBeEmpty.length > 0 || !courseId || !page || !onlyLoadBefore) {
         resp.status(400).json({ message: "invalid number of url params" })
         return
