@@ -31,7 +31,8 @@ test.afterAll(async () => {
 test.describe('settings menu pane', async () => {
     test('navigation to notifications settings menu', async ({ page }) => {
         const settingsPaneNotifBtnLocator = page.locator(
-            'a:has-text("Notifications")')
+            '[data-testid=settings-menu-pane-container]').locator(
+                'a:has-text("Notifications")')
         // only test this for browser contexts with large viewports
         const necessaryToTestThis = await settingsPaneNotifBtnLocator.isVisible()
         if (!necessaryToTestThis) return
