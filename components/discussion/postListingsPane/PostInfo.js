@@ -1,4 +1,4 @@
-import React, { useContext } from "react"
+import React, { useContext, useState } from "react"
 import QuestionMark from "./listingIcons/QuestionMark"
 import Announcement from "./listingIcons/Announcement"
 import Watching from "./listingIcons/Watching"
@@ -19,13 +19,22 @@ import { PostContext } from "../../../pages/[courseId]/discussion"
 
 const PostInfo = React.memo(function ({ info, categoryColor }) {
     const { setCurrentPost } = useContext(PostContext)
+    const [clicked, setClicked] = useState(false)
 
-    const unreadDot = !info.lastViewedAt || 
-        Date.parse(info.mostRecentCommentTime) > Date.parse(info.lastViewedAt)
+    let unreadDot = !clicked && (!info.lastViewedAt || 
+        Date.parse(info.mostRecentCommentTime) > Date.parse(info.lastViewedAt))
+
+    const handleClick = async () => {
+        setCurrentPost(info)
+        setClicked(true)
+        const pid = info.postId
+        const prevViewed = info.lastViewedAt ? "t" : "f"
+        await fetch(
+            `/api/course/postsInfo/${ pid }/viewedPost/${ prevViewed }`)
+    }
 
     return (
-        <li data-testid="post-info-container" 
-            onClick={ () => setCurrentPost(info) }
+        <li data-testid="post-info-container" onClick={ handleClick }
             className="w-full h-[90px] border-y border-gray-500 
                 border-r flex flex-col p-2 justify-between hover:cursor-pointer">
             <div className="flex justify-between">
