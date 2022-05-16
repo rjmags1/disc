@@ -28,7 +28,7 @@ function PostControlPanel() {
             <div data-testid="comment-privileged-container"
                 className="flex w-full justify-between mt-3 gap-[5%]">
                 { canEndorse && <EndorseButton endorsed={ currentPost.endorsed } /> }
-                { canDelete && <DeleteButton /> }
+                { canDelete && !currentPost.deleted && <DeleteButton /> }
             </div>
             <CommentButton />
         </section>

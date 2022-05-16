@@ -54,6 +54,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
     }
     else if (boolInteraction === "delete") {
         updateQueryText = `UPDATE post SET deleted = TRUE WHERE post_id = $1;`
+        params = [postId]
     }
 
     let client, queryFailure
