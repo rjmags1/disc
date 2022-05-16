@@ -47,8 +47,8 @@ function StarButton({ starred }) {
 
     return (
         <div data-testid="starred-button-container" className="h-[40px] w-[30%]">
-            <button className="flex items-center justify-center w-full 
-                h-full rounded bg-yellow-500 hover:bg-yellow-600 
+            <button className="flex items-center justify-center w-full rounded
+                h-full bg-yellow-500 hover:bg-yellow-600 border border-white 
                 hover:cursor-pointer" ref={ buttonRef } onClick={ handleClick }>
                 <span>{ status ? "Unstar" : "Star" }</span>
                 { loading && <ButtonLoading /> }

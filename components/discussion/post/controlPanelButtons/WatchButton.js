@@ -48,8 +48,8 @@ function WatchButton({ watched }) {
 
     return (
         <div data-testid="watched-button-container" className="h-[40px] w-[30%]">
-            <button className="flex items-center justify-center w-full 
-                h-full rounded bg-rose-400 hover:bg-rose-500 
+            <button className="flex items-center justify-center w-full rounded
+                h-full bg-rose-400 hover:bg-rose-500 border border-white
                 hover:cursor-pointer" ref={ buttonRef } onClick={ handleClick } >
                 <span>{ status ? "Unwatch" : "Watch" }</span>
                 { loading && <ButtonLoading />}
