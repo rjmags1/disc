@@ -1,10 +1,14 @@
 import { useState, useContext, useRef, useEffect } from 'react'
-import { PostContext } from '../../../../pages/[courseId]/discussion'
+import { PostContext, PostListingsContext } from '../../../../pages/[courseId]/discussion'
 import ButtonLoading from '../../../lib/ButtonLoading'
+import { syncListingWithBoolInteraction } from '../../../../lib/uiSync'
 
 function StarButton({ starred }) {
     const buttonRef = useRef(null)
     const { currentPost } = useContext(PostContext)
+    const {
+        postListings, setPostListings, specialListings, setSpecialListings 
+    } = useContext(PostListingsContext)
     const [status, setStatus] = useState(starred)
     const [loading, setLoading] = useState(false)
 
@@ -28,6 +32,14 @@ function StarButton({ starred }) {
                 { method: 'PUT' }
             )
             if (!resp.ok) setStatus(!newStatus)
+            else {
+                const listings = currentPost.pinned || currentPost.isAnnouncement ? 
+                    specialListings : postListings
+                const setListings = currentPost.pinned || currentPost.isAnnouncement ?
+                    setSpecialListings : setPostListings
+                syncListingWithBoolInteraction(
+                    "star", listings, setListings, currentPost, newStatus)
+            }
         }
         catch (error) { setStatus(!newStatus) }
         finally { setLoading(false) }
