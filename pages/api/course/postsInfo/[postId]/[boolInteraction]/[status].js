@@ -28,27 +28,32 @@ export default withIronSessionApiRoute(async function(req, resp) {
     }
 
 
-    let checkQueryText, insertQueryText, deleteQueryText, updateQueryText, params
+    let checkQueryText, insertQueryText, deleteQueryText, updateQueryText
+    let params = [parsedPostId, userId]
     if (boolInteraction === "like") {
         checkQueryText = `SELECT post_like_id FROM post_like 
             WHERE post = $1 AND liker = $2;`
         insertQueryText = `INSERT INTO post_like (post, liker) VALUES ($1, $2);`
         deleteQueryText = `DELETE FROM post_like WHERE post = $1 AND liker = $2;`
-        params = [parsedPostId, userId]
     }
     else if (boolInteraction === "watch") {
         checkQueryText = `SELECT watch_id FROM post_watch 
             WHERE post = $1 AND watcher = $2;`
         insertQueryText = `INSERT INTO post_watch (post, watcher) VALUES ($1, $2);`
         deleteQueryText = `DELETE FROM post_watch WHERE post = $1 AND watcher = $2;`
-        params = [parsedPostId, userId]
     }
     else if (boolInteraction === "star") {
         checkQueryText = `SELECT star_id FROM post_star 
             WHERE post = $1 AND starrer = $2;`
         insertQueryText = `INSERT INTO post_star (post, starrer) VALUES ($1, $2);`
         deleteQueryText = `DELETE FROM post_star WHERE post = $1 AND starrer = $2;`
-        params = [parsedPostId, userId]
+    }
+    else if (boolInteraction === "endorse") {
+        updateQueryText = `UPDATE post SET endorsed = $1 WHERE post_id = $2;`
+        params = [status, postId]
+    }
+    else if (boolInteraction === "delete") {
+        updateQueryText = `UPDATE post SET deleted = TRUE WHERE post_id = $1;`
     }
 
     let client, queryFailure
@@ -60,7 +65,6 @@ export default withIronSessionApiRoute(async function(req, resp) {
             // interaction on status (ie, a liked post has a row with
             // liker and post in post_like db relation)
             const checkResult = await clientQuery(client, checkQueryText, params)
-            console.log(checkResult.rows)
             const rowAlreadyPresent = checkResult.rows.length > 0
             if (rowAlreadyPresent && status === "false") { 
                 // do nothing if turning on, see above comment
@@ -73,7 +77,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
             }
         }
         else { // interaction status represented by boolean col in post table
-
+            await clientQuery(client, updateQueryText, params)
         }
     }
     catch(error) {
