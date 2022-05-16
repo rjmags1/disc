@@ -1,10 +1,12 @@
 import PostInfo from "./PostInfo"
-import React from "react"
+import React, { useContext } from "react"
 import { filterTest } from "../../../lib/filter"
+import { PostListingsContext } from "../../../pages/[courseId]/discussion"
 
 const Pinned = React.memo(function(props) {
-    const { pinnedPostsInfo, catColors, filters, user, setCurrentPost } = props
-    const filtered = pinnedPostsInfo.filter(
+    const { catColors, filters, user, setCurrentPost } = props
+    const { specialListings: { pinned } } = useContext(PostListingsContext)
+    const filtered = pinned.filter(
         pinned => filterTest(pinned, user, filters))
         
     if (filtered.length === 0) return null

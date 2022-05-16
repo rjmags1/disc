@@ -1,10 +1,12 @@
 import PostInfo from "./PostInfo"
-import React from "react"
+import React, { useContext } from "react"
 import { filterTest } from "../../../lib/filter"
+import { PostListingsContext } from "../../../pages/[courseId]/discussion"
 
 const Announcements = React.memo(function(props) {
-    const { announcementsInfo, catColors, filters, user, setCurrentPost } = props
-    const filtered = announcementsInfo.filter(
+    const { catColors, filters, user, setCurrentPost } = props
+    const { specialListings: { announcements } } = useContext(PostListingsContext)
+    const filtered = announcements.filter(
         ann => filterTest(ann, user, filters))
         
     if (filtered.length === 0) return null

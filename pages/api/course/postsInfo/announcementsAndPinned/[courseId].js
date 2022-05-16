@@ -76,6 +76,7 @@ const processRow = (row) => ({
     mostRecentCommentTime: row.latest_comment_time ? 
         fixNodePgUTCTimeInterpretation(row.latest_comment_time) : null,
     likes: parseInt(row.likes, 10),
+    liked: !!row.liker,
     comments: parseInt(row.comments, 10)
 })
 
@@ -157,5 +158,10 @@ FROM
         GROUP BY post_id
     ) AS latest_comments
     ON commented_post = post_id
+    LEFT JOIN (
+        SELECT post AS liked_post, liker FROM post_like
+            WHERE liker = $2
+        ) AS user_liked_posts
+    ON liked_post = post_id
 
 ORDER BY created_at DESC;`

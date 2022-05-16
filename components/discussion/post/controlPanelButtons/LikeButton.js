@@ -5,9 +5,12 @@ import ButtonLoading from '../../../lib/ButtonLoading'
 function LikeButton({ liked }) {
     const buttonRef = useRef(null)
     const { currentPost } = useContext(PostContext)
-    const { postListings, setPostListings } = useContext(PostListingsContext)
+    const {
+        postListings, setPostListings, specialListings, setSpecialListings 
+    } = useContext(PostListingsContext)
     const [status, setStatus] = useState(liked)
     const [loading, setLoading] = useState(false)
+    console.log(currentPost)
 
     useEffect(() => {
         if (!buttonRef.current) return
@@ -29,6 +32,47 @@ function LikeButton({ liked }) {
                 { method: 'PUT' })
             if (!resp.ok) setStatus(!newStatus)
             else {
+                if (currentPost.pinned) {
+                    const pinnedListings = specialListings.pinned
+                    const needsUpdateIdx = pinnedListings.findIndex(
+                        l => l.postId === currentPost.postId)
+                    const needsUpdate = pinnedListings[needsUpdateIdx]
+                    const updated = {
+                         ...needsUpdate, 
+                         liked: !needsUpdate.liked, 
+                         likes:  needsUpdate.likes + (newStatus ? 1 : -1)
+                        }
+                    setSpecialListings({ 
+                        announcements: specialListings.announcements, 
+                        pinned: [
+                            ...pinnedListings.slice(0, needsUpdateIdx),
+                            updated,
+                            ...pinnedListings.slice(needsUpdateIdx + 1)
+                        ] 
+                    })
+                    return
+                }
+                if (currentPost.isAnnouncement) {
+                    const announcements = specialListings.announcements
+                    const needsUpdateIdx = announcements.findIndex(
+                        l => l.postId = currentPost.postId)
+                    const needsUpdate = announcements[needsUpdateIdx]
+                    const updated = {
+                        ...needsUpdate, 
+                        liked: !needsUpdate.liked, 
+                        likes:  needsUpdate.likes + (newStatus ? 1 : -1)
+                    }
+                    setSpecialListings({
+                        pinned: specialListings.pinned,
+                        announcements: [
+                            ...announcements.slice(0, needsUpdateIdx),
+                            updated,
+                            ...announcements.slice(needsUpdateIdx + 1)
+                        ]
+                    })
+                    return
+                }
+
                 const needsUpdateIdx = postListings.findIndex(
                     l => l.postInfo.postId === currentPost.postId)
                 const { postInfo: oldPostInfo, catColor } = postListings[needsUpdateIdx]

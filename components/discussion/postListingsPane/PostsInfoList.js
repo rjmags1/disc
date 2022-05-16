@@ -17,7 +17,9 @@ const PostsInfoList = React.memo(function(props) {
     const router = useRouter()
     const { courseId } = router.query
     const initialLoadTime = useContext(TimeContext)
-    const { postListings, setPostListings } = useContext(PostListingsContext)
+    const {
+         postListings, setPostListings, specialListings, setSpecialListings 
+    } = useContext(PostListingsContext)
 
     const { course } = useCourse(courseId)
     const { user } = useUser()
@@ -69,6 +71,17 @@ const PostsInfoList = React.memo(function(props) {
     }, [apiPage, categoriesToLightRainbowHex])
 
 
+    useEffect(() => {
+        if (!announcementsInfo || !pinnedInfo) return
+
+        setSpecialListings({ 
+            pinned: [...specialListings.pinned, ...pinnedInfo],
+            announcements: [...specialListings.announcements, ...announcementsInfo]
+        })
+
+    }, [announcementsInfo, pinnedInfo])
+
+
     // filter loaded posts according to user-set filter ui
     useEffect(() => {
         if (!user) return
@@ -101,13 +114,11 @@ const PostsInfoList = React.memo(function(props) {
         <div data-testid="post-listings-container" id="post-listings-container"
             className="w-full overflow-auto" >
             { (!initialLoad && pinnedInfo.length > 0) && 
-            <Pinned pinnedPostsInfo={ pinnedInfo } filters={ filters }
-                user={ user } catColors={ categoriesToLightRainbowHex } 
-                setCurrentPost={ setCurrentPost } /> 
+            <Pinned filters={ filters } catColors={ categoriesToLightRainbowHex }
+                user={ user } setCurrentPost={ setCurrentPost } /> 
             }
             { (!initialLoad && announcementsInfo.length > 0) && 
-            <Announcements announcementsInfo={ announcementsInfo } 
-                user={ user } catColors={ categoriesToLightRainbowHex } 
+            <Announcements user={ user } catColors={ categoriesToLightRainbowHex }
                 filters={ filters } setCurrentPost={ setCurrentPost } /> 
             }
             { initialLoad ? 

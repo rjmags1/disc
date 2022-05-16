@@ -18,11 +18,13 @@ function Discussion() {
     const [showHiddenPane, setShowHiddenPane] = useState(false)
     const [currentPost, setCurrentPost] = useState(null)
     const [postListings, setPostListings] = useState([])
+    const [specialListings, setSpecialListings] = useState(
+        { pinned: [], announcements: [] })
     const [initialLoadTime] = useState(Date.now())
 
     const postContext = { currentPost, setCurrentPost }
     const postListingsContext = { 
-        postListings, setPostListings }
+        postListings, setPostListings, specialListings, setSpecialListings }
         
     const { user, loading: loadingUser } = useUser({ redirectTo: '/login' })
     const { course, loading: loadingCourse } = useCourse(router.query.courseId)
