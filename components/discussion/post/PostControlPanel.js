@@ -1,5 +1,8 @@
 import { useContext } from 'react'
 import { PostContext } from '../../../pages/[courseId]/discussion'
+import CommentButton from './controlPanelButtons/CommentButton'
+import DeleteButton from './controlPanelButtons/DeleteButton'
+import EndorseButton from './controlPanelButtons/EndorseButton'
 import LikeButton from './controlPanelButtons/LikeButton'
 import StarButton from './controlPanelButtons/StarButton'
 import WatchButton from './controlPanelButtons/WatchButton'
@@ -16,8 +19,12 @@ function PostControlPanel() {
                 <WatchButton watched={ currentPost.watched }/>
                 <StarButton starred={ currentPost.starred } />
             </div>
-            <div data-testid="privileged-interactions-container"></div>
-            <div data-testid="comment-container"></div>
+            <div data-testid="comment-privileged-container"
+                className="flex w-full justify-between mt-3 gap-[5%]">
+                <EndorseButton />
+                <DeleteButton />
+            </div>
+            <CommentButton />
         </section>
     )
 }
