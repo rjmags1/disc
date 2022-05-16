@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react"
+import React, { useState } from "react"
 import QuestionMark from "./listingIcons/QuestionMark"
 import Announcement from "./listingIcons/Announcement"
 import Watching from "./listingIcons/Watching"
@@ -18,7 +18,6 @@ import UnreadDot from "./listingIcons/UnreadDot"
 
 const PostInfo = React.memo(function ({ info, categoryColor, setCurrentPost }) {
     const [clicked, setClicked] = useState(false)
-    console.log("qwer")
 
     let unreadDot = !clicked && (!info.lastViewedAt || 
         Date.parse(info.mostRecentCommentTime) > Date.parse(info.lastViewedAt))

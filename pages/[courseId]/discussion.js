@@ -4,12 +4,12 @@ import PostListingsPane from '../../components/discussion/postListingsPane/PostL
 import Post from '../../components/discussion/post/Post'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import React, { useLayoutEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useUser, useCourse } from '../../lib/hooks'
 
 export const PostContext = React.createContext(null)
 export const TimeContext = React.createContext(null)
-export const PostListingsComponentsContext = React.createContext(null)
+export const PostListingsContext = React.createContext(null)
 
 function Discussion() {
     const router = useRouter()
@@ -17,17 +17,17 @@ function Discussion() {
     const [categoryFilter, setCategoryFilter] = useState(new Set())
     const [showHiddenPane, setShowHiddenPane] = useState(false)
     const [currentPost, setCurrentPost] = useState(null)
-    const [postListingComponents, setPostListingComponents] = useState([])
+    const [postListings, setPostListings] = useState([])
     const [initialLoadTime] = useState(Date.now())
 
     const postContext = { currentPost, setCurrentPost }
-    const postListingsComponentsContext = { 
-        postListingComponents, setPostListingComponents }
-
+    const postListingsContext = { 
+        postListings, setPostListings }
+        
     const { user, loading: loadingUser } = useUser({ redirectTo: '/login' })
     const { course, loading: loadingCourse } = useCourse(router.query.courseId)
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         if (!catPaneRef.current) return
 
         catPaneRef.current.style.display = showHiddenPane ? "flex" : ""
@@ -58,8 +58,8 @@ function Discussion() {
                 className="flex h-[calc(100vh-48px)] w-full">
                     <CategoryPane catPaneRef={ catPaneRef } 
                         changeCategoryFilter={ changeFilter } />
-                    <PostListingsComponentsContext.Provider 
-                        value={ postListingsComponentsContext } >
+                    <PostListingsContext.Provider 
+                        value={ postListingsContext } >
                         <PostContext.Provider value={ postContext }>
                             <section className="flex-auto text-white flex w-full" 
                                 data-testid="posts-section">
@@ -69,7 +69,7 @@ function Discussion() {
                                 <Post />
                             </section>
                         </PostContext.Provider>
-                    </PostListingsComponentsContext.Provider>
+                    </PostListingsContext.Provider>
                 </div>
             </TimeContext.Provider>
         </>

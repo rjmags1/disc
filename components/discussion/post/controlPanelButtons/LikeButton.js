@@ -1,10 +1,11 @@
 import { useState, useContext, useRef, useEffect } from 'react'
-import { PostContext } from '../../../../pages/[courseId]/discussion'
+import { PostContext, PostListingsContext } from '../../../../pages/[courseId]/discussion'
 import ButtonLoading from '../../../lib/ButtonLoading'
 
 function LikeButton({ liked }) {
     const buttonRef = useRef(null)
     const { currentPost } = useContext(PostContext)
+    const { postListings, setPostListings } = useContext(PostListingsContext)
     const [status, setStatus] = useState(liked)
     const [loading, setLoading] = useState(false)
 
@@ -27,6 +28,24 @@ function LikeButton({ liked }) {
                 `/api/course/postsInfo/${ currentPost.postId }/like/${ newStatus }`,
                 { method: 'PUT' })
             if (!resp.ok) setStatus(!newStatus)
+            else {
+                const needsUpdateIdx = postListings.findIndex(
+                    l => l.postInfo.postId === currentPost.postId)
+                const { postInfo: oldPostInfo, catColor } = postListings[needsUpdateIdx]
+                const updated = { 
+                    postInfo: { 
+                        ...oldPostInfo, 
+                        liked: !oldPostInfo.liked, 
+                        likes: oldPostInfo.likes + (newStatus ? 1 : -1)
+                    },
+                    catColor
+                }
+                setPostListings([
+                    ...postListings.slice(0, needsUpdateIdx),
+                    updated,
+                    ...postListings.slice(needsUpdateIdx + 1)
+                ])
+            }
         }
         catch (error) { setStatus(!newStatus) }
         finally { setLoading(false) }

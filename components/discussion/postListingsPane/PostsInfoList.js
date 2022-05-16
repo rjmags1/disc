@@ -9,7 +9,7 @@ import { LIGHT_RAINBOW_HEX } from'../../../lib/colors'
 import { filterTest } from '../../../lib/filter'
 import Pinned from './Pinned'
 import Announcements from './Announcements'
-import { TimeContext, PostListingsComponentsContext } from '../../../pages/[courseId]/discussion'
+import { TimeContext, PostListingsContext } from '../../../pages/[courseId]/discussion'
 
 
 const PostsInfoList = React.memo(function(props) {
@@ -17,9 +17,7 @@ const PostsInfoList = React.memo(function(props) {
     const router = useRouter()
     const { courseId } = router.query
     const initialLoadTime = useContext(TimeContext)
-    const { postListingComponents, setPostListingComponents } = useContext(
-        PostListingsComponentsContext)
-    console.log("asdf")
+    const { postListings, setPostListings } = useContext(PostListingsContext)
 
     const { course } = useCourse(courseId)
     const { user } = useUser()
@@ -64,13 +62,9 @@ const PostsInfoList = React.memo(function(props) {
         // put freshly loaded posts into postListingComponents
         const newPosts = newPostInfo.map((postInfo) => {
             const catColor = categoriesToLightRainbowHex[postInfo.category]
-            const component = (
-                <PostInfo info={ postInfo } categoryColor={ catColor } 
-                    key={ postInfo.postId } setCurrentPost={ setCurrentPost }/>
-            )
-            return { postInfo, component }
+            return { postInfo, catColor }
         })
-        setPostListingComponents([...postListingComponents, ...newPosts])
+        setPostListings([...postListings, ...newPosts])
 
     }, [apiPage, categoriesToLightRainbowHex])
 
@@ -80,18 +74,22 @@ const PostsInfoList = React.memo(function(props) {
         if (!user) return
 
         const filters = [categoryFilter, filterText, attributeFilter]
-        const filtered = postListingComponents.filter(
-            post => filterTest(post.postInfo, user, filters)).map(
-                filteredPost => filteredPost.component)
+        const filtered = postListings.filter(
+            ({ postInfo }) => filterTest(postInfo, user, filters)).map(
+                ({ postInfo, catColor }) => (
+                    <PostInfo categoryColor={ catColor } info={ postInfo }
+                        key={ postInfo.postId } setCurrentPost={ setCurrentPost } />
+                )
+            )
         setDisplayedPosts(filtered)
         setLoadingMorePosts(false)
 
-    }, [postListingComponents, categoryFilter, filterText, attributeFilter, user])
+    }, [postListings, categoryFilter, filterText, attributeFilter, user])
 
 
     const initialLoad = (
-        ((displayedPosts.length === 0 || postListingComponents.length === 0) && 
-        !(displayedPosts.length === 0 && postListingComponents.length > 0))
+        ((displayedPosts.length === 0 || postListings.length === 0) && 
+        !(displayedPosts.length === 0 && postListings.length > 0))
         || loadingAnnouncementsPinned
     )
     const notLoadingMorePosts = (
