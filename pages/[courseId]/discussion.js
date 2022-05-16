@@ -39,6 +39,18 @@ function Discussion() {
         catPaneRef.current.style.height = showHiddenPane ? "100%" : ""
 
     }, [catPaneRef, showHiddenPane])
+    
+    useEffect(() => {
+        const listingNodes = document.querySelectorAll(
+            '[data-testid=post-info-container]')
+        for (const listingNode of listingNodes) {
+            const splitNodePostId = listingNode.id.split('-')
+            const nodePostId = parseInt(splitNodePostId[splitNodePostId.length - 1])
+            if (nodePostId !== currentPost.postId) {
+                listingNode.style.backgroundColor = ""
+            }
+        }
+    }, [currentPost])
 
     const changeFilter = (add, category) => {
         const newFilter = new Set(categoryFilter)

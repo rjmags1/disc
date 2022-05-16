@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useRef } from "react"
 import QuestionMark from "./listingIcons/QuestionMark"
 import Announcement from "./listingIcons/Announcement"
 import Watching from "./listingIcons/Watching"
@@ -18,6 +18,7 @@ import UnreadDot from "./listingIcons/UnreadDot"
 
 const PostInfo = React.memo(function ({ info, categoryColor, setCurrentPost }) {
     const [clicked, setClicked] = useState(false)
+    const listingRef = useRef(null)
 
     let unreadDot = !clicked && (!info.lastViewedAt || 
         Date.parse(info.mostRecentCommentTime) > Date.parse(info.lastViewedAt))
@@ -25,6 +26,7 @@ const PostInfo = React.memo(function ({ info, categoryColor, setCurrentPost }) {
     const handleClick = async () => {
         setCurrentPost(info)
         setClicked(prev => !prev)
+        listingRef.current.style.backgroundColor = "#27272a"
         const pid = info.postId
         const prevViewed = info.lastViewedAt ? "t" : "f"
         await fetch(
@@ -33,6 +35,7 @@ const PostInfo = React.memo(function ({ info, categoryColor, setCurrentPost }) {
 
     return (
         <li data-testid="post-info-container" onClick={ handleClick }
+            id={`post-info-container-${ info.postId }`} ref={ listingRef }
             className="w-full h-[90px] border-y border-gray-500 
                 border-r flex flex-col p-2 justify-between hover:cursor-pointer">
             <div className="flex justify-between">
