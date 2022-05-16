@@ -9,7 +9,9 @@ import { LIGHT_RAINBOW_HEX } from'../../../lib/colors'
 import { filterTest } from '../../../lib/filter'
 import Pinned from './Pinned'
 import Announcements from './Announcements'
-import { TimeContext, PostListingsContext } from '../../../pages/[courseId]/discussion'
+import { 
+    TimeContext, PostListingsContext 
+} from '../../../pages/[courseId]/discussion'
 
 
 const PostsInfoList = React.memo(function(props) {
@@ -18,7 +20,7 @@ const PostsInfoList = React.memo(function(props) {
     const { courseId } = router.query
     const initialLoadTime = useContext(TimeContext)
     const {
-         postListings, setPostListings, specialListings, setSpecialListings 
+        postListings, setPostListings, specialListings, setSpecialListings 
     } = useContext(PostListingsContext)
 
     const { course } = useCourse(courseId)

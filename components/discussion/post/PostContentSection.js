@@ -9,27 +9,47 @@ function PostContentSection({ content }) {
                 <h3 data-testid="post-title" className="text-3xl font-medium">
                     { content.title }
                 </h3>
-                <section className="flex justify-between my-4 h-[55px] whitespace-nowrap" 
-                    data-testid="post-stats-bar">
+                <section className="flex justify-between my-4 h-[55px] 
+                    whitespace-nowrap" data-testid="post-stats-bar">
                     <div className="flex flex-none pr-4">
-                        <img src={ content.anonymous ? "/profile-button-img.png" : content.avatarUrl } width="55" className="rounded-full"/>
+                        <img  width="55" className="rounded-full"
+                            src={ content.anonymous ? 
+                                "/profile-button-img.png" : content.avatarUrl }/>
                         <div className="flex flex-col justify-center h-full">
-                            <h4 className="ml-2.5 font-normal">{ content.anonymous ? "Anonymous" : content.author }</h4>
+                            <h4 className="ml-2.5 font-normal">
+                                { content.anonymous ? 
+                                "Anonymous" : content.author }
+                            </h4>
                             <h5 className="text-xs py-1">
-                                <Timestamp createdAt={ new Date(content.createdAt) }/>
-                                <span className="-ml-1">in { content.category }</span>
+                                <Timestamp 
+                                createdAt={ new Date(content.createdAt) }/>
+                                <span className="-ml-1">
+                                    in { content.category }
+                                </span>
                             </h5>
                         </div>
                     </div>
                     <div className="flex text-xs h-full overflow-hidden font-normal">
-                        <div className="flex flex-col justify-center items-center mx-2">
-                            <h4 className="text-lg w-full text-center">{ views }</h4><h6>views</h6>
+                        <div className="flex flex-col justify-center 
+                            items-center mx-2">
+                            <h4 className="text-lg w-full text-center">
+                                { views }
+                            </h4>
+                            <h6>views</h6>
                         </div>
-                        <div className="flex flex-col justify-center items-center mx-2">
-                            <h4 className="text-lg w-full text-center">{ content.likes }</h4><h6>likes</h6>
+                        <div className="flex flex-col justify-center 
+                            items-center mx-2">
+                            <h4 className="text-lg w-full text-center">
+                                { content.likes }
+                            </h4>
+                            <h6>likes</h6>
                         </div>
-                        <div className="flex flex-col justify-center items-center mx-2">
-                            <h4 className="text-lg w-full text-center">{ content.comments }</h4><h6>comments</h6>
+                        <div className="flex flex-col justify-center 
+                            items-center mx-2">
+                            <h4 className="text-lg w-full text-center">
+                                { content.comments }
+                            </h4>
+                            <h6>comments</h6>
                         </div>
                     </div>
                 </section>

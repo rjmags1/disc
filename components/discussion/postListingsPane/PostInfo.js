@@ -24,7 +24,7 @@ const PostInfo = React.memo(function ({ info, categoryColor, setCurrentPost }) {
 
     const handleClick = async () => {
         setCurrentPost(info)
-        setClicked(true)
+        setClicked(prev => !prev)
         const pid = info.postId
         const prevViewed = info.lastViewedAt ? "t" : "f"
         await fetch(
