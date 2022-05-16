@@ -1,4 +1,5 @@
 import { useContext } from 'react'
+import { useUser } from '../../../lib/hooks'
 import { PostContext } from '../../../pages/[courseId]/discussion'
 import CommentButton from './controlPanelButtons/CommentButton'
 import DeleteButton from './controlPanelButtons/DeleteButton'
@@ -9,6 +10,11 @@ import WatchButton from './controlPanelButtons/WatchButton'
 
 function PostControlPanel() {
     const { currentPost } = useContext(PostContext)
+
+    const { user } = useUser()
+    const userId = user.user_id
+    const canEndorse = user.is_admin || user.is_staff || user.is_instructor
+    const canDelete = user.is_admin || userId === currentPost.authorId
 
     return (
         <section data-testid="post-control-panel-container" 
@@ -21,8 +27,8 @@ function PostControlPanel() {
             </div>
             <div data-testid="comment-privileged-container"
                 className="flex w-full justify-between mt-3 gap-[5%]">
-                <EndorseButton />
-                <DeleteButton />
+                { canEndorse && <EndorseButton /> }
+                { canDelete && <DeleteButton /> }
             </div>
             <CommentButton />
         </section>
