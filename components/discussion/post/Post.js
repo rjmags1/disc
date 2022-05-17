@@ -16,8 +16,9 @@ function Post() {
     const { currentPost } = useContext(PostContext)
     const initialLoadTime = useContext(TimeContext)
 
-    const loaderRef = useRef(null)
-    const canLoadMoreRef = useRef(false)
+    const loaderRef = useRef(null) // triggers thread lazy loading on intersxn
+    const canLoadMoreRef = useRef(false) // .current true only if just loaded 
+                                         // api page and theres another one 
     const observerRef = useRef(new IntersectionObserver((entries) => {
         if (canLoadMoreRef.current && entries[0].isIntersecting) {
             setApiPage(prev => prev + 1)
@@ -25,9 +26,13 @@ function Post() {
         }
     }))
 
+    // get new post content associated with currentPost (selected 
+    // from postListingsPane) and apiPage, which is inc on lazy loader intersxn
     const { content, loading: loadingPostContent } = usePostContent(
         currentPost?.postId, currentPost?.authorId, apiPage, initialLoadTime)
 
+    // reset apiPage whenever a new post is selected, 
+    // hook up observer on first post selection from postListingsPane
     useEffect(() => {
         if (!currentPost) return
         setApiPage(1)
@@ -39,6 +44,13 @@ function Post() {
         return () => observerRef.current.unobserve(loaderRef.current)
     }, [currentPost])
 
+    // update threads and postContent to be displayed on new/first 
+    // post selection and successful subsequent data loading.
+    // also update whether it is possible to load more threads,
+    // and remember this post so the next time this effect runs
+    // we'll know whether its running again due to new post selection
+    // from listings pane or lazy loading more threads associated
+    // with this post
     useEffect(() => {
         if (!content || loadingPostContent) return
 
@@ -65,13 +77,19 @@ function Post() {
 
     }, [loadingPostContent, currentPost])
 
+    const neverSelectedPost = !currentPost
+    const loadingNewPost = apiPage === 1 && loadingPostContent
+    const postContentSyncedWithCurrentPost = 
+        (postContent?.postId === currentPost?.postId)
+    const showPost = !!postContent && postContentSyncedWithCurrentPost
+
     return (
         <div data-testid="post-container"
             className="hidden lg:flex flex-col w-full flex-auto 
                 bg-light-gray py-[4%] px-[7%] overflow-auto">
-            { !currentPost && <NoPostSelected /> }
-            { apiPage === 1 && loadingPostContent && !content && <Loading /> }
-            { !!postContent && 
+            { neverSelectedPost && <NoPostSelected /> }
+            { loadingNewPost && <Loading /> }
+            { showPost && 
             <>
                 <PostContentSection 
                     content={ postContent } /> 
