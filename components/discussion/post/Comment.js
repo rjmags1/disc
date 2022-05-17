@@ -1,8 +1,17 @@
 import React, { useState } from 'react'
 import Timestamp from '../postListingsPane/listingIcons/Timestamp'
+import { useUser } from '../../../lib/hooks'
 
 const Comment = React.memo(function({ info, isAncestor }) {
     const [depth] = useState(isAncestor ? 0 : info.threadId.split('.').length)
+    const { user } = useUser()
+    const userId = user.user_id
+    console.log(info)
+    const userIsAuthor = userId === info.authorId
+    const canDelete = userIsAuthor || user.is_admin
+    const canEndorse = user.is_staff || user.is_instructor
+    const canMarkAnswer = userIsAuthor && info.postIsQuestion
+    const canMarkResolving = userIsAuthor && !info.postIsQuestion
 
     return (
         <>
@@ -32,7 +41,13 @@ const Comment = React.memo(function({ info, isAncestor }) {
                     <div className="mt-2 flex h-[12px] items-center text-xs
                         font-normal opacity-50">
                         <span className="mr-0.5">{ info.likes }</span>
-                        <img src="/heart.png" width="11" className="mt-0.5"/>
+                        <img src="/heart.png" width="11" className="mt-0.5 mr-1"/>
+                        <button className="px-1">LIKE</button>
+                        { userIsAuthor && <button className="px-1">EDIT</button> }
+                        { canDelete && <button className="px-1">DELETE</button> }
+                        { canEndorse && <button className="px-1">ENDORSE</button> }
+                        { canMarkAnswer && <button className="px-1">MARK AS ANSWER</button> }
+                        { canMarkResolving && <button className="px-1">MARK AS RESOLVING</button> }
                     </div>}
                 </div>
             </div>

@@ -55,7 +55,8 @@ function Post() {
                 <hr className="mb-1"/>
                 <CommentButton />
                 { threads.map(thread => (
-                <Thread key={ `${ thread.ancestor.commentId }-thread` } info={ thread } />)) }
+                <Thread key={ `${ thread.ancestor.commentId }-thread` } info={ thread }
+                    postIsQuestion={ currentPost.isQuestion } />)) }
             </>}
         </div>
     )

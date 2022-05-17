@@ -175,6 +175,7 @@ const processDescendantCommentRows = (rows, userId) => {
         processed.push({
             commentId: row.comment_id,
             author: `${ row.f_name } ${ row.l_name }`,
+            authorId: row.user_id,
             avatarUrl: row.avatar_url,
             editContent: row.user_id === userId ? row.edit_content : null,
             displayContent: row.display_content,
@@ -213,6 +214,7 @@ const processAncestorCommentRows = (rows, userId) => rows.map(
     row => ({
         commentId: row.comment_id,
         author: `${ row.f_name } ${ row.l_name }`,
+        authorId: row.user_id,
         avatarUrl: row.avatar_url,
         editContent: row.user_id === userId ? row.edit_content : null,
         displayContent: row.display_content,

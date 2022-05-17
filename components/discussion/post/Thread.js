@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import Comment from './Comment'
 
-const Thread = React.memo(function({ info }) {
+const Thread = React.memo(function({ info, postIsQuestion }) {
     const { ancestor: ancestorInfo, descendants: initDescendantInfo } = info
-    console.log(initDescendantInfo.length)
 
     const [descendantsInfo, setDescendantsInfo] = useState(initDescendantInfo)
     const [threadIdOffset] = useState(initDescendantInfo.length === 2 ?
@@ -14,10 +13,10 @@ const Thread = React.memo(function({ info }) {
     
     return (
         <div data-testid="thread-container" className="mb-6">
-            <Comment isAncestor={ true } info={ ancestorInfo } 
+            <Comment isAncestor={ true } info={ { ...ancestorInfo, postIsQuestion } } 
                 key={ ancestorInfo.commentId } />
             { descendantsInfo.map(descInfo => (
-                <Comment isAncestor={ false } info={ descInfo } 
+                <Comment isAncestor={ false } info={ { ...descInfo, postIsQuestion } } 
                     key={ descInfo.commentId } />))}
             { apiPage !== null && 
             <button className="ml-[5%] text-sm text-white flex items-center italic
