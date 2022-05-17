@@ -5,10 +5,12 @@ import NoPostSelected from './NoPostSelected'
 import { usePostContent } from '../../../lib/hooks'
 import PostContentSection from './PostContentSection'
 import PostControlPanel from './PostControlPanel'
+import Thread from './Thread'
 
 function Post() {
     const [apiPage, setApiPage] = useState(1)
     const [threads, setThreads] = useState([])
+    const [loadingCommentsFor, setLoadingCommentsFor] = useState(null)
     const { currentPost } = useContext(PostContext)
     const initialLoadTime = useContext(TimeContext)
 
@@ -17,23 +19,42 @@ function Post() {
         currentPost?.postId, currentPost?.authorId, apiPage, initialLoadTime)
 
     useEffect(() => {
-        if (!content) return
+        if (!content || loadingPostContent) return
 
-        //console.log(content.descendantInfo)
-        //console.log(content.ancestorInfo, content.descendantInfo)
-        //const newThreads = content.ancestorInfo.map()
-        //setThreads([...threads, ...newThreads])
-    }, [content])
+        const { ancestorInfo, descendantInfo } = content
+        const newThreads = ancestorInfo.map(
+            ancestorCommentInfo => ({
+                ancestor: ancestorCommentInfo, 
+                descendants: descendantInfo ? 
+                    descendantInfo[ancestorCommentInfo.commentId] 
+                    : []
+            })
+        )
+
+        const newPostSelected = (
+            loadingCommentsFor !== null && 
+            loadingCommentsFor !== currentPost.postId)
+        setThreads(newPostSelected ? newThreads : [...threads, ...newThreads])
+        setLoadingCommentsFor(currentPost.postId)
+
+    }, [apiPage, loadingPostContent, currentPost])
+
 
     return (
         <div data-testid="post-container"
-            className="hidden lg:flex flex-col w-full flex-auto bg-light-gray py-[4%] px-[7%]">
+            className="hidden lg:flex flex-col w-full flex-auto 
+                bg-light-gray py-[4%] px-[7%] overflow-auto">
             { !currentPost && <NoPostSelected /> }
             { apiPage === 1 && loadingPostContent && !content && <Loading /> }
-            { !!content && apiPage === 1 && <>
-            <PostContentSection 
-                content={{ ...currentPost, ...content.postInfo }} /> 
-            <PostControlPanel />
+            { !!content && apiPage === 1 && 
+            <>
+                <PostContentSection 
+                    content={{ ...currentPost, ...content.postInfo }} /> 
+                <PostControlPanel />
+                <h4 className="text-lg font-base">Comments</h4>
+                <hr className="mb-2"/>
+                { threads.map(thread => (
+                <Thread key={ `${ thread.ancestor.commentId }-thread` } info={ thread } />)) }
             </>}
         </div>
     )

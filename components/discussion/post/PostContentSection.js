@@ -9,10 +9,10 @@ function PostContentSection({ content }) {
                 <h3 data-testid="post-title" className="text-3xl font-medium">
                     { content.title }
                 </h3>
-                <section className="flex justify-between my-4 h-[55px] 
+                <section className="flex justify-between mt-4 h-[55px] 
                     whitespace-nowrap" data-testid="post-stats-bar">
                     <div className="flex flex-none pr-4">
-                        <img  width="55" className="rounded-full"
+                        <img width="55" className="rounded-full"
                             src={ content.anonymous ? 
                                 "/profile-button-img.png" : content.avatarUrl }/>
                         <div className="flex flex-col justify-center h-full">

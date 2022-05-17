@@ -18,7 +18,7 @@ function PostControlPanel() {
 
     return (
         <section data-testid="post-control-panel-container" 
-            className="w-full flex flex-col">
+            className="w-full flex flex-col mb-6">
             <div data-testid="like-watch-star-container" 
                 className="flex w-full justify-between">
                 <LikeButton liked={ currentPost.liked } />
