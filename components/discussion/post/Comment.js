@@ -6,7 +6,6 @@ const Comment = React.memo(function({ info, isAncestor }) {
     const [depth] = useState(isAncestor ? 0 : info.threadId.split('.').length)
     const { user } = useUser()
     const userId = user.user_id
-    console.log(info)
     const userIsAuthor = userId === info.authorId
     const canDelete = userIsAuthor || user.is_admin
     const canEndorse = user.is_staff || user.is_instructor
