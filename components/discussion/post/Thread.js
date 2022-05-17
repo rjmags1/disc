@@ -3,6 +3,7 @@ import Comment from './Comment'
 
 const Thread = React.memo(function({ info }) {
     const { ancestor: ancestorInfo, descendants: initDescendantInfo } = info
+    console.log(initDescendantInfo.length)
 
     const [descendantsInfo, setDescendantsInfo] = useState(initDescendantInfo)
     const [threadIdOffset] = useState(initDescendantInfo.length === 2 ?
@@ -12,7 +13,7 @@ const Thread = React.memo(function({ info }) {
         1 : null)
     
     return (
-        <div data-testid="thread-container" className="pb-2 mb-2">
+        <div data-testid="thread-container" className="mb-6">
             <Comment isAncestor={ true } info={ ancestorInfo } 
                 key={ ancestorInfo.commentId } />
             { descendantsInfo.map(descInfo => (

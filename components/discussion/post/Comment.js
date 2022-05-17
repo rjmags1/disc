@@ -6,7 +6,7 @@ const Comment = React.memo(function({ info, isAncestor }) {
 
     return (
         <>
-            { !isAncestor && <div className="mt-1" /> }
+            { !isAncestor && <div className="mt-4" /> }
             <div data-testid="comment-box-container" 
                 className="w-full flex items-start justify-start py-2"
                 style={{ paddingLeft: `${ depth * 5 }%`}} >
@@ -28,6 +28,12 @@ const Comment = React.memo(function({ info, isAncestor }) {
                     <div data-testid="comment-container" className="font-light" 
                         dangerouslySetInnerHTML={{ __html: info.displayContent }}/>
                     }
+                    { !info.deleted && 
+                    <div className="mt-2 flex h-[12px] items-center text-xs
+                        font-normal opacity-50">
+                        <span className="mr-0.5">{ info.likes }</span>
+                        <img src="/heart.png" width="11" className="mt-0.5"/>
+                    </div>}
                 </div>
             </div>
         </>

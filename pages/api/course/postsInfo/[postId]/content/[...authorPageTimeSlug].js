@@ -89,7 +89,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
         const ancestorCommentQueryText = `
         SELECT 
             comment_id, user_id, f_name, l_name, avatar_url, edit_content, display_content, 
-            created_at, is_resolving, is_answer, endorsed, deleted, anonymous 
+            created_at, is_resolving, is_answer, endorsed, deleted, anonymous, likes 
         FROM
             (SELECT 
                 comment_id, author, edit_content, display_content, created_at,
@@ -104,6 +104,16 @@ export default withIronSessionApiRoute(async function(req, resp) {
             AS people 
             ON user_id = author
             LEFT JOIN avatar_url ON avatar_url_id = people.avatar
+            LEFT JOIN (SELECT likes, liked_comment_id FROM (
+                SELECT comment_id AS liked_comment_id FROM comment 
+                WHERE post = $1 AND ancestor_comment IS NULL AND created_at < $2) 
+                AS comments 
+                LEFT JOIN (
+                    SELECT COUNT(DISTINCT liker) as likes, comment FROM comment_like 
+                    GROUP BY comment
+                ) AS comment_likes ON comment_likes.comment = comments.liked_comment_id
+            ) AS c_likes
+            ON liked_comment_id = comment_id
             ORDER BY created_at ASC;`
         ancestorCommentQuery = (
             await clientQuery(
@@ -161,21 +171,7 @@ const processDescendantCommentRows = (rows, userId) => {
     if (rows.length === 0) return null
 
     const processed = []
-    let relatedCount = 0
-    let prevAncestor = null
     for (const row of rows) {
-        if (prevAncestor === row.ancestor_comment) {
-            relatedCount++
-            if (relatedCount >= INITIAL_NESTED_COMMENTS + 1) {
-                processed[processed.length - 1].loadMoreButtonBelow = true
-                continue
-            }
-        }
-        else {
-            prevAncestor = row.ancestor_comment
-            relatedCount = 1
-        }
-
         processed.push({
             commentId: row.comment_id,
             author: `${ row.f_name } ${ row.l_name }`,
@@ -190,7 +186,8 @@ const processDescendantCommentRows = (rows, userId) => {
             deleted: row.deleted,
             anonymous: row.anonymous,
             ancestorComment: row.ancestor_comment,
-            loadMoreButtonBelow: false
+            loadMoreButtonBelow: false,
+            likes: row.likes || 0
         })
     }
 
@@ -202,6 +199,13 @@ const processDescendantCommentRows = (rows, userId) => {
         }
         ancestorToDesc[ancestorComment].push(desc)
     })
+    for (const threadComments of Object.values(ancestorToDesc)) {
+        threadComments.sort((c1, c2) => c1.threadId > c2.threadId ? 1 : -1)
+        if (threadComments.length === 3) {
+            threadComments[1].loadMoreButtonBelow = true
+            threadComments.pop()
+        }
+    }
     return ancestorToDesc
 }
 
@@ -219,19 +223,20 @@ const processAncestorCommentRows = (rows, userId) => rows.map(
         endorsed: row.endorsed,
         deleted: row.deleted,
         anonymous: row.anonymous,
-        ancestorComment: row.ancestor_comment
+        ancestorComment: row.ancestor_comment,
+        likes: row.likes || 0
     })
 )
 
 const descendantQueryTextFromAncestors = (ancestorComments) => {
     const tokens = [`SELECT 
         comment_id, user_id, f_name, l_name, avatar_url, edit_content, display_content, created_at,
-        is_resolving, is_answer, endorsed, deleted, anonymous, thread_id, ancestor_comment FROM (`]
+        is_resolving, is_answer, endorsed, deleted, anonymous, thread_id, ancestor_comment, likes FROM (`]
     for (let i = 0; i < ancestorComments; i++) {
         tokens.push(`(
             SELECT comment_id FROM comment 
             WHERE post = $1 AND ancestor_comment = $${ i + 2 }
-            ORDER BY thread_id 
+            ORDER BY thread_id
             LIMIT ${ INITIAL_NESTED_COMMENTS + 1 })`)
 
         if (i < ancestorComments - 1) tokens.push(" UNION ")
@@ -248,7 +253,17 @@ const descendantQueryTextFromAncestors = (ancestorComments) => {
         LEFT JOIN (SELECT user_id, f_name, l_name, avatar_url AS avatar FROM person)
         AS people 
         ON user_id = author
-        LEFT JOIN avatar_url ON avatar_url_id = people.avatar;`)
+        LEFT JOIN avatar_url ON avatar_url_id = people.avatar
+        LEFT JOIN (SELECT likes, liked_comment_id FROM (
+            SELECT comment_id AS liked_comment_id FROM comment 
+            WHERE post = $1 AND ancestor_comment IS NOT NULL) 
+            AS comments 
+            LEFT JOIN (
+                SELECT COUNT(DISTINCT liker) as likes, comment FROM comment_like 
+                GROUP BY comment
+            ) AS comment_likes ON comment_likes.comment = comments.liked_comment_id
+        ) AS c_likes
+        ON liked_comment_id = comment_id;`)
 
     return tokens.join("")
 }
