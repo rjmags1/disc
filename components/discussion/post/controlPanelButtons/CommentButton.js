@@ -1,8 +1,8 @@
 function CommentButton() {
     return (
-        <button className="w-full h-[40px] bg-purple rounded border 
-            border-white hover:cursor-pointer hover:bg-violet-700 mt-3">
-            Comment
+        <button className="w-full h-[35px] bg-purple rounded border 
+            border-white hover:cursor-pointer hover:bg-violet-700 my-3 py-1">
+            + New Comment
         </button>
     )
 }

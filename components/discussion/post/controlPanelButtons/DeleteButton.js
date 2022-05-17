@@ -42,9 +42,9 @@ function DeleteButton() {
     
     return (
         <div data-testid="delete-button-container"
-            className="w-full h-[40px]">
-            <button className="w-full h-full bg-red-600 rounded border 
-                border-white hover:cursor-pointer hover:bg-red-700"
+            className="h-[25px] text-sm ">
+            <button className="h-full bg-red-600 rounded border px-1.5
+                border-white hover:cursor-pointer hover:bg-red-700 w-max"
                 onClick={ handleClick }>
                 Delete
                 { loading && <ButtonLoading /> }

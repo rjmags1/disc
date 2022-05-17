@@ -4,8 +4,9 @@ import Loading from '../../lib/Loading'
 import NoPostSelected from './NoPostSelected'
 import { usePostContent } from '../../../lib/hooks'
 import PostContentSection from './PostContentSection'
-import PostControlPanel from './PostControlPanel'
 import Thread from './Thread'
+import Comment from './Comment'
+import CommentButton from './controlPanelButtons/CommentButton'
 
 function Post() {
     const [apiPage, setApiPage] = useState(1)
@@ -50,9 +51,9 @@ function Post() {
             <>
                 <PostContentSection 
                     content={{ ...currentPost, ...content.postInfo }} /> 
-                <PostControlPanel />
                 <h4 className="text-lg font-base">Comments</h4>
-                <hr className="mb-2"/>
+                <hr className="mb-1"/>
+                <CommentButton />
                 { threads.map(thread => (
                 <Thread key={ `${ thread.ancestor.commentId }-thread` } info={ thread } />)) }
             </>}

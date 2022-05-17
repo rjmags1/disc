@@ -46,8 +46,8 @@ function EndorseButton({ endorsed }) {
 
     return (
         <div data-testid="endorse-button-container"
-            className="w-full h-[40px]">
-            <button className="w-full h-full bg-blue-600 rounded border 
+            className="h-[25px] text-sm">
+            <button className="w-max px-1.5 h-full bg-blue-600 rounded border 
                 border-white hover:bg-blue-700 hover:cursor-pointer"
                 onClick={ handleClick }>
                 <span>{ status ? "Unendorse" : "Endorse" }</span>

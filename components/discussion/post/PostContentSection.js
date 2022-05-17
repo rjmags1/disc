@@ -1,4 +1,6 @@
 import Timestamp from "../postListingsPane/listingIcons/Timestamp"
+import CommentButton from "./controlPanelButtons/CommentButton"
+import PostControlPanel from "./PostControlPanel"
 
 function PostContentSection({ content }) {
     // fetch views and add 
@@ -9,7 +11,7 @@ function PostContentSection({ content }) {
                 <h3 data-testid="post-title" className="text-3xl font-medium">
                     { content.title }
                 </h3>
-                <section className="flex justify-between mt-4 h-[55px] 
+                <section className="flex justify-between my-4 h-[55px] 
                     whitespace-nowrap" data-testid="post-stats-bar">
                     <div className="flex flex-none pr-4">
                         <img width="55" className="rounded-full"
@@ -54,6 +56,7 @@ function PostContentSection({ content }) {
                     </div>
                 </section>
             </header>
+            <PostControlPanel />
             <section data-testid="post-display-content" 
                 dangerouslySetInnerHTML={{ __html: content.displayContent }} 
                 className="font-light" />
