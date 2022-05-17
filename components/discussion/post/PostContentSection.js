@@ -1,5 +1,4 @@
 import Timestamp from "../postListingsPane/listingIcons/Timestamp"
-import CommentButton from "./controlPanelButtons/CommentButton"
 import PostControlPanel from "./PostControlPanel"
 
 function PostContentSection({ content }) {
