@@ -26,9 +26,9 @@ const PostListingsPane = React.memo(function(props) {
     useEffect(() => {
         window.addEventListener('resize', 
         () => {
-            if ((!listingsPane.current.style.width && 
+            if ((!listingsPane.current?.style.width && 
                 window.innerWidth >= LARGE_MEDIA_BREAKPOINT)  ||
-                (listingsPane.current.style.width && 
+                (listingsPane.current?.style.width && 
                     window.innerWidth < LARGE_MEDIA_BREAKPOINT)) {
                 
                 setResized(true)
