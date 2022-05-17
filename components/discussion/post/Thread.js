@@ -19,12 +19,11 @@ const Thread = React.memo(function({ info }) {
                 <Comment isAncestor={ false } info={ descInfo } 
                     key={ descInfo.commentId } />))}
             { apiPage !== null && 
-            <p className="ml-[5%] text-sm text-white flex items-center
-                justify-start bg-purple rounded pl-1 pr-2 hover:cursor-pointer
-                border border-white w-max hover:bg-violet-700 mt-2">
-                <img src="/sort-down.png" width="10px" />
+            <button className="ml-[5%] text-sm text-white flex items-center italic
+                justify-start pl-1 pr-2 hover:cursor-pointer w-max mt-2 hover:opacity-50">
+                <img src="/sort-down.png" width="10px" className='opacity-inherit' />
                 <span className="pl-1">View more replies</span>
-            </p> }
+            </button>}
         </div>
     )
 })
