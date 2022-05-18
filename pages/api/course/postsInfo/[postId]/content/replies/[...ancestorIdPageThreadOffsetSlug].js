@@ -39,7 +39,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
     let replyQuery
     try {
         replyQuery = await query(
-            replyQueryText(page), [parsedAncestorId, threadOffset])
+            replyQueryText(page), [parsedAncestorId, threadOffset, userId])
     }
     catch (error) {
         console.error(error)
@@ -73,7 +73,8 @@ const processRows = (rows, userId) => rows.map(row => ({
     deleted: row.deleted,
     anonymous: row.anonymous,
     ancestorComment: row.ancestor_comment,
-    likes: row.likes || 0
+    likes: row.likes || 0,
+    liked: !!row.liked
 }))
 
 const replyQueryText = (page) => `
@@ -107,4 +108,10 @@ const replyQueryText = (page) => `
                 ) AS comment_likes ON comment_likes.comment = liked_replies.liked_comment_id
             ) AS c_likes
             ON liked_comment_id = comment_id
+            LEFT JOIN (
+                SELECT comment AS liked_comment, liker AS user_like 
+                FROM comment_like 
+                WHERE liker = $3
+            ) AS user_comment_like
+            ON liked_comment = comment_id
             ORDER BY thread_id;`

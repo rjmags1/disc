@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import Timestamp from '../postListingsPane/listingIcons/Timestamp'
 import { useUser } from '../../../lib/hooks'
+import CommentLikeButton from './commentButtons/CommentLikeButton'
 
-const Comment = React.memo(function({ info, isAncestor }) {
+const Comment = React.memo(function({ info, isAncestor, postId }) {
     const [depth] = useState(isAncestor ? 0 : info.threadId.split('.').length)
+    const [likes, setLikes] = useState(parseInt(info.likes))
     const { user } = useUser()
     const userId = user.user_id
     const userIsAuthor = userId === info.authorId
@@ -11,7 +13,7 @@ const Comment = React.memo(function({ info, isAncestor }) {
     const canEndorse = user.is_staff || user.is_instructor
     const canMarkAnswer = userIsAuthor && info.postIsQuestion
     const canMarkResolving = userIsAuthor && !info.postIsQuestion
-
+    console.log(likes)
     return (
         <>
             { !isAncestor && <div className="mt-4" /> }
@@ -39,9 +41,11 @@ const Comment = React.memo(function({ info, isAncestor }) {
                     { !info.deleted && 
                     <div className="mt-2 flex h-[12px] items-center text-xs
                         font-normal opacity-50">
-                        <span className="mr-0.5">{ info.likes }</span>
+                        <span className="mr-0.5">{ likes }</span>
                         <img src="/heart.png" width="11" className="mt-0.5 mr-1"/>
-                        <button className="px-1">LIKE</button>
+                        <CommentLikeButton initialLiked={ info.liked } postId={ postId }
+                            setDisplayedLikes={ setLikes } commentId={ info.commentId } />
+                        <button className="px-1">REPLY</button>
                         { userIsAuthor && <button className="px-1">EDIT</button> }
                         { canDelete && <button className="px-1">DELETE</button> }
                         { canEndorse && <button className="px-1">ENDORSE</button> }

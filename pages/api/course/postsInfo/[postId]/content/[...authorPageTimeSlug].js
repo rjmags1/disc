@@ -13,6 +13,7 @@ import {
     clientQuery, 
     releaseClient 
 } from "../../../../../../db"
+import { findRenderedComponentWithType } from "react-dom/test-utils"
 
 const TOP_LEVEL_COMMENTS_PER_PAGE = 20
 const INITIAL_NESTED_COMMENTS = 2
@@ -89,7 +90,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
         const ancestorCommentQueryText = `
         SELECT 
             comment_id, user_id, f_name, l_name, avatar_url, edit_content, display_content, 
-            created_at, is_resolving, is_answer, endorsed, deleted, anonymous, likes 
+            created_at, is_resolving, is_answer, endorsed, deleted, anonymous, likes, user_like 
         FROM
             (SELECT 
                 comment_id, author, edit_content, display_content, created_at,
@@ -114,11 +115,17 @@ export default withIronSessionApiRoute(async function(req, resp) {
                 ) AS comment_likes ON comment_likes.comment = comments.liked_comment_id
             ) AS c_likes
             ON liked_comment_id = comment_id
+            LEFT JOIN (
+                SELECT comment AS liked_comment, liker AS user_like 
+                FROM comment_like 
+                WHERE liker = $3
+            ) AS user_comment_like
+            ON liked_comment = comment_id
             ORDER BY created_at ASC;`
         ancestorCommentQuery = (
             await clientQuery(
                 dbClient, ancestorCommentQueryText, [
-                    postId, new Date(parsedTimeCutoff)]))
+                    postId, new Date(parsedTimeCutoff), userId]))
         const ancestorCommentIds = ancestorCommentQuery.rows.map(
             row => row.comment_id).slice(0, 20)
         
@@ -127,7 +134,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
                 descendantQueryTextFromAncestors(ancestorCommentIds.length))
             descendantCommentQuery = (
                 await clientQuery(dbClient, descendantCommentQueryText, [
-                    postId, ...ancestorCommentIds
+                    postId, userId, ...ancestorCommentIds
                 ])
             )
         }
@@ -188,7 +195,8 @@ const processDescendantCommentRows = (rows, userId) => {
             anonymous: row.anonymous,
             ancestorComment: row.ancestor_comment,
             loadMoreButtonBelow: false,
-            likes: row.likes || 0
+            likes: row.likes || 0,
+            liked: !!row.user_like
         })
     }
 
@@ -226,18 +234,19 @@ const processAncestorCommentRows = (rows, userId) => rows.map(
         deleted: row.deleted,
         anonymous: row.anonymous,
         ancestorComment: row.ancestor_comment,
-        likes: row.likes || 0
+        likes: row.likes || 0,
+        liked: !!row.user_like
     })
 )
 
 const descendantQueryTextFromAncestors = (ancestorComments) => {
     const tokens = [`SELECT 
         comment_id, user_id, f_name, l_name, avatar_url, edit_content, display_content, created_at,
-        is_resolving, is_answer, endorsed, deleted, anonymous, thread_id, ancestor_comment, likes FROM (`]
+        is_resolving, is_answer, endorsed, deleted, anonymous, thread_id, ancestor_comment, likes, user_like FROM (`]
     for (let i = 0; i < ancestorComments; i++) {
         tokens.push(`(
             SELECT comment_id FROM comment 
-            WHERE post = $1 AND ancestor_comment = $${ i + 2 }
+            WHERE post = $1 AND ancestor_comment = $${ i + 3 }
             ORDER BY thread_id
             LIMIT ${ INITIAL_NESTED_COMMENTS + 1 })`)
 
@@ -265,7 +274,13 @@ const descendantQueryTextFromAncestors = (ancestorComments) => {
                 GROUP BY comment
             ) AS comment_likes ON comment_likes.comment = comments.liked_comment_id
         ) AS c_likes
-        ON liked_comment_id = comment_id;`)
+        ON liked_comment_id = comment_id
+        LEFT JOIN (
+            SELECT comment AS liked_comment, liker AS user_like 
+            FROM comment_like 
+            WHERE liker = $2
+        ) AS user_comment_like
+        ON liked_comment = comment_id;`)
 
     return tokens.join("")
 }
