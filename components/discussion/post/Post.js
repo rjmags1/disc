@@ -41,7 +41,6 @@ function Post() {
         observerRef.current.observe(loaderRef.current)
         setObserved(true)
         
-        return () => observerRef.current.unobserve(loaderRef.current)
     }, [currentPost])
 
     // update threads and postContent to be displayed on new/first 
