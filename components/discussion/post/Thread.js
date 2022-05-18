@@ -39,10 +39,10 @@ const Thread = React.memo(function({ info, postIsQuestion, postId }) {
     
     return (
         <div data-testid="thread-container" className="mb-6">
-            <Comment isAncestor={ true } info={ { ...ancestorInfo, postIsQuestion, postId } } 
+            <Comment isAncestor={ true } info={ { ...ancestorInfo, postIsQuestion, postId, postAuthorId: info.postAuthorId } } 
                 key={ ancestorInfo.commentId } />
             { descendantsInfo.map(descInfo => (
-                <Comment isAncestor={ false } info={ { ...descInfo, postIsQuestion, postId } } 
+                <Comment isAncestor={ false } info={ { ...descInfo, postIsQuestion, postId, postAuthorId: info.postAuthorId } } 
                     key={ descInfo.commentId } />))}
             { showViewMore &&
             <button className="ml-[5%] text-sm text-white flex items-center italic

@@ -12,11 +12,12 @@ const Comment = React.memo(function({ info, isAncestor, postId }) {
     const [likes, setLikes] = useState(parseInt(info.likes))
     const { user } = useUser()
     const userId = user.user_id
-    const userIsAuthor = userId === info.authorId
-    const canDelete = userIsAuthor || user.is_admin
+    const userIsCommentAuthor = userId === info.authorId
+    const userIsPostAuthor = userId === info.postAuthorId
+    const canDelete = userIsCommentAuthor || user.is_admin
     const canEndorse = user.is_staff || user.is_instructor
-    const canMarkAnswer = userIsAuthor && info.postIsQuestion
-    const canMarkResolving = userIsAuthor && !info.postIsQuestion
+    const canMarkAnswer = userIsPostAuthor && info.postIsQuestion
+    const canMarkResolving =  userIsPostAuthor && !info.postIsQuestion
 
 
     return (
@@ -57,7 +58,7 @@ const Comment = React.memo(function({ info, isAncestor, postId }) {
                         <CommentLikeButton initialLiked={ info.liked } postId={ postId }
                             setDisplayedLikes={ setLikes } commentId={ info.commentId } />
                         <button className="px-1">REPLY</button>
-                        { userIsAuthor && <button className="px-1">EDIT</button> }
+                        { userIsCommentAuthor && <button className="px-1">EDIT</button> }
                         { canDelete && 
                         <CommentDeleteButton postId={ postId } commentId={ info.commentId }
                             markDeleted={ () => setUserDeleted(true) } /> }

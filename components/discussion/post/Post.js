@@ -96,7 +96,7 @@ function Post() {
                 <CommentButton />
                 { threads.map(thread => (
                 <Thread key={ `${ thread.ancestor.commentId }-thread` }
-                    postId={ currentPost.postId }  info={ thread }
+                    postId={ currentPost.postId }  info={{ ...thread, postAuthorId: currentPost.authorId }}
                     postIsQuestion={ currentPost.isQuestion } />)) }
             </>}
             <div ref={ loaderRef } className="w-full h-[1px] bg-inherit" />
