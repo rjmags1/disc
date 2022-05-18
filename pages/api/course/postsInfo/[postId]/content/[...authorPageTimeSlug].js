@@ -24,7 +24,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
         return
     }
     if (!req.session?.user) {
-        resp.status(200).json({ paginatedPostsInfo: {} })
+        resp.status(200).json({ message: "not authenticated" })
         return
     }
     const userId = req.session.user.user_id
