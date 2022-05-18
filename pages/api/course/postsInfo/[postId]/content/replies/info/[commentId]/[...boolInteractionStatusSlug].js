@@ -40,9 +40,13 @@ export default withIronSessionApiRoute(async function(req, resp) {
         insertQueryText = `INSERT INTO comment_like (comment, liker) VALUES ($1, $2);`
         deleteQueryText = `DELETE FROM comment_like WHERE comment = $1 AND liker = $2;`
     }
-    if (boolInteraction === "delete") {
+    else if (boolInteraction === "delete") {
         updateQueryText = `UPDATE comment SET deleted = TRUE where comment_id = $1;`
         params = [commentId]
+    }
+    else if (boolInteraction === "endorse") {
+        updateQueryText = `UPDATE comment SET endorsed = $2 WHERE comment_id = $1;`
+        params = [commentId, status]
     }
 
 

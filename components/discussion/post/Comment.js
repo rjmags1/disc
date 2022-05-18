@@ -3,10 +3,12 @@ import Timestamp from '../postListingsPane/listingIcons/Timestamp'
 import { useUser } from '../../../lib/hooks'
 import CommentLikeButton from './commentButtons/CommentLikeButton'
 import CommentDeleteButton from './commentButtons/CommentDeleteButton'
+import CommentEndorseButton from './commentButtons/CommentEndorseButton'
 
 const Comment = React.memo(function({ info, isAncestor, postId }) {
     const [depth] = useState(isAncestor ? 0 : info.threadId.split('.').length)
     const [userDeleted, setUserDeleted] = useState(info.deleted) 
+    const [endorsed, setEndorsed] = useState(info.endorsed)
     const [likes, setLikes] = useState(parseInt(info.likes))
     const { user } = useUser()
     const userId = user.user_id
@@ -23,9 +25,15 @@ const Comment = React.memo(function({ info, isAncestor, postId }) {
             <div data-testid="comment-box-container" 
                 className="w-full flex items-start justify-start py-2"
                 style={{ paddingLeft: `${ depth * 5 }%`}} >
-                <img width="40" className="rounded-full" src={ 
-                        info.anonymous || userDeleted ? 
-                        "/profile-button-img.png" : info.avatarUrl }/>
+                <div className="flex flex-col justify-start items-center" >
+                    <img width="40" className="rounded-full" src={ 
+                            info.anonymous || userDeleted ? 
+                            "/profile-button-img.png" : info.avatarUrl }/>
+                    { endorsed && 
+                    <span className="h-[18px] mt-1" >
+                        <img src="/endorsed.png" width="18"/>
+                    </span> }
+                </div>
                 <div data-testid="comment-content-container" 
                     className="pl-2 -mt-0.5 w-full flex-col items-start 
                         justify-start text-sm font-thin">
@@ -33,12 +41,12 @@ const Comment = React.memo(function({ info, isAncestor, postId }) {
                         <span className="font-light">
                             { userDeleted ? "anonymous" : info.author }
                         </span>
-                        <Timestamp createdAt={ new Date(info.createdAt) }/>
+                        { !userDeleted && <Timestamp createdAt={ new Date(info.createdAt) }/> }
                     </h6> 
                     { userDeleted ? 
                     <span className="font-light">deleted</span> 
                     :
-                    <div data-testid="comment-container" className="font-light" 
+                    <div data-testid="comment-container" className="font-light mt-1" 
                         dangerouslySetInnerHTML={{ __html: info.displayContent }}/>
                     }
                     { !userDeleted && 
@@ -53,7 +61,9 @@ const Comment = React.memo(function({ info, isAncestor, postId }) {
                         { canDelete && 
                         <CommentDeleteButton postId={ postId } commentId={ info.commentId }
                             markDeleted={ () => setUserDeleted(true) } /> }
-                        { canEndorse && <button className="px-1">ENDORSE</button> }
+                        { canEndorse && 
+                        <CommentEndorseButton postId={ postId } commentId={ info.commentId }
+                            endorsed={ endorsed } setEndorsed={ setEndorsed } /> }
                         { canMarkAnswer && <button className="px-1">MARK AS ANSWER</button> }
                         { canMarkResolving && <button className="px-1">MARK AS RESOLVING</button> }
                     </div>}

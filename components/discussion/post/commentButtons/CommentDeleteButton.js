@@ -1,7 +1,7 @@
 import React from "react"
 
-function CommentDeleteButton({ postId, commentId, markDeleted }) {
-
+const CommentDeleteButton = React.memo(function(props) {
+    const { postId, commentId, markDeleted } = props
     const handleClick = async () => {
         try {
             const resp = await fetch(
@@ -18,6 +18,6 @@ function CommentDeleteButton({ postId, commentId, markDeleted }) {
             DELETE
         </button>
     )
-}
+})
 
 export default CommentDeleteButton
