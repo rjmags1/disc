@@ -15,7 +15,7 @@ function Post() {
     const [postContent, setPostContent] = useState(null)
     const { currentPost } = useContext(PostContext)
     const initialLoadTime = useContext(TimeContext)
-
+    console.log(currentPost?.postId)
     const loaderRef = useRef(null) // triggers thread lazy loading on intersxn
     const canLoadMoreRef = useRef(false) // .current true only if just loaded 
                                          // api page and theres another one 
@@ -96,7 +96,8 @@ function Post() {
                 <hr className="mb-1"/>
                 <CommentButton />
                 { threads.map(thread => (
-                <Thread key={ `${ thread.ancestor.commentId }-thread` } info={ thread }
+                <Thread key={ `${ thread.ancestor.commentId }-thread` }
+                    postId={ currentPost.postId }  info={ thread }
                     postIsQuestion={ currentPost.isQuestion } />)) }
             </>}
             <div ref={ loaderRef } className="w-full h-[1px] bg-inherit" />
