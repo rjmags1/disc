@@ -1,7 +1,7 @@
 import Timestamp from "../postListingsPane/listingIcons/Timestamp"
 import PostControlPanel from "./PostControlPanel"
 
-function PostContentSection({ content }) {
+function PostContentSection({ content, resolved, answered }) {
     // fetch views and add 
     const views = 100
     return (
@@ -10,7 +10,7 @@ function PostContentSection({ content }) {
                 <h3 data-testid="post-title" className="text-3xl font-medium">
                     { content.title }
                 </h3>
-                <section className="flex justify-between my-4 h-[55px] 
+                <section className="flex justify-between my-2 mb-3 h-[55px] 
                     whitespace-nowrap" data-testid="post-stats-bar">
                     <div className="flex flex-none pr-4">
                         <img width="55" className="rounded-full"
@@ -31,6 +31,13 @@ function PostContentSection({ content }) {
                         </div>
                     </div>
                     <div className="flex text-xs h-full overflow-hidden font-normal">
+                        { (resolved || answered) && 
+                        <div className="h-full flex items-center my-0.5 mr-2">
+                            <span className="text-base text-green-500 py-0.5
+                                border border-green-500 rounded px-2" >
+                                { answered ? "ANSWERED" : "RESOLVED" }
+                            </span>
+                        </div> }
                         <div className="flex flex-col justify-center 
                             items-center mx-2">
                             <h4 className="text-lg w-full text-center">

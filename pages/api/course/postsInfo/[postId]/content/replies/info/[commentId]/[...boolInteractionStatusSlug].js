@@ -5,7 +5,7 @@ import { sessionOptions } from '../../../../../../../../../lib/session'
 import { withIronSessionApiRoute } from 'iron-session/next'
 
 const BOOLEAN_COMMENT_INTERACTIONS = [
-    "like", "delete", "endorse", "markAnswered", "markResolved"]
+    "like", "delete", "endorse", "answer", "resolve"]
 
 const STATUSES = ["true", "false"]
 
@@ -20,19 +20,23 @@ export default withIronSessionApiRoute(async function(req, resp) {
     }
     const userId = req.session.user.user_id
     const commentId = parseInt(req.query.commentId, 10)
+    const postId = parseInt(req.query.postId)
     const slug = req.query.boolInteractionStatusSlug
-    console.log(userId, commentId, slug)
-    if (!commentId || commentId < 1 || ! slug || slug.length !== 2) {
+    //console.log(userId, commentId, slug)
+    console.log(postId, commentId, slug)
+    if (!postId || postId < 0 || !commentId || commentId < 1 || !slug || slug.length !== 2) {
         resp.status(400).json({ message: "bad url params" })
         return
     }
     const [boolInteraction, status] = slug
+    console.log(boolInteraction, status)
     if (BOOLEAN_COMMENT_INTERACTIONS.indexOf(boolInteraction) === -1 || 
         STATUSES.indexOf(status) === -1) {
         resp.status(400).json({ message: "bad url params" })
         return
     }
-    let checkQueryText, insertQueryText, deleteQueryText, updateQueryText
+    let checkQueryText, insertQueryText, deleteQueryText
+    let updateQueryText, postUpdateQueryText, checkUnresolvePostQueryText
     let params = [commentId, userId]
     if (boolInteraction === "like") {
         checkQueryText = `SELECT comment_like_id FROM comment_like 
@@ -46,6 +50,15 @@ export default withIronSessionApiRoute(async function(req, resp) {
     }
     else if (boolInteraction === "endorse") {
         updateQueryText = `UPDATE comment SET endorsed = $2 WHERE comment_id = $1;`
+        params = [commentId, status]
+    }
+    else if (boolInteraction === "resolve") {
+        updateQueryText = `UPDATE comment SET is_resolving = $2 WHERE comment_id = $1;`
+        postUpdateQueryText = `UPDATE post SET resolved = $2 WHERE post_id = $1;`
+        checkUnresolvePostQueryText = `
+            SELECT COUNT(comment_id) AS resolving_comments FROM (
+                SELECT comment_id FROM comment 
+                WHERE post = $1 AND is_resolving) AS resolving_comments;`
         params = [commentId, status]
     }
 
@@ -71,7 +84,28 @@ export default withIronSessionApiRoute(async function(req, resp) {
             }
         }
         else { // interaction status represented by boolean col in post table
-            await clientQuery(client, updateQueryText, params)
+            const mayAffectPostInfo = (
+                boolInteraction === "resolve" || boolInteraction === "answer")
+            if (!mayAffectPostInfo) {
+                await clientQuery(client, updateQueryText, params)
+            }
+
+            else if (boolInteraction === "resolve") {
+                await clientQuery(client, updateQueryText, params)
+
+                let shouldUpdatePost = true
+                if (status === "false") {
+                    const shouldUpdatePostQuery = (
+                        await clientQuery(client, checkUnresolvePostQueryText, [postId]))
+                    shouldUpdatePost = shouldUpdatePostQuery.rows.length > 0
+                }
+                if (shouldUpdatePost) {
+                    await clientQuery(client, postUpdateQueryText, [postId, status])
+                }
+            }
+            else if (boolInteraction === "answer") {
+                //
+            }
         }
     }
     catch(error) {

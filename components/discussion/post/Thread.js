@@ -3,7 +3,7 @@ import Comment from './Comment'
 import ButtonLoading from '../../lib/ButtonLoading'
 import { useMoreReplies } from '../../../lib/hooks'
 
-const Thread = React.memo(function({ info, postIsQuestion, postId }) {
+const Thread = React.memo(function({ info, postIsQuestion, postId, setPostResolved }) {
     const { ancestor: ancestorInfo, descendants: initDescendantInfo } = info
     //console.log(ancestorInfo, initDescendantInfo)
 
@@ -40,10 +40,10 @@ const Thread = React.memo(function({ info, postIsQuestion, postId }) {
     return (
         <div data-testid="thread-container" className="mb-6">
             <Comment isAncestor={ true } info={ { ...ancestorInfo, postIsQuestion, postId, postAuthorId: info.postAuthorId } } 
-                key={ ancestorInfo.commentId } />
+                key={ ancestorInfo.commentId } setPostResolved={ setPostResolved } />
             { descendantsInfo.map(descInfo => (
                 <Comment isAncestor={ false } info={ { ...descInfo, postIsQuestion, postId, postAuthorId: info.postAuthorId } } 
-                    key={ descInfo.commentId } />))}
+                    key={ descInfo.commentId } setPostResolved={ setPostResolved } />))}
             { showViewMore &&
             <button className="ml-[5%] text-sm text-white flex items-center italic
                 justify-start pl-1 pr-2 hover:cursor-pointer w-max mt-2 hover:opacity-50"

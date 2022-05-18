@@ -14,6 +14,8 @@ function Post() {
     const [observed, setObserved] = useState(false)
     const [postContent, setPostContent] = useState(null)
     const { currentPost } = useContext(PostContext)
+    const [postResolved, setPostResolved] = useState(currentPost?.resolved)
+    const [postAnswered, setPostAnswered] = useState(currentPost?.answered)
     const initialLoadTime = useContext(TimeContext)
     const loaderRef = useRef(null) // triggers thread lazy loading on intersxn
     const canLoadMoreRef = useRef(false) // .current true only if just loaded 
@@ -89,15 +91,16 @@ function Post() {
             { loadingNewPost && <Loading /> }
             { showPost && 
             <>
-                <PostContentSection 
-                    content={ postContent } /> 
+                <PostContentSection answered={ postAnswered }
+                    resolved={ postResolved } content={ postContent } /> 
                 <h4 className="text-lg font-base">Comments</h4>
                 <hr className="mb-1"/>
                 <CommentButton />
                 { threads.map(thread => (
-                <Thread key={ `${ thread.ancestor.commentId }-thread` }
-                    postId={ currentPost.postId }  info={{ ...thread, postAuthorId: currentPost.authorId }}
-                    postIsQuestion={ currentPost.isQuestion } />)) }
+                <Thread key={ `${ thread.ancestor.commentId }-thread` } postId={ currentPost.postId }
+                    info={{ ...thread, postAuthorId: currentPost.authorId }}
+                    postIsQuestion={ currentPost.isQuestion } 
+                    setPostResolved={ setPostResolved } />)) }
             </>}
             <div ref={ loaderRef } className="w-full h-[1px] bg-inherit" />
         </div>
