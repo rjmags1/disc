@@ -15,7 +15,6 @@ function Post() {
     const [postContent, setPostContent] = useState(null)
     const { currentPost } = useContext(PostContext)
     const initialLoadTime = useContext(TimeContext)
-    console.log(currentPost?.postId)
     const loaderRef = useRef(null) // triggers thread lazy loading on intersxn
     const canLoadMoreRef = useRef(false) // .current true only if just loaded 
                                          // api page and theres another one 

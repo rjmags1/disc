@@ -18,7 +18,6 @@ const Thread = React.memo(function({ info, postIsQuestion, postId }) {
 
     const { replies: newReplies, loading: loadingMoreReplies, nextPage } = useMoreReplies(
         postId, ancestorInfo.commentId, apiPage, threadIdOffset)
-    console.log(postId, newReplies, loadingMoreReplies, nextPage)
 
     useEffect(() => {
         if (loadingMoreReplies || !newReplies || apiPage < 1) return
