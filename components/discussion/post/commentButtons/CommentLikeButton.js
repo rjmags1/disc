@@ -1,10 +1,10 @@
 import React, { useState } from "react"
 
 
-const CommentLikeButton = React.memo(function ({ initialLiked, setDisplayedLikes, postId, commentId }) {
+const CommentLikeButton = React.memo(function(props) {
+    const { initialLiked, setDisplayedLikes, postId, commentId } = props
     const [liked, setLiked] = useState(initialLiked)
 
-    console.log(liked)
     const handleClick = async () => {
         const newStatus = !liked
         setLiked(newStatus)
@@ -17,9 +17,7 @@ const CommentLikeButton = React.memo(function ({ initialLiked, setDisplayedLikes
             if (!resp.ok) setLiked(!newStatus)
             else setDisplayedLikes(prev => prev + (newStatus ? 1 : -1))
         }
-        catch (error) { 
-            console.error(error)
-            setLiked(!newStatus) }
+        catch (error) { setLiked(!newStatus) }
 
     }
 
