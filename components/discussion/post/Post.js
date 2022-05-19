@@ -14,8 +14,8 @@ function Post() {
     const [observed, setObserved] = useState(false)
     const [postContent, setPostContent] = useState(null)
     const { currentPost } = useContext(PostContext)
-    const [postResolved, setPostResolved] = useState(currentPost?.resolved)
-    const [postAnswered, setPostAnswered] = useState(currentPost?.answered)
+    const [postResolved, setPostResolved] = useState(null)
+    const [postAnswered, setPostAnswered] = useState(null)
     const initialLoadTime = useContext(TimeContext)
     const loaderRef = useRef(null) // triggers thread lazy loading on intersxn
     const canLoadMoreRef = useRef(false) // .current true only if just loaded 
@@ -36,6 +36,8 @@ function Post() {
     // hook up observer on first post selection from postListingsPane
     useEffect(() => {
         if (!currentPost) return
+        setPostAnswered(currentPost.answered)
+        setPostResolved(currentPost.resolved)
         setApiPage(1)
 
         if (observed) return
@@ -100,7 +102,8 @@ function Post() {
                 <Thread key={ `${ thread.ancestor.commentId }-thread` } postId={ currentPost.postId }
                     info={{ ...thread, postAuthorId: currentPost.authorId }}
                     postIsQuestion={ currentPost.isQuestion } 
-                    setPostResolved={ setPostResolved } />)) }
+                    setPostResolved={ setPostResolved } 
+                    setPostAnswered={ setPostAnswered }/>)) }
             </>}
             <div ref={ loaderRef } className="w-full h-[1px] bg-inherit" />
         </div>

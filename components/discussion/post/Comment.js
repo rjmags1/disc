@@ -5,8 +5,9 @@ import CommentLikeButton from './commentButtons/CommentLikeButton'
 import CommentDeleteButton from './commentButtons/CommentDeleteButton'
 import CommentEndorseButton from './commentButtons/CommentEndorseButton'
 import CommentMarkResolvingButton from './commentButtons/CommentMarkResolvingButton'
+import CommentMarkAnswerButton from './commentButtons/CommentMarkAnswerButton'
 
-const Comment = React.memo(function({ info, isAncestor, setPostResolved }) {
+const Comment = React.memo(function({ info, isAncestor, setPostResolved, setPostAnswered }) {
     const [depth] = useState(isAncestor ? 0 : info.threadId.split('.').length)
     const [userDeleted, setUserDeleted] = useState(info.deleted) 
     const [endorsed, setEndorsed] = useState(info.endorsed)
@@ -34,9 +35,9 @@ const Comment = React.memo(function({ info, isAncestor, setPostResolved }) {
                     <img width="40" className="rounded-full" src={ 
                             info.anonymous || userDeleted ? 
                             "/profile-button-img.png" : info.avatarUrl }/>
-                    <div className='flex items-center'>
+                    <div className='flex items-center justify-center'>
                         { endorsed && 
-                        <span className="h-[18px] mt-2 mr-2" >
+                        <span className="h-[18px] mt-2" >
                             <img src="/endorsed.png" width="18"/>
                         </span> }
                         { (commentResolving || commentIsAnswer) &&
@@ -73,7 +74,11 @@ const Comment = React.memo(function({ info, isAncestor, setPostResolved }) {
                         { canEndorse && 
                         <CommentEndorseButton postId={ postId } commentId={ info.commentId }
                             endorsed={ endorsed } setEndorsed={ setEndorsed } /> }
-                        { canMarkAnswer && <button className="px-1">MARK AS ANSWER</button> }
+                        { canMarkAnswer && 
+                        <CommentMarkAnswerButton postId={ postId }
+                            commentInfo={ info } isAnswer={ commentIsAnswer }
+                            setCommentIsAnswer={ setCommentIsAnswer }
+                            setPostAnswered={ setPostAnswered } /> }
                         { canMarkResolving && 
                         <CommentMarkResolvingButton postId={ postId }
                             commentInfo={ info } isResolving={ commentResolving }

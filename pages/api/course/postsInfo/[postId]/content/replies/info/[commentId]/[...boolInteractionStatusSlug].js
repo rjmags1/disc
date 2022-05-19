@@ -36,7 +36,8 @@ export default withIronSessionApiRoute(async function(req, resp) {
         return
     }
     let checkQueryText, insertQueryText, deleteQueryText
-    let updateQueryText, postUpdateQueryText, checkUnresolvePostQueryText
+    let updateQueryText, postUpdateQueryText 
+    let checkUnresolvePostQueryText, checkUnanswerPostQueryText
     let params = [commentId, userId]
     if (boolInteraction === "like") {
         checkQueryText = `SELECT comment_like_id FROM comment_like 
@@ -59,6 +60,15 @@ export default withIronSessionApiRoute(async function(req, resp) {
             SELECT COUNT(comment_id) AS resolving_comments FROM (
                 SELECT comment_id FROM comment 
                 WHERE post = $1 AND is_resolving) AS resolving_comments;`
+        params = [commentId, status]
+    }
+    else if (boolInteraction === "answer") {
+        updateQueryText = `UPDATE comment SET is_answer = $2 WHERE comment_id = $1;`
+        postUpdateQueryText = `UPDATE post SET answered = $2 WHERE post_id = $1;`
+        checkUnanswerPostQueryText = `
+            SELECT COUNT(comment_id) AS answering_comments FROM (
+                SELECT comment_id FROM comment 
+                WHERE post = $1 AND is_answer) AS answering_comments;`
         params = [commentId, status]
     }
 
@@ -89,22 +99,21 @@ export default withIronSessionApiRoute(async function(req, resp) {
             if (!mayAffectPostInfo) {
                 await clientQuery(client, updateQueryText, params)
             }
-
-            else if (boolInteraction === "resolve") {
+            else {
                 await clientQuery(client, updateQueryText, params)
 
                 let shouldUpdatePost = true
                 if (status === "false") {
-                    const shouldUpdatePostQuery = (
-                        await clientQuery(client, checkUnresolvePostQueryText, [postId]))
+                    const shouldUpdatePostQuery = (boolInteraction === "resolve" ?
+                        (await clientQuery(
+                            client, checkUnresolvePostQueryText, [postId]))
+                        : (await clientQuery(
+                            client, checkUnanswerPostQueryText, [postId])))
                     shouldUpdatePost = shouldUpdatePostQuery.rows.length > 0
                 }
                 if (shouldUpdatePost) {
                     await clientQuery(client, postUpdateQueryText, [postId, status])
                 }
-            }
-            else if (boolInteraction === "answer") {
-                //
             }
         }
     }

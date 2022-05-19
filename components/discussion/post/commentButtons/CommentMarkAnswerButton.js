@@ -1,37 +1,36 @@
 import React, { useContext } from "react"
-import { PostListingsContext, PostContext } from '../../../../pages/[courseId]/discussion'
+import { PostContext, PostListingsContext } from "../../../../pages/[courseId]/discussion"
 import { syncListingWithBoolInteraction } from "../../../../lib/uiSync"
 
-const CommentMarkResolvingButton = React.memo(function(props) {
-    const { commentInfo, postId, isResolving, 
-        setPostResolved, setCommentResolving } = props
-    const { 
+const CommentMarkAnswerButton = React.memo(function(props) {
+    const { commentInfo, postId, isAnswer, 
+        setPostAnswered, setCommentIsAnswer } = props
+    const {
         postListings, setPostListings, specialListings, setSpecialListings
     } = useContext(PostListingsContext)
     const { currentPost } = useContext(PostContext)
-
+    
     const handleClick = async () => {
         try {
             // tell backend about new post resolve status 
             // and new comment is resolving status
-            const newStatus = !isResolving
+            const newStatus = !isAnswer
             const resp = await fetch(
-                `/api/course/postsInfo/${ postId }/content/replies/info/${ commentInfo.commentId }/resolve/${ newStatus }`,
+                `/api/course/postsInfo/${ postId }/content/replies/info/${ commentInfo.commentId }/answer/${ newStatus }`,
                 { method: "PUT" })
             if (!resp.ok) return // return if backend update failed
 
             // update ui to reflect new comment and post resolution status
-            setPostResolved(newStatus) 
-            setCommentResolving(newStatus)
+            setPostAnswered(newStatus) 
+            setCommentIsAnswer(newStatus)
 
-            const listings = currentPost.pinned || currentPost.isAnnouncement ? 
-                    specialListings : postListings
-            const setListings = currentPost.pinned || currentPost.isAnnouncement ?
-                setSpecialListings : setPostListings
+            const specialListing = currentPost.pinned || currentPost.isAnnouncement
+            const listings = specialListing ?  specialListings : postListings
+            const setListings = specialListing ?  setSpecialListings : setPostListings
             // rerender associated listings based on resolution status 
             // (ie, remove checkmark or add one)
             syncListingWithBoolInteraction(
-                "resolve", listings, setListings, currentPost, newStatus)
+                "answer", listings, setListings, currentPost, newStatus)
         }
         catch (error) {
             console.error(error)
@@ -40,9 +39,9 @@ const CommentMarkResolvingButton = React.memo(function(props) {
 
     return (
         <button className="px-1 hover:opacity-60" onClick={ handleClick }>
-            { isResolving ? "UNMARK AS RESOLVING" : "MARK AS RESOLVING" }
+            { isAnswer ? "UNMARK AS ANSWER" : "MARK AS ANSWER" }
         </button>
     )
 })
 
-export default CommentMarkResolvingButton
+export default CommentMarkAnswerButton
