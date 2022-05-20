@@ -56,7 +56,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
         commentId: row.comment_id, authorId: row.author, postId: row.post,
         ancestorComment: row.ancestor_comment, threadId: row.thread_id,
         editContent: row.edit_content, displayContent: row.display_content,
-        createdAt: fixNodePgUTCTimeInterpretation(row.created_at), 
+        createdAt: row.created_at, 
         isResolving: row.is_resolving, isAnswer: row.is_answer, 
         endorsed: row.endorsed, loadMoreButtonBelow: false,
         deleted: row.deleted, anonymous: row.anonymous, avatarUrl,
@@ -70,7 +70,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
 const invalidParams = (reqBody) => {
     const {
         post, ancestorComment, threadId, editContent,
-        displayContent, createdAt, anonymous, isReply
+        displayContent, createdAt, anonymous
     } = reqBody
 
     if (!post || !Number.isInteger(post) || post < 1) return true
@@ -89,6 +89,5 @@ const invalidParams = (reqBody) => {
     if (typeof(editContent) !== 'object') return true
     if (typeof(displayContent) !== 'string') return true
     if (new Date(createdAt).toString() === 'Invalid Date') return true
-    if (typeof(anonymous) !== 'boolean' ||
-        typeof(isReply) !== 'boolean') return true
+    if (typeof(anonymous) !== 'boolean') return true
 }

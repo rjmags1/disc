@@ -38,8 +38,7 @@ const Comment = React.memo(function(props) {
             editContent,
             displayContent,
             createdAt: new Date(Date.now()).toUTCString(),
-            anonymous,
-            isReply: true
+            anonymous
         } 
 
         let submitSuccessful, newCommentInfo
@@ -66,7 +65,9 @@ const Comment = React.memo(function(props) {
                 ...newCommentInfo, 
                 loadMoreButtonBelow: !!info.loadMoreButtonBelow,
                 postAuthorId: info.postAuthorId,
-                postIsQuestion: info.postIsQuestion
+                postIsQuestion: info.postIsQuestion,
+                // localize utc created at received from backend
+                createdAt: new Date(newCommentInfo.createdAt)
             }
             addReplyToUi(newCommentInfo, info)
         }

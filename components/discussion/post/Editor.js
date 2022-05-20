@@ -43,20 +43,22 @@ function Editor({ hideEditor, handleSubmit }) {
         <>
             <div id="quill-editor-container" ref={ editorRef } 
                 className="text-white rounded-b-[10px]" />
-            <button className="mt-2 bg-purple py-0.5 px-2 rounded border
-                border-white hover:bg-violet-800" onClick={ handleSubmitClick }>
-                Submit
-            </button>
-            <button className="mx-2 mt-2 py-0.5 opacity-60 underline 
-                hover:opacity-30 font-thin text-sm" 
-                onClick={ () => setAnonymous(prev => !prev) }>
-                { anonymous ? "Unmark anonymous" : "Mark anonymous" }
-            </button>
-            <button className="mt-2 py-0.5 opacity-60 underline 
-                hover:opacity-30 font-thin text-sm" 
-                onClick={ removeToolbarAndEditor }>
-                Cancel
-            </button>
+            <div className="flex mb-2">
+                <button className="mt-2 bg-purple py-0.5 px-2 rounded border
+                    border-white hover:bg-violet-800" onClick={ handleSubmitClick }>
+                    Submit
+                </button>
+                <button className="mx-2 mt-2 py-0.5 opacity-60 underline 
+                    hover:opacity-30 font-thin text-sm" 
+                    onClick={ () => setAnonymous(prev => !prev) }>
+                    { anonymous ? "Unmark anonymous" : "Mark anonymous" }
+                </button>
+                <button className="mt-2 py-0.5 opacity-60 underline 
+                    hover:opacity-30 font-thin text-sm" 
+                    onClick={ removeToolbarAndEditor }>
+                    Cancel
+                </button>
+            </div>
         </>
         
     )
