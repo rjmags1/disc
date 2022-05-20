@@ -6,10 +6,16 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import React, { useEffect, useRef, useState } from 'react'
 import { useUser, useCourse } from '../../lib/hooks'
+import 'quill/dist/quill.snow.css'
+import dynamic from 'next/dynamic'
+const Editor = dynamic(
+    () => import('../../components/discussion/post/Editor'), 
+    { ssr: false })
 
 export const PostContext = React.createContext(null)
 export const TimeContext = React.createContext(null)
 export const PostListingsContext = React.createContext(null)
+export const EditorContext = React.createContext(null)
 
 function Discussion() {
     const router = useRouter()
@@ -67,25 +73,27 @@ function Discussion() {
     return (
         <>
             <Head><title>{ title }</title></Head>
-            <TimeContext.Provider value={ initialLoadTime } >
-                <div data-testid="discussion-container" 
-                className="flex h-[calc(100vh-48px)] w-full">
-                    <CategoryPane catPaneRef={ catPaneRef } 
-                        changeCategoryFilter={ changeFilter } />
-                    <PostListingsContext.Provider 
-                        value={ postListingsContext } >
-                        <PostContext.Provider value={ postContext }>
-                            <section className="flex-auto text-white flex w-full" 
-                                data-testid="posts-section">
-                                <PostListingsPane catPaneRef={ catPaneRef }
-                                    toggleCatPane={ () => setShowHiddenPane(!showHiddenPane) }
-                                    categoryFilter={ categoryFilter } setCurrentPost={ setCurrentPost }/>
-                                <Post />
-                            </section>
-                        </PostContext.Provider>
-                    </PostListingsContext.Provider>
-                </div>
-            </TimeContext.Provider>
+            <EditorContext.Provider value={ Editor } >
+                <TimeContext.Provider value={ initialLoadTime } >
+                    <div data-testid="discussion-container" 
+                    className="flex h-[calc(100vh-48px)] w-full">
+                        <CategoryPane catPaneRef={ catPaneRef } 
+                            changeCategoryFilter={ changeFilter } />
+                        <PostListingsContext.Provider 
+                            value={ postListingsContext } >
+                            <PostContext.Provider value={ postContext }>
+                                <section className="flex-auto text-white flex w-full" 
+                                    data-testid="posts-section">
+                                    <PostListingsPane catPaneRef={ catPaneRef }
+                                        toggleCatPane={ () => setShowHiddenPane(!showHiddenPane) }
+                                        categoryFilter={ categoryFilter } setCurrentPost={ setCurrentPost }/>
+                                    <Post />
+                                </section>
+                            </PostContext.Provider>
+                        </PostListingsContext.Provider>
+                    </div>
+                </TimeContext.Provider>
+            </EditorContext.Provider>
         </>
     )
 }

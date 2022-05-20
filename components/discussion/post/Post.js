@@ -88,7 +88,7 @@ function Post() {
     return (
         <div data-testid="post-container"
             className="hidden lg:flex flex-col w-full flex-auto 
-                bg-light-gray py-[4%] px-[7%] overflow-auto">
+                bg-light-gray py-[4%] px-[7%] overflow-y-scroll">
             { neverSelectedPost && <NoPostSelected /> }
             { loadingNewPost && <Loading /> }
             { showPost && 

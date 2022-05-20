@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import Timestamp from '../postListingsPane/listingIcons/Timestamp'
 import { useUser } from '../../../lib/hooks'
 import CommentLikeButton from './commentButtons/CommentLikeButton'
@@ -6,14 +6,90 @@ import CommentDeleteButton from './commentButtons/CommentDeleteButton'
 import CommentEndorseButton from './commentButtons/CommentEndorseButton'
 import CommentMarkResolvingButton from './commentButtons/CommentMarkResolvingButton'
 import CommentMarkAnswerButton from './commentButtons/CommentMarkAnswerButton'
+import ReplyButton from './commentButtons/ReplyButton'
+import { EditorContext } from '../../../pages/[courseId]/discussion'
 
-const Comment = React.memo(function({ info, isAncestor, setPostResolved, setPostAnswered }) {
+const Comment = React.memo(function(props) {
+    const {
+        info, 
+        isAncestor, 
+        setPostResolved, 
+        setPostAnswered, 
+        calcReplyThreadId, 
+        setDescendantsInfo, 
+        descendantsInfo
+    } = props
+
     const [depth] = useState(isAncestor ? 0 : info.threadId.split('.').length)
     const [userDeleted, setUserDeleted] = useState(info.deleted) 
     const [endorsed, setEndorsed] = useState(info.endorsed)
     const [likes, setLikes] = useState(parseInt(info.likes))
     const [commentResolving, setCommentResolving] = useState(info.isResolving)
     const [commentIsAnswer, setCommentIsAnswer] = useState(info.isAnswer)
+    const [replying, setReplying] = useState(false)
+    const Editor = useContext(EditorContext)
+
+    const handleReplySubmit = async ({ editContent, displayContent, anonymous }) => {
+        const body = { 
+            post: info.postId,
+            ancestorComment: isAncestor ? 
+                info.commentId : info.ancestorComment,
+            threadId: calcReplyThreadId(info.threadId),
+            editContent,
+            displayContent,
+            createdAt: new Date(Date.now()).toUTCString(),
+            anonymous,
+            isReply: true
+        } 
+
+        let submitSuccessful, newCommentInfo
+        try {
+            const resp = await fetch(
+                `/api/course/postsInfo/${ info.postId }/content/newComment`, { 
+                    method: 'POST', 
+                    body: JSON.stringify(body), 
+                    headers: { 'Content-Type': 'application/json'} 
+                })
+            submitSuccessful = resp.ok
+            if (submitSuccessful) {
+                const parsed = await resp.json()
+                newCommentInfo = parsed.newCommentInfo
+            }
+        }
+        catch (error) { 
+            console.error(error)
+            submitSuccessful = false 
+        }
+
+        if (submitSuccessful) {
+            newCommentInfo = { 
+                ...newCommentInfo, 
+                loadMoreButtonBelow: !!info.loadMoreButtonBelow,
+                postAuthorId: info.postAuthorId,
+                postIsQuestion: info.postIsQuestion
+            }
+            addReplyToUi(newCommentInfo, info)
+        }
+
+        return submitSuccessful
+    }
+
+    const addReplyToUi = (newCommentInfo, repliedToInfo) => {
+        // place new comment right under repliedTo
+
+        if (isAncestor) { 
+            setDescendantsInfo([newCommentInfo, ...descendantsInfo])
+            return
+        }
+        const newRepliedToInfo = { ...repliedToInfo, loadMoreButtonBelow: false }
+        const repliedToIdx = descendantsInfo.indexOf(repliedToInfo)
+        setDescendantsInfo([
+            ...descendantsInfo.slice(0, repliedToIdx), 
+            newRepliedToInfo,
+            newCommentInfo,
+            ...descendantsInfo.slice(repliedToIdx + 1)
+        ])
+    }
 
     const { postId } = info
     const { user } = useUser()
@@ -64,31 +140,39 @@ const Comment = React.memo(function({ info, isAncestor, setPostResolved, setPost
                         dangerouslySetInnerHTML={{ __html: info.displayContent }}/>
                     }
                     { !userDeleted && 
-                    <div className="mt-2 flex h-[12px] items-center text-xs
-                        font-normal opacity-50">
-                        <span className="mr-0.5">{ likes }</span>
-                        <img src="/heart.png" width="11" className="mr-1"/>
-                        <CommentLikeButton initialLiked={ info.liked } postId={ postId }
-                            setDisplayedLikes={ setLikes } commentId={ info.commentId } />
-                        <button className="px-1">REPLY</button>
-                        { userIsCommentAuthor && <button className="px-1">EDIT</button> }
-                        { canDelete && 
-                        <CommentDeleteButton postId={ postId } commentId={ info.commentId }
-                            markDeleted={ () => setUserDeleted(true) } /> }
-                        { canEndorse && 
-                        <CommentEndorseButton postId={ postId } commentId={ info.commentId }
-                            endorsed={ endorsed } setEndorsed={ setEndorsed } /> }
-                        { canMarkAnswer && 
-                        <CommentMarkAnswerButton postId={ postId }
-                            commentInfo={ info } isAnswer={ commentIsAnswer }
-                            setCommentIsAnswer={ setCommentIsAnswer }
-                            setPostAnswered={ setPostAnswered } /> }
-                        { canMarkResolving && 
-                        <CommentMarkResolvingButton postId={ postId }
-                            commentInfo={ info } isResolving={ commentResolving }
-                            setCommentResolving={ setCommentResolving }
-                            setPostResolved={ setPostResolved } /> }
-                    </div>}
+                    <>
+                        <div className="mt-2 flex h-[12px] items-center text-xs
+                            font-normal opacity-50">
+                            <span className="mr-0.5">{ likes }</span>
+                            <img src="/heart.png" width="11" className="mr-1"/>
+                            <CommentLikeButton initialLiked={ info.liked } postId={ postId }
+                                setDisplayedLikes={ setLikes } commentId={ info.commentId } />
+                            {!replying &&
+                            <ReplyButton parentId={ info.commentId }
+                                ancestorId={ isAncestor ? null : info.ancestorComment } 
+                                setClicked={ () => setReplying(true) } /> }
+                            { userIsCommentAuthor && <button className="px-1">EDIT</button> }
+                            { canDelete && 
+                            <CommentDeleteButton postId={ postId } commentId={ info.commentId }
+                                markDeleted={ () => setUserDeleted(true) } /> }
+                            { canEndorse && 
+                            <CommentEndorseButton postId={ postId } commentId={ info.commentId }
+                                endorsed={ endorsed } setEndorsed={ setEndorsed } /> }
+                            { canMarkAnswer && 
+                            <CommentMarkAnswerButton postId={ postId }
+                                commentInfo={ info } isAnswer={ commentIsAnswer }
+                                setCommentIsAnswer={ setCommentIsAnswer }
+                                setPostAnswered={ setPostAnswered } /> }
+                            { canMarkResolving && 
+                            <CommentMarkResolvingButton postId={ postId }
+                                commentInfo={ info } isResolving={ commentResolving }
+                                setCommentResolving={ setCommentResolving }
+                                setPostResolved={ setPostResolved } /> }
+                        </div>
+                        { replying && 
+                        <Editor hideEditor={ () => setReplying(false) } 
+                            handleSubmit={ handleReplySubmit } /> }
+                    </>}
                 </div>
             </div>
         </>

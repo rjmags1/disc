@@ -13,7 +13,6 @@ import {
     clientQuery, 
     releaseClient 
 } from "../../../../../../db"
-import { findRenderedComponentWithType } from "react-dom/test-utils"
 
 const TOP_LEVEL_COMMENTS_PER_PAGE = 20
 const INITIAL_NESTED_COMMENTS = 2
