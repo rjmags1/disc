@@ -82,7 +82,14 @@ const Comment = React.memo(function(props) {
             return
         }
         const newRepliedToInfo = { ...repliedToInfo, loadMoreButtonBelow: false }
-        const repliedToIdx = descendantsInfo.indexOf(repliedToInfo)
+        let repliedToIdx
+        for (let i = 0; i < descendantsInfo.length; i++) {
+            const { commentId } = descendantsInfo[i]
+            if (commentId === repliedToInfo.commentId) {
+                repliedToIdx = i
+                break
+            }
+        }
         setDescendantsInfo([
             ...descendantsInfo.slice(0, repliedToIdx), 
             newRepliedToInfo,

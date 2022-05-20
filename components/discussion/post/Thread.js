@@ -5,7 +5,6 @@ import { useMoreReplies } from '../../../lib/hooks'
 
 const Thread = React.memo(function({ info, postIsQuestion, postId, setPostResolved, setPostAnswered }) {
     const { ancestor: ancestorInfo, descendants: initDescendantInfo } = info
-    //console.log(ancestorInfo, initDescendantInfo)
 
     const [descendantsInfo, setDescendantsInfo] = useState(initDescendantInfo)
     const [loadingMore, setLoadingMore] = useState(false)
@@ -18,6 +17,8 @@ const Thread = React.memo(function({ info, postIsQuestion, postId, setPostResolv
 
     const { replies: newReplies, loading: loadingMoreReplies, nextPage } = useMoreReplies(
         postId, ancestorInfo.commentId, apiPage, threadIdOffset)
+
+    console.log(descendantsInfo)
 
     useEffect(() => {
         if (loadingMoreReplies || !newReplies || apiPage < 1) return
