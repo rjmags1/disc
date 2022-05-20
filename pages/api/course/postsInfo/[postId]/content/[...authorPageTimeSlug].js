@@ -163,8 +163,8 @@ export default withIronSessionApiRoute(async function(req, resp) {
     
     const ancestorRows = ancestorCommentQuery.rows
     const ancestorInfo = processAncestorCommentRows(ancestorRows.length === 21 ? 
-        ancestorRows.slice(0, ancestorRows.length - 1) : ancestorRows)
-    const descendantInfo = processDescendantCommentRows(descendantCommentQuery.rows)
+        ancestorRows.slice(0, ancestorRows.length - 1) : ancestorRows, userId)
+    const descendantInfo = processDescendantCommentRows(descendantCommentQuery.rows, userId)
 
 
 

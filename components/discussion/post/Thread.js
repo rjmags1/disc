@@ -4,8 +4,9 @@ import ButtonLoading from '../../lib/ButtonLoading'
 import { useMoreReplies } from '../../../lib/hooks'
 
 const Thread = React.memo(function({ info, postIsQuestion, postId, setPostResolved, setPostAnswered }) {
-    const { ancestor: ancestorInfo, descendants: initDescendantInfo } = info
+    const { ancestor: initAncestorInfo, descendants: initDescendantInfo } = info
 
+    const [ancestor, setAncestor] = useState(initAncestorInfo)
     const [descendantsInfo, setDescendantsInfo] = useState(initDescendantInfo)
     const [loadingMore, setLoadingMore] = useState(false)
     const [loadedAll, setLoadedAll] = useState(false)
@@ -16,7 +17,7 @@ const Thread = React.memo(function({ info, postIsQuestion, postId, setPostResolv
         0 : null)
 
     const { replies: newReplies, loading: loadingMoreReplies, nextPage } = useMoreReplies(
-        postId, ancestorInfo.commentId, apiPage, threadIdOffset)
+        postId, ancestor.commentId, apiPage, threadIdOffset)
 
     useEffect(() => {
         if (loadingMoreReplies || !newReplies || apiPage < 1) return
@@ -55,9 +56,10 @@ const Thread = React.memo(function({ info, postIsQuestion, postId, setPostResolv
     
     return (
         <div data-testid="thread-container" className="mb-6">
-            <Comment isAncestor={ true } info={ { ...ancestorInfo, postIsQuestion, postId, postAuthorId: info.postAuthorId } } 
-                key={ ancestorInfo.commentId } setPostResolved={ setPostResolved } setPostAnswered={ setPostAnswered } 
-                calcReplyThreadId={ calcNewThreadId } descendantsInfo={ descendantsInfo } setDescendantsInfo={ setDescendantsInfo } />
+            <Comment isAncestor={ true } info={ { ...ancestor, postIsQuestion, postId, postAuthorId: info.postAuthorId } } 
+                key={ ancestor.commentId } setPostResolved={ setPostResolved } setPostAnswered={ setPostAnswered } 
+                calcReplyThreadId={ calcNewThreadId } descendantsInfo={ descendantsInfo } setDescendantsInfo={ setDescendantsInfo } 
+                setAncestor={ setAncestor } ancestor={ ancestor } />
             { descendantsInfo.map(descInfo => (
                 <Comment isAncestor={ false } info={ { ...descInfo, postIsQuestion, postId, postAuthorId: info.postAuthorId } } 
                     key={ descInfo.commentId } setPostResolved={ setPostResolved } setPostAnswered={ setPostAnswered } 

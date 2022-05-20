@@ -3,7 +3,7 @@ import { useRef, useEffect, useState } from 'react'
 
 let quill
 
-function Editor({ hideEditor, handleSubmit }) {
+function Editor({ hideEditor, handleSubmit, editContent }) {
     const [tick, setTick] = useState(0)
     const [anonymous, setAnonymous] = useState(false)
     const editorRef = useRef(null)
@@ -12,6 +12,7 @@ function Editor({ hideEditor, handleSubmit }) {
         quill = new Quill(editorRef.current, {
             theme: 'snow'
         })
+        if (!!editContent) quill.setContents(editContent)
         setTick(prev => prev + 1)
         
     }, [editorRef.current])

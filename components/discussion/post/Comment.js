@@ -8,6 +8,7 @@ import CommentMarkResolvingButton from './commentButtons/CommentMarkResolvingBut
 import CommentMarkAnswerButton from './commentButtons/CommentMarkAnswerButton'
 import ReplyButton from './commentButtons/ReplyButton'
 import { EditorContext } from '../../../pages/[courseId]/discussion'
+import CommentEditButton from './commentButtons/CommentEditButton'
 
 const Comment = React.memo(function(props) {
     const {
@@ -17,7 +18,9 @@ const Comment = React.memo(function(props) {
         setPostAnswered, 
         calcReplyThreadId, 
         setDescendantsInfo, 
-        descendantsInfo
+        descendantsInfo,
+        setAncestor,
+        ancestor
     } = props
 
     const [depth] = useState(isAncestor ? 0 : info.threadId.split('.').length)
@@ -27,7 +30,68 @@ const Comment = React.memo(function(props) {
     const [commentResolving, setCommentResolving] = useState(info.isResolving)
     const [commentIsAnswer, setCommentIsAnswer] = useState(info.isAnswer)
     const [replying, setReplying] = useState(false)
+    const [editing, setEditing] = useState(false)
     const Editor = useContext(EditorContext)
+
+    const handleEditSubmit = async ({ editContent, displayContent }) => {
+        const body = { commentId: info.commentId, editContent, displayContent }
+
+        let submitSuccessful, editedCommentInfo
+        try {
+            const resp = await fetch(
+                `/api/course/postsInfo/${ info.postId }/content/editComment`, {
+                    method: 'PUT',
+                    body: JSON.stringify(body),
+                    headers: { 'Content-Type': 'application/json'} 
+                }
+            )
+            submitSuccessful = resp.ok
+            if (submitSuccessful) {
+                const parsed = await resp.json()
+                editedCommentInfo = parsed.editedCommentInfo
+            }
+        }
+        catch (error) {
+            console.error(error)
+            submitSuccessful = false
+        }
+
+        if (submitSuccessful) {
+            const {
+                commentId,
+                editContent: newEditContent, 
+                displayContent: newDisplayContent 
+            } = editedCommentInfo
+            updateCommentUi(commentId, newEditContent, newDisplayContent)
+        }
+        return submitSuccessful
+    }
+
+    const updateCommentUi = (commentId, newEditContent, newDisplayContent) => {
+        if (isAncestor) {
+            setAncestor({
+                ...ancestor, 
+                editContent: newEditContent, 
+                displayContent: newDisplayContent
+            })
+            return
+        }
+        
+        let oldCommentIdx
+        for (let i = 0; i < descendantsInfo.length; i++) {
+            if (descendantsInfo[i].commentId === commentId) {
+                oldCommentIdx = i
+                break
+            }
+        }
+        setDescendantsInfo([
+            ...descendantsInfo.slice(0, oldCommentIdx),
+            { ...descendantsInfo[oldCommentIdx],
+                editContent: newEditContent, 
+                displayContent: newDisplayContent },
+            ...descendantsInfo.slice(oldCommentIdx + 1)
+        ])
+    }
 
     const handleReplySubmit = async ({ editContent, displayContent, anonymous }) => {
         const body = { 
@@ -159,7 +223,8 @@ const Comment = React.memo(function(props) {
                             <ReplyButton parentId={ info.commentId }
                                 ancestorId={ isAncestor ? null : info.ancestorComment } 
                                 setClicked={ () => setReplying(true) } /> }
-                            { userIsCommentAuthor && <button className="px-1">EDIT</button> }
+                            { userIsCommentAuthor && !editing &&
+                            <CommentEditButton setClicked={ () => setEditing(true) } /> }
                             { canDelete && 
                             <CommentDeleteButton postId={ postId } commentId={ info.commentId }
                                 markDeleted={ () => setUserDeleted(true) } /> }
@@ -177,9 +242,11 @@ const Comment = React.memo(function(props) {
                                 setCommentResolving={ setCommentResolving }
                                 setPostResolved={ setPostResolved } /> }
                         </div>
-                        { replying && 
-                        <Editor hideEditor={ () => setReplying(false) } 
-                            handleSubmit={ handleReplySubmit } /> }
+                        { (replying || editing) && 
+                        <Editor hideEditor={ 
+                            replying ? () => setReplying(false) : () => setEditing(false) } 
+                            handleSubmit={ replying ? handleReplySubmit : handleEditSubmit }
+                            editContent={ info.editContent } /> }
                     </>}
                 </div>
             </div>

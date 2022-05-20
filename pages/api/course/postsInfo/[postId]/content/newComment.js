@@ -1,7 +1,6 @@
 import { sessionOptions } from "../../../../../../lib/session"
 import { withIronSessionApiRoute } from "iron-session/next"
 import { query } from '../../../../../../db/index'
-import { fixNodePgUTCTimeInterpretation } from "../../../../../../lib/time"
 
 export default withIronSessionApiRoute(async function(req, resp) {
     if (req.method !== 'POST') {
@@ -12,7 +11,6 @@ export default withIronSessionApiRoute(async function(req, resp) {
         resp.status(200).json({ message: "not authenticated" })
         return
     }
-    console.log(req.body)
     if (invalidParams(req.body)) {
         resp.status(400).json({ message: "supplied params invalid" })
         return
@@ -38,6 +36,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
         insertCommentQuery = (
             await query(insertCommentQueryText, insertCommentQueryParams))
+        insertFailure = insertCommentQuery.rows.length === 0
     }
     catch (error) {
         console.error(error)

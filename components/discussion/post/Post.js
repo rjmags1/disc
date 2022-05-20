@@ -30,8 +30,6 @@ function Post() {
         }
     }))
 
-    console.log(threads)
-
     // get new post content associated with currentPost (selected 
     // from postListingsPane) and apiPage, which is inc on lazy loader intersxn
     const { content, loading: loadingPostContent } = usePostContent(
@@ -96,7 +94,6 @@ function Post() {
             createdAt: new Date(Date.now()).toUTCString(),
             anonymous
         }
-        console.log(body.createdAt)
         let submitSuccessful, newCommentInfo
         try {
             const resp = await fetch(
