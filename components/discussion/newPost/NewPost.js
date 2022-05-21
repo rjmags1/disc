@@ -1,12 +1,16 @@
-import { useContext, useState } from 'react'
-import { EditorContext } from '../../../pages/[courseId]/discussion'
+import { useContext, useState, useMemo } from 'react'
+import { EditorContext, PostListingsContext } from '../../../pages/[courseId]/discussion'
 import { useCourse, useUser } from '../../../lib/hooks'
 import { useRouter } from 'next/router'
+import { LIGHT_RAINBOW_HEX } from '../../../lib/colors'
 
 function NewPost({ exitNewPost }) {
-    const Editor = useContext(EditorContext)
     const router = useRouter()
     const { courseId } = router.query
+    const Editor = useContext(EditorContext)
+    const {
+        postListings, setPostListings, specialListings, setSpecialListings
+    } = useContext(PostListingsContext)
 
     const [title, setTitle] = useState("")
     const [category, setCategory] = useState("General")
@@ -17,15 +21,81 @@ function NewPost({ exitNewPost }) {
     const [isAnonymous, setIsAnonymous] = useState(false)
 
     const { user } = useUser()
-    //const canMarkAnnouncementOrPinned = (
-        //user.is_instructor || user.is_staff || user.is_admin)
-    const canMarkAnnouncementOrPinned = true
-
     const { course, loading: loadingCourse } = useCourse(courseId)
-    const categories = !!course ? course.categories : []
 
+    const canMarkAnnouncementOrPinned = true //(
+        //user.is_instructor || user.is_staff || user.is_admin)
+    const categories = loadingCourse ? [] : course.categories
 
-    console.log(isQuestion)
+    const categoriesToLightRainbowHex = useMemo(() => {
+        if (!course?.categories) return null
+
+        const mapped = {}
+        const { categories } = course
+        for (let i = 0; i < categories.length; i++) {
+            const category = categories[i]
+            mapped[category] = LIGHT_RAINBOW_HEX[i % LIGHT_RAINBOW_HEX.length]
+        }
+        return mapped
+    }, [course])
+
+    const handleNewPostSubmit = async (editorInfo) => {
+        const { editContent, displayContent } = editorInfo
+        const body = {
+            title, category, isQuestion, isAnnouncement, displayContent,
+            isPrivate, isPinned, isAnonymous, editContent, courseId: parseInt(courseId),
+            createdAt: new Date(Date.now()).toUTCString(),
+        }
+        let submitSuccessful, newPostInfo
+        try {
+            const resp = await fetch(
+                `/api/course/postsInfo/null/content/newPost`, {
+                    method: 'POST',
+                    body: JSON.stringify(body),
+                    headers: { 'Content-Type': 'application/json' }
+                }
+            )
+            submitSuccessful = resp.ok
+            if (submitSuccessful) {
+                const parsed = await resp.json()
+                newPostInfo = parsed.newPostInfo
+            }
+        }
+        catch (error) {
+            console.error(error)
+            submitSuccessful = false
+        }
+        if (submitSuccessful) {
+            newPostInfo = { 
+                ...newPostInfo, 
+                createdAt: new Date(newPostInfo.createdAt) 
+            }
+            console.log(newPostInfo)
+            console.log(specialListings)
+            console.log(postListings)
+
+            if (newPostInfo.isAnnouncement || newPostInfo.isPinned) {
+                setSpecialListings(
+                    newPostInfo.isPinned ? {
+                        ...specialListings,
+                        pinned: [newPostInfo, ...specialListings.pinned]
+                    } : {
+                        ...specialListings, 
+                        announcements: [newPostInfo, ...specialListings.announcements]
+                    } 
+                )
+            }
+            else {
+                const catColor = categoriesToLightRainbowHex[category]
+                newPostInfo = { postInfo: newPostInfo, catColor }
+                setPostListings([newPostInfo, ...postListings])
+            }
+            exitNewPost()
+        }
+
+        return submitSuccessful
+    }
+
     return (
         <div data-testid="new-post-container" 
             className="w-full h-full bg-light-gray p-[8%] overflow-x-hidden">
@@ -34,7 +104,7 @@ function NewPost({ exitNewPost }) {
                 <img className="hover:cursor-pointer h-[30px]" 
                     onClick={ exitNewPost } src="/x-out.png" width="30"/>
             </header>
-            <form className="mt-4 h-full">
+            <div className="mt-4 h-full">
                 <label className="flex flex-col">
                     <input type="text" className="bg-inherit border-b border-b-white 
                         min-w-[60%] focus:outline-none max-w-max font-light"
@@ -60,29 +130,31 @@ function NewPost({ exitNewPost }) {
                         <label className='flex font-thin text-md h-fit items-center mx-1'>
                             <input type="checkbox" className='accent-[#9400FF] mr-1 h-fit' 
                                 onChange={ () => setIsQuestion(prev => !prev) }/>
-                            <span className='whitespace-nowrap'>Is question?</span>
+                            <span className='whitespace-nowrap'>Question</span>
                         </label>
                         <label className='flex font-thin text-md h-fit items-center mx-1'>
                             <input type="checkbox" className='accent-[#9400FF] mr-1 h-fit' 
                                 onChange={ () => setIsAnonymous(prev => !prev) }/>
-                            <span className='whitespace-nowrap'>Post anonymously?</span>
+                            <span className='whitespace-nowrap'>Anonymous</span>
                         </label>
                         { canMarkAnnouncementOrPinned && 
                         <label className='flex font-thin text-md h-fit items-center mx-1'>
                             <input type="checkbox" className='accent-[#9400FF] mr-1 h-fit' 
                                 onChange={ () => setIsPinned(prev => !prev) }/>
-                            <span className='whitespace-nowrap'>Pin?</span>
+                            <span className='whitespace-nowrap'>Pin</span>
                         </label> }
                         { canMarkAnnouncementOrPinned && 
                         <label className='flex font-thin text-md h-fit items-center mx-1'>
                             <input type="checkbox" className='accent-[#9400FF] mr-1 h-fit' 
                                 onChange={ () => setIsAnnouncement(prev => !prev) }/>
-                            <span className='whitespace-nowrap'>Make announcement?</span>
+                            <span className='whitespace-nowrap'>Announcement</span>
                         </label> }
                     </div>
                 </section>
-                <div className='h-[60%]'><Editor isPost/></div>
-            </form>
+                <div className='h-[60%]'>
+                    <Editor isPost handleSubmit={ handleNewPostSubmit } />
+                </div>
+            </div>
         </div>
     )
 }

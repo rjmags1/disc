@@ -4,7 +4,6 @@ import { useRef, useEffect, useState } from 'react'
 let quill
 
 function Editor({ hideEditor, handleSubmit, editContent, isPost }) {
-    console.log(isPost)
     const [tick, setTick] = useState(0)
     const [anonymous, setAnonymous] = useState(false)
     const editorRef = useRef(null)
@@ -29,7 +28,7 @@ function Editor({ hideEditor, handleSubmit, editContent, isPost }) {
 
     const removeToolbarAndEditor = () => {
         removeToolbar(editorRef.current)
-        hideEditor()
+        if (!!hideEditor) hideEditor()
     }
 
     const handleSubmitClick = async () => {
@@ -38,6 +37,7 @@ function Editor({ hideEditor, handleSubmit, editContent, isPost }) {
             displayContent: editorRef.current.firstElementChild.innerHTML,
             anonymous
         })
+        console.log(submitted)
         if (submitted) removeToolbarAndEditor()
     }
 
