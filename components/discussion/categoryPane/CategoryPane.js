@@ -6,7 +6,7 @@ import Category from './Category'
 import { RAINBOW_HEX } from '../../../lib/colors'
 import { LARGE_MEDIA_BREAKPOINT } from '../../../lib/layout'
 
-function CategoryPane({ catPaneRef, changeCategoryFilter }) {
+function CategoryPane({ catPaneRef, changeCategoryFilter, setNewPost, newPost }) {
     const MAX_CAT_PANE_WIDTH = 400
     const INITIAL_CAT_PANE_WIDTH = 250
     const router = useRouter()
@@ -65,6 +65,12 @@ function CategoryPane({ catPaneRef, changeCategoryFilter }) {
             <div data-testid="category-headers-container"
                 className="w-full flex flex-col items-center justify-start 
                     overflow-hidden my-2">
+                { !newPost && 
+                <button className='w-[90%] bg-purple border border-white
+                    rounded py-1 mb-3 mt-1 hover:bg-violet-800 font-mono' 
+                    onClick={ () => setNewPost(true) }>
+                    + New Post
+                </button> }
                 <header className="w-full">
                     <h3 className="text-sm font-mono text-gray-400 w-full
                         text-left px-4 truncate">

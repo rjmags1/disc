@@ -3,7 +3,8 @@ import { useRef, useEffect, useState } from 'react'
 
 let quill
 
-function Editor({ hideEditor, handleSubmit, editContent }) {
+function Editor({ hideEditor, handleSubmit, editContent, isPost }) {
+    console.log(isPost)
     const [tick, setTick] = useState(0)
     const [anonymous, setAnonymous] = useState(false)
     const editorRef = useRef(null)
@@ -43,22 +44,26 @@ function Editor({ hideEditor, handleSubmit, editContent }) {
     return (
         <>
             <div id="quill-editor-container" ref={ editorRef } 
-                className="text-white rounded-b-[10px]" />
+                className="text-white rounded-b-[10px]" 
+                style={ isPost ? { fontSize: '1rem', fontWeight: 200 } : {} } />
             <div className="flex mb-2">
-                <button className="mt-2 bg-purple py-0.5 px-2 rounded border
-                    border-white hover:bg-violet-800" onClick={ handleSubmitClick }>
-                    Submit
+                <button className="mt-4 bg-purple py-0.5 px-2 rounded border
+                    border-white hover:bg-violet-800" onClick={ handleSubmitClick }
+                    style={ isPost ? { paddingLeft: '2rem', paddingRight: '2rem' } : {} }>
+                    { isPost ? "Post" : "Submit" }
                 </button>
+                { !isPost && 
                 <button className="mx-2 mt-2 py-0.5 opacity-60 underline 
                     hover:opacity-30 font-thin text-sm" 
                     onClick={ () => setAnonymous(prev => !prev) }>
                     { anonymous ? "Unmark anonymous" : "Mark anonymous" }
-                </button>
+                </button> }
+                { !isPost && 
                 <button className="mt-2 py-0.5 opacity-60 underline 
                     hover:opacity-30 font-thin text-sm" 
                     onClick={ removeToolbarAndEditor }>
                     Cancel
-                </button>
+                </button> }
             </div>
         </>
         

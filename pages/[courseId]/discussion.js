@@ -8,6 +8,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useUser, useCourse } from '../../lib/hooks'
 import 'quill/dist/quill.snow.css'
 import dynamic from 'next/dynamic'
+import NewPost from '../../components/discussion/newPost/NewPost'
 const Editor = dynamic(
     () => import('../../components/discussion/post/Editor'), 
     { ssr: false })
@@ -27,6 +28,7 @@ function Discussion() {
     const [specialListings, setSpecialListings] = useState(
         { pinned: [], announcements: [] })
     const [initialLoadTime] = useState(Date.now())
+    const [newPost, setNewPost] = useState(false)
 
     const postContext = { currentPost, setCurrentPost }
     const postListingsContext = { 
@@ -78,7 +80,8 @@ function Discussion() {
                     <div data-testid="discussion-container" 
                     className="flex h-[calc(100vh-48px)] w-full">
                         <CategoryPane catPaneRef={ catPaneRef } 
-                            changeCategoryFilter={ changeFilter } />
+                            changeCategoryFilter={ changeFilter }
+                            newPost={ newPost } setNewPost={ setNewPost } />
                         <PostListingsContext.Provider 
                             value={ postListingsContext } >
                             <PostContext.Provider value={ postContext }>
@@ -87,7 +90,9 @@ function Discussion() {
                                     <PostListingsPane catPaneRef={ catPaneRef }
                                         toggleCatPane={ () => setShowHiddenPane(!showHiddenPane) }
                                         categoryFilter={ categoryFilter } setCurrentPost={ setCurrentPost }/>
-                                    <Post />
+                                    { newPost ? 
+                                    <NewPost exitNewPost={ () => setNewPost(false) } /> 
+                                    : <Post /> }
                                 </section>
                             </PostContext.Provider>
                         </PostListingsContext.Provider>
