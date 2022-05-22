@@ -1,43 +1,62 @@
-import { useContext, useEffect, useState, useRef } from 'react'
-import { PostContext, TimeContext } from '../../../pages/[courseId]/discussion'
 import Loading from '../../lib/Loading'
 import NoPostSelected from './NoPostSelected'
-import { usePostContent } from '../../../lib/hooks'
 import PostContentSection from './PostContentSection'
 import Thread from './Thread'
 import CommentButton from './controlPanelButtons/CommentButton'
-import { EditorContext } from '../../../pages/[courseId]/discussion'
+
+import { useContext, useEffect, useState, useRef } from 'react'
+import { 
+    PostContext, TimeContext, EditorContext 
+} from '../../../pages/[courseId]/discussion'
+import { usePostContent } from '../../../lib/hooks'
+
 
 function Post() {
     const Editor = useContext(EditorContext)
-    const [apiPage, setApiPage] = useState(1)
-    const [threads, setThreads] = useState([])
-    const [loadingCommentsFor, setLoadingCommentsFor] = useState(null)
-    const [observed, setObserved] = useState(false)
-    const [postContent, setPostContent] = useState(null)
-    const { currentPost } = useContext(PostContext)
-    const [postResolved, setPostResolved] = useState(null)
-    const [postAnswered, setPostAnswered] = useState(null)
-    const [showNewCommentBtn, setShowNewCommentBtn] = useState(true)
     const initialLoadTime = useContext(TimeContext)
+    const { currentPost } = useContext(PostContext)
+
+    const [apiPage, setApiPage] = useState(1)
+    const [threads, setThreads] = useState(
+        []
+    ) // threads are top level (ancestor) comments and first 2 associated
+      // replies, plus a load more button to load more replies
+    const [loadingCommentsFor, setLoadingCommentsFor] = useState(
+        null
+    ) // loadingCommentsFor keeps track of post for which current apiPage 
+      // corresponds to. changes when Post component renders different post info,
+      // ie, when currentPost (from context) changes
+    const [showNewCommentBtn, setShowNewCommentBtn] = useState(true)
+    const [postContent, setPostContent] = useState(null)
+    const [postResolved, setPostResolved] = useState(
+        null
+    ) // hold resolved and answered info in state to update ui in case
+      // a user is post author and marks a comment as resolving or answer
+    const [postAnswered, setPostAnswered] = useState(null)
+    const [observed, setObserved] = useState(false)
+
     const loaderRef = useRef(null) // triggers thread lazy loading on intersxn
-    const canLoadMoreRef = useRef(false) // .current true only if just loaded 
-                                         // api page and theres another one 
+    const canLoadMoreContentForPostRef = useRef(
+        false
+    ) // .current true only if just loaded an api page and theres 
+      // more info to load from the backend
     const observerRef = useRef(new IntersectionObserver((entries) => {
-        if (canLoadMoreRef.current && entries[0].isIntersecting) {
+        if (canLoadMoreContentForPostRef.current && entries[0].isIntersecting) {
             setApiPage(prev => prev + 1)
-            canLoadMoreRef.current = false
+            canLoadMoreContentForPostRef.current = false
         }
     }))
 
-    // get new post content associated with currentPost (selected 
-    // from postListingsPane) and apiPage, which is inc on lazy loader intersxn
+    // get post content, ie author avatar, display and edit content, 
+    // associated with currentPost and apiPage, which is inc on lazy 
+    // loader intersxn
     const { content, loading: loadingPostContent } = usePostContent(
         currentPost?.postId, currentPost?.authorId, apiPage, initialLoadTime)
 
-    // reset apiPage whenever a new post is selected, 
-    // hook up observer on first post selection from postListingsPane
+
     useEffect(() => {
+        // effect for resetting apiPage back to 1 when new post is selected. 
+        // this effect also wires observer to loaderRef on first post select
         if (!currentPost) return
         setPostAnswered(currentPost.answered)
         setPostResolved(currentPost.resolved)
@@ -49,14 +68,14 @@ function Post() {
         
     }, [currentPost])
 
-    // update threads and postContent to be displayed on new/first 
-    // post selection and successful subsequent data loading.
-    // also update whether it is possible to load more threads,
-    // and remember this post so the next time this effect runs
-    // we'll know whether its running again due to new post selection
-    // from listings pane or lazy loading more threads associated
-    // with this post
     useEffect(() => {
+        // update threads and postContent state on new/first 
+        // post selection and successful subsequent usePostContent data hook 
+        // call. also update whether it is possible to load more threads,
+        // and remember this post in loadingCommentsFor state
+        // so the next time this effect runs we'll know whether its running 
+        // again due to new post selection from listings pane (currentPost change)
+        // or lazy loading more threads associated with this post
         if (!content || loadingPostContent) return
 
         const { ancestorInfo, descendantInfo, nextPage } = content
@@ -64,25 +83,26 @@ function Post() {
             ancestorCommentInfo => ({
                 ancestor: ancestorCommentInfo, 
                 descendants: (
-                    !!descendantInfo && 
-                    descendantInfo[ancestorCommentInfo.commentId]) ? 
-                    descendantInfo[ancestorCommentInfo.commentId] : []
+                    (!!descendantInfo && 
+                        descendantInfo[ancestorCommentInfo.commentId]) ? 
+                    descendantInfo[ancestorCommentInfo.commentId] : [])
             })
         )
 
-        const newPostSelected = (
-            loadingCommentsFor !== null && 
-            loadingCommentsFor !== currentPost.postId)
+        const newPostSelected = (loadingCommentsFor !== null 
+            && loadingCommentsFor !== currentPost.postId)
         if (apiPage === 1 && (newPostSelected || loadingCommentsFor === null)) {
             setPostContent({ ...currentPost, ...content.postInfo })
         }
-        canLoadMoreRef.current = !!nextPage
+        canLoadMoreContentForPostRef.current = !!nextPage
         setThreads(newPostSelected ? newThreads : [...threads, ...newThreads])
         setLoadingCommentsFor(currentPost.postId)
 
     }, [loadingPostContent, currentPost])
 
+
     const handleNewThread = async ({ editContent, displayContent, anonymous }) => {
+        // handles new top-level/ancestor comment submission
         // talk to backend
         const { postId } = currentPost
         const body = { 
@@ -125,8 +145,10 @@ function Post() {
 
     const neverSelectedPost = !currentPost
     const loadingNewPost = apiPage === 1 && loadingPostContent
-    const postContentSyncedWithCurrentPost = 
-        (postContent?.postId === currentPost?.postId)
+    const postContentSyncedWithCurrentPost = (
+        postContent?.postId === currentPost?.postId
+    ) // will be false if new currentPost changed and effect that updates
+      // postContent state has not fired yet
     const showPost = !!postContent && postContentSyncedWithCurrentPost
 
     return (
@@ -142,16 +164,16 @@ function Post() {
                     setContent={ setPostContent } /> 
                 <h4 className="text-lg font-base">Comments</h4>
                 <hr className="mb-1"/>
-                { showNewCommentBtn &&
-                <CommentButton hideCommentBtn={ () => setShowNewCommentBtn(false) } /> }
-                { !showNewCommentBtn &&
+                { showNewCommentBtn ?
+                <CommentButton 
+                    hideCommentBtn={ () => setShowNewCommentBtn(false) } /> :
                 <Editor hideEditor={ () => setShowNewCommentBtn(true) } 
-                    handleSubmit={ handleNewThread } />}
+                    handleSubmit={ handleNewThread } /> }
                 { threads.map(thread => (
-                <Thread key={ `${ thread.ancestor.commentId }-thread` } postId={ currentPost.postId }
+                <Thread key={ `${ thread.ancestor.commentId }-thread` } 
+                    postId={ currentPost.postId } setPostResolved={ setPostResolved }
                     info={{ ...thread, postAuthorId: currentPost.authorId }}
                     postIsQuestion={ currentPost.isQuestion } 
-                    setPostResolved={ setPostResolved } 
                     setPostAnswered={ setPostAnswered }/>)) }
             </>}
             <div ref={ loaderRef } className="w-full h-[1px] bg-inherit" />

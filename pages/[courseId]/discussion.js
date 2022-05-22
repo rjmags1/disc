@@ -97,6 +97,7 @@ function Discussion() {
         }
     }, [currentPost])
 
+
     const changeCategoryFilter = (add, category) => {
         const newFilter = new Set(categoryFilter)
         if (add) newFilter.add(category)
