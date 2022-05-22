@@ -1,14 +1,17 @@
-import { useState, useContext, useMemo } from 'react'
 import Timestamp from "../postListingsPane/listingIcons/Timestamp"
 import PostControlPanel from "./PostControlPanel"
+
+import { useState, useContext, useMemo } from 'react'
+import { useCourse } from '../../../lib/hooks'
+import { useRouter } from 'next/router'
 import { 
     EditorContext, PostListingsContext 
 } from '../../../pages/[courseId]/discussion'
+
 import { LIGHT_RAINBOW_HEX } from '../../../lib/colors'
-import { useCourse } from '../../../lib/hooks'
-import { useRouter } from 'next/router'
 
 function PostContentSection({ content, resolved, answered, setContent }) {
+    console.log(content)
     const router = useRouter()
     const { courseId } = router.query
     const Editor = useContext(EditorContext)
@@ -18,7 +21,6 @@ function PostContentSection({ content, resolved, answered, setContent }) {
 
     const [editing, setEditing] = useState(false)
     // fetch views and add 
-    const views = 100
     const { course } = useCourse(courseId)
 
     const categoriesToLightRainbowHex = useMemo(() => {
@@ -151,7 +153,7 @@ function PostContentSection({ content, resolved, answered, setContent }) {
                         <div className="flex flex-col justify-center 
                             items-center mx-2">
                             <h4 className="text-lg w-full text-center">
-                                { views }
+                                { content.views }
                             </h4>
                             <h6>views</h6>
                         </div>

@@ -52,9 +52,9 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
         if (pageNumber === 1) {
             const postContentQueryText = (userId === authorId ?
-                `SELECT display_content, edit_content, avatar_url 
+                `SELECT display_content, edit_content, avatar_url, views 
                 FROM (
-                        SELECT display_content, edit_content, author 
+                        SELECT post_id, display_content, edit_content, author 
                         FROM post 
                         WHERE post_id = $1)
                     AS post
@@ -65,11 +65,18 @@ export default withIronSessionApiRoute(async function(req, resp) {
                     AS person
                     ON author = user_id
                     JOIN avatar_url 
-                    ON avatar_url_id = person.avatar;`
+                    ON avatar_url_id = person.avatar
+                    JOIN (
+                        SELECT COUNT(DISTINCT viewer) AS views, post AS viewed_post
+                        FROM post_view 
+                        WHERE post = $1
+                        GROUP BY viewed_post)
+                    AS post_views
+                    ON post_id = viewed_post;`
                 : 
-                `SELECT display_content, avatar_url 
+                `SELECT display_content, avatar_url, views
                 FROM (
-                    SELECT display_content, author 
+                    SELECT post_id, display_content, author 
                     FROM post 
                     WHERE post_id = $1)
                 AS post
@@ -80,7 +87,14 @@ export default withIronSessionApiRoute(async function(req, resp) {
                 AS person
                 ON author = user_id
                 JOIN avatar_url 
-                ON avatar_url_id = person.avatar;`)
+                ON avatar_url_id = person.avatar
+                JOIN (
+                    SELECT COUNT(DISTINCT viewer) AS views, post AS viewed_post
+                    FROM post_view 
+                    WHERE post = $1
+                    GROUP BY viewed_post)
+                AS post_views
+                ON post_id = viewed_post;`)
             postContentQuery = (
                 await clientQuery(dbClient, postContentQueryText, [postId, authorId]))
         }
@@ -159,6 +173,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
         postInfo.avatarUrl = postContentQuery.rows[0].avatar_url
         postInfo.displayContent = postContentQuery.rows[0].display_content
         postInfo.editContent = postContentQuery.rows[0].edit_content
+        postInfo.views = parseInt(postContentQuery.rows[0].views)
     }
     
     const ancestorRows = ancestorCommentQuery.rows
