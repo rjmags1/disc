@@ -23,7 +23,7 @@ function NewPost({ exitNewPost }) {
     const { user } = useUser()
     const { course, loading: loadingCourse } = useCourse(courseId)
 
-    const canMarkAnnouncementOrPinned = true (
+    const canMarkAnnouncementOrPinned = (
         user.is_instructor || user.is_staff || user.is_admin)
     const categories = loadingCourse ? [] : course.categories
 
