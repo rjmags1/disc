@@ -3,7 +3,7 @@ import { useRef, useEffect, useState } from 'react'
 
 let quill
 
-function Editor({ hideEditor, handleSubmit, editContent, isPost }) {
+function Editor({ hideEditor, handleSubmit, editContent, isPost, editingPost }) {
     const [tick, setTick] = useState(0)
     const [anonymous, setAnonymous] = useState(false)
     const editorRef = useRef(null)
@@ -37,7 +37,6 @@ function Editor({ hideEditor, handleSubmit, editContent, isPost }) {
             displayContent: editorRef.current.firstElementChild.innerHTML,
             anonymous
         })
-        console.log(submitted)
         if (submitted) removeToolbarAndEditor()
     }
 
@@ -50,7 +49,7 @@ function Editor({ hideEditor, handleSubmit, editContent, isPost }) {
                 <button className="mt-4 bg-purple py-0.5 px-2 rounded border
                     border-white hover:bg-violet-800" onClick={ handleSubmitClick }
                     style={ isPost ? { paddingLeft: '2rem', paddingRight: '2rem' } : {} }>
-                    { isPost ? "Post" : "Submit" }
+                    { isPost && !editingPost ? "Post" : "Submit" }
                 </button>
                 { !isPost && 
                 <button className="mx-2 mt-2 py-0.5 opacity-60 underline 
@@ -58,9 +57,10 @@ function Editor({ hideEditor, handleSubmit, editContent, isPost }) {
                     onClick={ () => setAnonymous(prev => !prev) }>
                     { anonymous ? "Unmark anonymous" : "Mark anonymous" }
                 </button> }
-                { !isPost && 
+                { (!isPost || editingPost) && 
                 <button className="mt-2 py-0.5 opacity-60 underline 
-                    hover:opacity-30 font-thin text-sm" 
+                    hover:opacity-30 font-thin text-sm mx-2" 
+                    style={ editingPost ? { marginTop: '1rem' } : {} } 
                     onClick={ removeToolbarAndEditor }>
                     Cancel
                 </button> }

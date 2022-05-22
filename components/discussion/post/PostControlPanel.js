@@ -8,7 +8,7 @@ import StarButton from './controlPanelButtons/StarButton'
 import WatchButton from './controlPanelButtons/WatchButton'
 import EditButton from './controlPanelButtons/EditButton'
 
-function PostControlPanel() {
+function PostControlPanel({ editPost }) {
     const { currentPost } = useContext(PostContext)
 
     const { user } = useUser()
@@ -22,7 +22,7 @@ function PostControlPanel() {
             className="w-max flex mb-3 gap-[3%]">
             <LikeButton liked={ currentPost.liked } />
             <WatchButton watched={ currentPost.watched }/>
-            { userIsAuthor && <EditButton /> }
+            { userIsAuthor && <EditButton editPost={ editPost } /> }
             <StarButton starred={ currentPost.starred } />
             { canEndorse && <EndorseButton endorsed={ currentPost.endorsed } /> }
             { canDelete && !currentPost.deleted && <DeleteButton /> }

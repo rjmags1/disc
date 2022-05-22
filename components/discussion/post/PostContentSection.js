@@ -1,13 +1,123 @@
+import { useState, useContext, useMemo } from 'react'
 import Timestamp from "../postListingsPane/listingIcons/Timestamp"
 import PostControlPanel from "./PostControlPanel"
+import { 
+    EditorContext, PostListingsContext 
+} from '../../../pages/[courseId]/discussion'
+import { LIGHT_RAINBOW_HEX } from '../../../lib/colors'
+import { useCourse } from '../../../lib/hooks'
+import { useRouter } from 'next/router'
 
-function PostContentSection({ content, resolved, answered }) {
+function PostContentSection({ content, resolved, answered, setContent }) {
+    const router = useRouter()
+    const { courseId } = router.query
+    const Editor = useContext(EditorContext)
+    const {
+        postListings, setPostListings, specialListings, setSpecialListings
+    } = useContext(PostListingsContext)
+
+    const [editing, setEditing] = useState(false)
     // fetch views and add 
     const views = 100
+    const { course } = useCourse(courseId)
+
+    const categoriesToLightRainbowHex = useMemo(() => {
+        if (!course?.categories) return null
+
+        const mapped = {}
+        const { categories } = course
+        for (let i = 0; i < categories.length; i++) {
+            const category = categories[i]
+            mapped[category] = LIGHT_RAINBOW_HEX[i % LIGHT_RAINBOW_HEX.length]
+        }
+        return mapped
+    }, [course])
+    
+    const handlePostEdit = async ({ editContent, displayContent }) => {
+        const body = { 
+            postId: parseInt(content.postId), editContent, displayContent }
+
+        let submitSuccessful, editedPostInfo
+        try {
+            const resp = await fetch(
+                `/api/course/postsInfo/${ content.postId }/content/editPost`, {
+                    method: 'PUT',
+                    body: JSON.stringify(body),
+                    headers: { 'Content-Type': 'application/json' }
+                }
+            )
+            submitSuccessful = resp.ok
+            if (submitSuccessful) {
+                const parsed = await resp.json()
+                editedPostInfo = parsed.editedPostInfo
+            }
+        }
+        catch (error) {
+            console.error(error)
+            submitSuccessful = false
+        }
+
+        if (submitSuccessful) {
+            const { 
+                editContent: newEditContent, 
+                displayContent: newDisplayContent,
+                postId: editedPostId
+            } = editedPostInfo
+
+            editedPostInfo = {
+                ...content,  
+                editContent: newEditContent,
+                displayContent: newDisplayContent
+            }
+
+            const specialPost = (
+                editedPostInfo.isAnnouncement || editedPostInfo.isPinned)
+            const editedPostListingIdx = getEditedIdx(
+                specialPost ? specialListings : postListings, 
+                editedPostId, 
+                specialPost
+            )
+
+            if (specialPost) {
+                setSpecialListings(
+                    editedPostInfo.isPinned ? {
+                        ...specialListings,
+                        pinned: [
+                            ...specialListings.pinned.slice(0, editedPostListingIdx),
+                            editedPostInfo,
+                            ...specialListings.pinned.slice(editedPostListingIdx + 1)
+                        ]
+                    } : {
+                        ...specialListings, 
+                        announcements: [
+                            ...specialListings.announcements.slice(0, editedPostListingIdx),
+                            editedPostInfo,
+                            ...specialListings.announcements.slice(editedPostListingIdx + 1)
+                        ]
+                    } 
+                )
+            }
+            else {
+                const catColor = categoriesToLightRainbowHex[content.category]
+                editedPostInfo = { postInfo: editedPostInfo, catColor }
+                setPostListings([
+                    ...postListings.slice(0, editedPostListingIdx),
+                    editedPostInfo,
+                    ...postListings.slice(editedPostListingIdx + 1)
+                ])
+            }
+
+            setContent(specialPost ? editedPostInfo.postId : editedPostInfo.postInfo)
+        }
+
+        setEditing(false)
+        return submitSuccessful
+    }
+
     return (
         <div data-testid="post-content-container" className="w-full font-thin">
             <header>
-                <h3 data-testid="post-title" className="text-3xl font-medium">
+                <h3 data-testid="post-title" className="text-3xl font-medium mb-3">
                     { content.title }
                 </h3>
                 <section className="flex justify-between my-2 mb-3 h-[55px] 
@@ -62,12 +172,28 @@ function PostContentSection({ content, resolved, answered }) {
                     </div>
                 </section>
             </header>
-            <PostControlPanel />
+            { !editing && 
+            <PostControlPanel editPost={ () => setEditing(true) } /> }
+            { editing ? 
+            <div>
+                <Editor editContent={ content.editContent } isPost editingPost 
+                    handleSubmit={ handlePostEdit } 
+                    hideEditor={ () => setEditing(false) } />
+            </div> : 
             <section data-testid="post-display-content" 
                 dangerouslySetInnerHTML={{ __html: content.displayContent }} 
-                className="font-light" />
+                className="font-light my-8" /> }
         </div>
     )
+}
+
+const getEditedIdx = (listings, postId, special) => {
+    for (let i = 0; i < listings.length; i++) {
+        const listing = listings[i]
+        const listingPostId = special ? listing.postId : listing.postInfo.postId
+        if (listingPostId === postId) return i
+    }
+    throw new Error()
 }
 
 export default PostContentSection

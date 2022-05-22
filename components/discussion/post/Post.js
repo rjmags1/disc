@@ -138,7 +138,8 @@ function Post() {
             { showPost && 
             <>
                 <PostContentSection answered={ postAnswered }
-                    resolved={ postResolved } content={ postContent } /> 
+                    resolved={ postResolved } content={ postContent } 
+                    setContent={ setPostContent } /> 
                 <h4 className="text-lg font-base">Comments</h4>
                 <hr className="mb-1"/>
                 { showNewCommentBtn &&

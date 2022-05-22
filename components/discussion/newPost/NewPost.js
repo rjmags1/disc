@@ -70,9 +70,6 @@ function NewPost({ exitNewPost }) {
                 ...newPostInfo, 
                 createdAt: new Date(newPostInfo.createdAt) 
             }
-            console.log(newPostInfo)
-            console.log(specialListings)
-            console.log(postListings)
 
             if (newPostInfo.isAnnouncement || newPostInfo.isPinned) {
                 setSpecialListings(
