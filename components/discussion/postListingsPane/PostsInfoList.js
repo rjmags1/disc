@@ -5,7 +5,7 @@ import React, { useState, useEffect, useMemo, useContext } from 'react'
 import { useAnnouncementsPinned, useCourse, useUser } from '../../../lib/hooks'
 import PostInfo from './PostInfo'
 import LoadMoreButton from './LoadMoreButton'
-import { LIGHT_RAINBOW_HEX } from'../../../lib/colors'
+import { categoriesToLightRainbowHex } from'../../../lib/colors'
 import { filterTest } from '../../../lib/filter'
 import Pinned from './Pinned'
 import Announcements from './Announcements'
@@ -25,16 +25,9 @@ const PostsInfoList = React.memo(function(props) {
 
     const { course } = useCourse(courseId)
     const { user } = useUser()
-    const categoriesToLightRainbowHex = useMemo(() => {
+    const categoriesToColors = useMemo(() => {
         if (!course?.categories) return null
-
-        const mapped = {}
-        const { categories } = course
-        for (let i = 0; i < categories.length; i++) {
-            const category = categories[i]
-            mapped[category] = LIGHT_RAINBOW_HEX[i % LIGHT_RAINBOW_HEX.length]
-        }
-        return mapped
+        return categoriesToLightRainbowHex(course.categories)
     }, [course])
 
 
@@ -53,7 +46,7 @@ const PostsInfoList = React.memo(function(props) {
 
     // fetch more posts on apiPage change (initial load or load more btn click)
     useEffect(async () => {
-        if (!categoriesToLightRainbowHex) return
+        if (!categoriesToColors) return
         
         // render loading post icon if not initial load
         setLoadingMorePosts(apiPage > 1) 
@@ -65,12 +58,12 @@ const PostsInfoList = React.memo(function(props) {
 
         // put freshly loaded posts into postListingComponents
         const newPosts = newPostInfo.map((postInfo) => {
-            const catColor = categoriesToLightRainbowHex[postInfo.category]
+            const catColor = categoriesToColors[postInfo.category]
             return { postInfo, catColor }
         })
         setPostListings([...postListings, ...newPosts])
 
-    }, [apiPage, categoriesToLightRainbowHex])
+    }, [apiPage, categoriesToColors])
 
 
     useEffect(() => {
@@ -116,11 +109,11 @@ const PostsInfoList = React.memo(function(props) {
         <div data-testid="post-listings-container" id="post-listings-container"
             className="w-full overflow-auto" >
             { (!initialLoad && pinnedInfo.length > 0) && 
-            <Pinned filters={ filters } catColors={ categoriesToLightRainbowHex }
+            <Pinned filters={ filters } catColors={ categoriesToColors }
                 user={ user } setCurrentPost={ setCurrentPost } /> 
             }
             { (!initialLoad && announcementsInfo.length > 0) && 
-            <Announcements user={ user } catColors={ categoriesToLightRainbowHex }
+            <Announcements user={ user } catColors={ categoriesToColors }
                 filters={ filters } setCurrentPost={ setCurrentPost } /> 
             }
             { initialLoad ? 

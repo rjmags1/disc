@@ -2,7 +2,7 @@ import { useContext, useState, useMemo } from 'react'
 import { EditorContext, PostListingsContext } from '../../../pages/[courseId]/discussion'
 import { useCourse, useUser } from '../../../lib/hooks'
 import { useRouter } from 'next/router'
-import { LIGHT_RAINBOW_HEX } from '../../../lib/colors'
+import { categoriesToLightRainbowHex } from '../../../lib/colors'
 
 function NewPost({ exitNewPost }) {
     const router = useRouter()
@@ -23,20 +23,13 @@ function NewPost({ exitNewPost }) {
     const { user } = useUser()
     const { course, loading: loadingCourse } = useCourse(courseId)
 
-    const canMarkAnnouncementOrPinned = true //(
-        //user.is_instructor || user.is_staff || user.is_admin)
+    const canMarkAnnouncementOrPinned = true (
+        user.is_instructor || user.is_staff || user.is_admin)
     const categories = loadingCourse ? [] : course.categories
 
-    const categoriesToLightRainbowHex = useMemo(() => {
-        if (!course?.categories) return null
-
-        const mapped = {}
-        const { categories } = course
-        for (let i = 0; i < categories.length; i++) {
-            const category = categories[i]
-            mapped[category] = LIGHT_RAINBOW_HEX[i % LIGHT_RAINBOW_HEX.length]
-        }
-        return mapped
+    const categoriesToColors = useMemo(() => {
+        if (!course?.categories) return {}
+        return categoriesToLightRainbowHex(course.categories)
     }, [course])
 
     const handleNewPostSubmit = async (editorInfo) => {
@@ -83,7 +76,7 @@ function NewPost({ exitNewPost }) {
                 )
             }
             else {
-                const catColor = categoriesToLightRainbowHex[category]
+                const catColor = categoriesToColors[category]
                 newPostInfo = { postInfo: newPostInfo, catColor }
                 setPostListings([newPostInfo, ...postListings])
             }
