@@ -114,7 +114,7 @@ const bigPaginatedCourseInfoQueryText = `
         AS course_categories
         JOIN (SELECT * FROM post WHERE 
             (NOT private OR author = $2) AND 
-            created_at <= $5 AND NOT pinned AND NOT is_announcement) 
+            created_at <= $5 AND NOT pinned AND NOT is_announcement AND NOT deleted) 
         AS displayed_posts
             ON displayed_posts.category = category_id
         JOIN (
