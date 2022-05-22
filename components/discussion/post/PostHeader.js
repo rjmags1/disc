@@ -19,7 +19,7 @@ function PostHeader({ content, resolved, answered, catColor }) {
                         </h4>
                         <h5 className="text-xs py-1 font-extralight">
                             <Timestamp createdAt={ new Date(content.createdAt) }/>
-                            <span className="-ml-1">in </span>
+                            <span className="-ml-1 mr-1.5">in</span>
                             <span style={{ color: catColor }} >
                                 { content.category }
                             </span>
