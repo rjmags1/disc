@@ -1,23 +1,27 @@
 import Quill from "quill"
+import { sanitize } from 'dompurify'
 import { useRef, useEffect, useState } from 'react'
 
-let quill
 
 function Editor({ hideEditor, handleSubmit, editContent, isPost, editingPost }) {
     const [tick, setTick] = useState(0)
     const [anonymous, setAnonymous] = useState(false)
+    const [quill, setQuill] = useState(null)
+
     const editorRef = useRef(null)
-    useEffect(() => {
+
+
+    useEffect(() => { // init quill once its container is rendered
         if (!editorRef.current || tick > 0) return
-        quill = new Quill(editorRef.current, {
-            theme: 'snow'
-        })
-        if (!!editContent) quill.setContents(editContent)
+
+        const newQuill = new Quill(editorRef.current, { theme: 'snow' })
+        if (!!editContent) newQuill.setContents(editContent)
+        setQuill(newQuill)
         setTick(prev => prev + 1)
         
     }, [editorRef.current])
 
-    useEffect(() => {
+    useEffect(() => { // once quill is init style the toolbar icons
         if (!editorRef.current) return
 
         const svgs = document.getElementsByTagName("svg")
@@ -32,9 +36,11 @@ function Editor({ hideEditor, handleSubmit, editContent, isPost, editingPost }) 
     }
 
     const handleSubmitClick = async () => {
+        const sanitizedUserHtmlFromQuill = sanitize(
+            editorRef.current.firstElementChild.innerHTML)
         const submitted = await handleSubmit({ 
             editContent: quill.getContents(),
-            displayContent: editorRef.current.firstElementChild.innerHTML,
+            displayContent: sanitizedUserHtmlFromQuill,
             anonymous
         })
         if (submitted) removeToolbarAndEditor()
