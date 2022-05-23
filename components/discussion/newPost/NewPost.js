@@ -3,6 +3,7 @@ import { EditorContext, PostListingsContext } from '../../../pages/[courseId]/di
 import { useCourse, useUser } from '../../../lib/hooks'
 import { useRouter } from 'next/router'
 import { categoriesToLightRainbowHex } from '../../../lib/colors'
+import PostBooleanAttribute from './PostBooleanAttribute'
 
 function NewPost({ exitNewPost }) {
     const router = useRouter()
@@ -36,10 +37,11 @@ function NewPost({ exitNewPost }) {
         const { editContent, displayContent } = editorInfo
         const body = {
             title, category, isQuestion, isAnnouncement, displayContent,
-            isPrivate, isPinned, isAnonymous, editContent, courseId: parseInt(courseId),
+            isPrivate, isPinned, isAnonymous, editContent, 
+            courseId: parseInt(courseId),
             createdAt: new Date(Date.now()).toUTCString(),
         }
-        let submitSuccessful, newPostInfo
+        let backendUpdateSuccessful, newPostInfo
         try {
             const resp = await fetch(
                 `/api/course/postsInfo/null/content/newPost`, {
@@ -48,42 +50,23 @@ function NewPost({ exitNewPost }) {
                     headers: { 'Content-Type': 'application/json' }
                 }
             )
-            submitSuccessful = resp.ok
-            if (submitSuccessful) {
+            backendUpdateSuccessful = resp.ok
+            if (backendUpdateSuccessful) {
                 const parsed = await resp.json()
                 newPostInfo = parsed.newPostInfo
             }
         }
         catch (error) {
             console.error(error)
-            submitSuccessful = false
+            backendUpdateSuccessful = false
         }
-        if (submitSuccessful) {
-            newPostInfo = { 
-                ...newPostInfo, 
-                createdAt: new Date(newPostInfo.createdAt) 
-            }
-
-            if (newPostInfo.isAnnouncement || newPostInfo.isPinned) {
-                setSpecialListings(
-                    newPostInfo.isPinned ? {
-                        ...specialListings,
-                        pinned: [newPostInfo, ...specialListings.pinned]
-                    } : {
-                        ...specialListings, 
-                        announcements: [newPostInfo, ...specialListings.announcements]
-                    } 
-                )
-            }
-            else {
-                const catColor = categoriesToColors[category]
-                newPostInfo = { postInfo: newPostInfo, catColor }
-                setPostListings([newPostInfo, ...postListings])
-            }
-            exitNewPost()
+        if (backendUpdateSuccessful) {
+            handleBackendUpdateSuccess(newPostInfo, setSpecialListings, 
+                setPostListings, specialListings, postListings, 
+                categoriesToColors, exitNewPost)
         }
 
-        return submitSuccessful
+        return backendUpdateSuccessful
     }
 
     return (
@@ -104,41 +87,32 @@ function NewPost({ exitNewPost }) {
                 <section className='flex flex-col'>
                     <label className='mt-2 flex font-thin text-md h-fit'>
                         <span className='mr-2 h-fit'>Category:</span>
-                        <select value={ category } onChange={ e => setCategory(e.target.value) } 
-                            className="bg-light-gray border-b border-white w-fit h-fit font-light" >
-                            { categories.map(cat => <option value={ cat } key={ cat } 
-                                className="bg-light-gray border-white font-light">{ cat }</option>) }
+                        <select value={ category } 
+                            onChange={ e => setCategory(e.target.value) } 
+                            className="bg-light-gray border-b border-white 
+                                w-fit h-fit font-light" >
+                            { categories.map(cat => (
+                                <option value={ cat } key={ cat } 
+                                    className="bg-light-gray border-white 
+                                    font-light">
+                                    { cat }
+                                </option>)) }
                         </select>
                     </label>
                     <div className='flex justify-around mt-4 bg-purple border 
                         border-white rounded-lg px-2 py-1 overflow-hidden'>
-                        <label className='flex font-thin text-md h-fit items-center mx-1'>
-                            <input type="checkbox" className='accent-[#9400FF] mr-1 h-fit' 
-                                onChange={ () => setIsPrivate(prev => !prev) }/>
-                            <span className='no-wrap' >Private</span>
-                        </label>
-                        <label className='flex font-thin text-md h-fit items-center mx-1'>
-                            <input type="checkbox" className='accent-[#9400FF] mr-1 h-fit' 
-                                onChange={ () => setIsQuestion(prev => !prev) }/>
-                            <span className='whitespace-nowrap'>Question</span>
-                        </label>
-                        <label className='flex font-thin text-md h-fit items-center mx-1'>
-                            <input type="checkbox" className='accent-[#9400FF] mr-1 h-fit' 
-                                onChange={ () => setIsAnonymous(prev => !prev) }/>
-                            <span className='whitespace-nowrap'>Anonymous</span>
-                        </label>
-                        { canMarkAnnouncementOrPinned && 
-                        <label className='flex font-thin text-md h-fit items-center mx-1'>
-                            <input type="checkbox" className='accent-[#9400FF] mr-1 h-fit' 
-                                onChange={ () => setIsPinned(prev => !prev) }/>
-                            <span className='whitespace-nowrap'>Pin</span>
-                        </label> }
-                        { canMarkAnnouncementOrPinned && 
-                        <label className='flex font-thin text-md h-fit items-center mx-1'>
-                            <input type="checkbox" className='accent-[#9400FF] mr-1 h-fit' 
-                                onChange={ () => setIsAnnouncement(prev => !prev) }/>
-                            <span className='whitespace-nowrap'>Announcement</span>
-                        </label> }
+                        <PostBooleanAttribute label="Private" 
+                            stateSetter={ () => setIsPrivate(prev => !prev) } />
+                        <PostBooleanAttribute label="Question"
+                            stateSetter={ () => setIsQuestion(prev => !prev) } />
+                        <PostBooleanAttribute label="Anonymous"
+                            stateSetter={ () => setIsAnonymous(prev=> !prev) } />
+                        { canMarkAnnouncementOrPinned && <>
+                        <PostBooleanAttribute label="Pin"
+                            stateSetter={ () => setIsPinned(prev => !prev) } />
+                        <PostBooleanAttribute label="Announcement"
+                            stateSetter={ () => setIsAnnouncement(prev => !prev) } />
+                        </>}
                     </div>
                 </section>
                 <div className='h-[60%]'>
@@ -147,6 +121,34 @@ function NewPost({ exitNewPost }) {
             </div>
         </div>
     )
+}
+
+const handleBackendUpdateSuccess = (
+    newPostInfo, setSpecialListings, setPostListings, 
+    specialListings, postListings, categoriesToColors, exitNewPost) => {
+
+    newPostInfo = { 
+        ...newPostInfo, 
+        createdAt: new Date(newPostInfo.createdAt) 
+    }
+
+    if (newPostInfo.isAnnouncement || newPostInfo.isPinned) {
+        setSpecialListings(
+            newPostInfo.isPinned ? {
+                ...specialListings,
+                pinned: [newPostInfo, ...specialListings.pinned]
+            } : {
+                ...specialListings, 
+                announcements: [newPostInfo, ...specialListings.announcements]
+            } 
+        )
+    }
+    else {
+        const catColor = categoriesToColors[category]
+        newPostInfo = { postInfo: newPostInfo, catColor }
+        setPostListings([newPostInfo, ...postListings])
+    }
+    exitNewPost()
 }
 
 export default NewPost
