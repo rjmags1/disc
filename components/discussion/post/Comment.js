@@ -106,7 +106,7 @@ const Comment = React.memo(function(props) {
         setPostResolved, setPostAnswered, setUserDeleted, setEndorsed,
         likes, setLikes, setCommentResolving, setCommentIsAnswer,
         replying, setReplying, editing, setEditing, handleEditSubmit,
-        handleReplySubmit, info, isAncestor
+        handleReplySubmit, info, isAncestor, commentIsAnswer, commentResolving
     }
 
     const headerProps = {
