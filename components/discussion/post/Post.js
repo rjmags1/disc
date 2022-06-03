@@ -15,7 +15,6 @@ function Post({ postContainerRef, toggleMobilePostDisplay }) {
     const Editor = useContext(EditorContext)
     const initialLoadTime = useContext(TimeContext)
     const { currentPost } = useContext(PostContext)
-    console.log(currentPost)
 
     const [apiPage, setApiPage] = useState(1)
     const [threads, setThreads] = useState(
@@ -51,8 +50,9 @@ function Post({ postContainerRef, toggleMobilePostDisplay }) {
     // get post content, ie author avatar, display and edit content, 
     // associated with currentPost and apiPage, which is inc on lazy 
     // loader intersxn
+    const apiPageArg = currentPost?.postId === postContent?.postId ? apiPage : 1
     const { content, loading: loadingPostContent } = usePostContent(
-        currentPost?.postId, currentPost?.authorId, apiPage, initialLoadTime)
+        currentPost?.postId, currentPost?.authorId, apiPageArg, initialLoadTime)
 
 
     useEffect(() => {
@@ -92,7 +92,7 @@ function Post({ postContainerRef, toggleMobilePostDisplay }) {
 
         const newPostSelected = (loadingCommentsFor !== null 
             && loadingCommentsFor !== currentPost.postId)
-        if (apiPage === 1 && (newPostSelected || loadingCommentsFor === null)) {
+        if (newPostSelected || loadingCommentsFor === null) {
             setPostContent({ ...currentPost, ...content.postInfo })
         }
         canLoadMoreContentForPostRef.current = !!nextPage
