@@ -1,11 +1,21 @@
+import { LARGE_MEDIA_BREAKPOINT } from "../../../lib/layout"
 import Timestamp from "../postListingsPane/listingIcons/Timestamp"
 
-function PostHeader({ content, resolved, answered, catColor }) {
+function PostHeader({
+    content, resolved, answered, catColor, toggleMobilePostDisplay }) {
     return (
         <header>
-            <h3 data-testid="post-title" className="text-3xl font-medium mb-3">
-                { content.title }
-            </h3>
+            <div className="flex justify-between mb-3 items-center">
+                <h3 data-testid="post-title" className="text-3xl font-medium">
+                    { content.title }
+                </h3>
+                { window.innerWidth < LARGE_MEDIA_BREAKPOINT && 
+                <button className="rounded bg-purple border border-white px-2 
+                    h-fit py-0.5 mr-2 hover:bg-violet-800" 
+                    onClick={ toggleMobilePostDisplay }>
+                    { "< Back" }
+                </button> }
+            </div>
             <section className="flex justify-between my-2 mb-3 h-[55px] 
                 whitespace-nowrap" data-testid="post-stats-bar">
                 <div className="flex flex-none pr-4">

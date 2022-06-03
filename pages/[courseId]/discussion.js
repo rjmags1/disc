@@ -17,6 +17,7 @@ import 'quill/dist/quill.snow.css'
 import { useRouter } from 'next/router'
 import React, { useEffect, useRef, useState } from 'react'
 import { useUser, useCourse } from '../../lib/hooks'
+import { LARGE_MEDIA_BREAKPOINT } from '../../lib/layout'
 
 export const PostContext = React.createContext(null)
 export const TimeContext = React.createContext(null)
@@ -27,6 +28,9 @@ function Discussion() {
     const router = useRouter()
     const { courseId } = router.query
     const catPaneRef = useRef(null)
+    const listingsPaneRef = useRef(null)
+    const filterRef = useRef(null)
+    const postContainerRef = useRef(null)
 
     const [categoryFilter, setCategoryFilter] = useState(new Set())
     const [showHiddenPane, setShowHiddenPane] = (
@@ -46,6 +50,7 @@ function Discussion() {
     const [newPost, setNewPost] = (
         useState(false)
     ) // used to toggle post display or new post form in post content section
+    const [mobileDisplayPost, setMobileDisplayPost] = useState(false)
 
 
     const postContext = { 
@@ -63,6 +68,18 @@ function Discussion() {
         course, loading: loadingCourse 
     } = useCourse(courseId) // get course info for page header
 
+
+    useEffect(() => {
+        if (!filterRef.current || 
+            !listingsPaneRef.current || 
+            !postContainerRef.current) return
+        if (window.innerWidth >= LARGE_MEDIA_BREAKPOINT) return
+
+        filterRef.current.style.display = mobileDisplayPost ? "none" : ""
+        listingsPaneRef.current.style.display = mobileDisplayPost ? "none" : ""
+        postContainerRef.current.style.display = mobileDisplayPost ? "block" : "none"
+
+    }, [mobileDisplayPost])
 
     useEffect(() => { 
         // effect for controlling visibility of category pane when 
@@ -104,6 +121,8 @@ function Discussion() {
         else newFilter.delete(category)
         setCategoryFilter(newFilter)
     }
+
+    const toggleMobilePostDisplay = () => setMobileDisplayPost(prev => !prev)
     
     if (loadingUser || !user.authenticated || loadingCourse) return null
 
@@ -126,13 +145,16 @@ function Discussion() {
                 <section className="flex-auto text-white flex w-full"
                     data-testid="posts-section">
                     <PostListingsPane catPaneRef={ catPaneRef }
+                        filterRef={ filterRef } listingsPaneRef={ listingsPaneRef }
                         toggleCatPane={ 
                             () => setShowHiddenPane(!showHiddenPane) }
+                        toggleMobilePostDisplay={ toggleMobilePostDisplay }
                         categoryFilter={ categoryFilter } 
                         setCurrentPost={ setCurrentPost }/>
                     { newPost ? 
                     <NewPost exitNewPost={ () => setNewPost(false) } /> 
-                    : <Post /> }
+                    : <Post postContainerRef={ postContainerRef } 
+                        toggleMobilePostDisplay={ toggleMobilePostDisplay } /> }
                 </section>
             </div>
 

@@ -11,10 +11,11 @@ import {
 import { usePostContent } from '../../../lib/hooks'
 
 
-function Post() {
+function Post({ postContainerRef, toggleMobilePostDisplay }) {
     const Editor = useContext(EditorContext)
     const initialLoadTime = useContext(TimeContext)
     const { currentPost } = useContext(PostContext)
+    console.log(currentPost)
 
     const [apiPage, setApiPage] = useState(1)
     const [threads, setThreads] = useState(
@@ -152,29 +153,29 @@ function Post() {
     const showPost = !!postContent && postContentSyncedWithCurrentPost
 
     return (
-        <div data-testid="post-container"
+        <div data-testid="post-container" ref={ postContainerRef }
             className="hidden lg:flex flex-col w-full flex-auto 
                 bg-light-gray py-[4%] px-[7%] overflow-y-scroll">
             { neverSelectedPost && <NoPostSelected /> }
             { loadingNewPost && <Loading /> }
-            { showPost && 
-            <>
-                <PostContentSection answered={ postAnswered }
-                    resolved={ postResolved } content={ postContent } 
-                    setContent={ setPostContent } /> 
-                <h4 className="text-lg font-base">Comments</h4>
-                <hr className="mb-1"/>
-                { showNewCommentBtn ?
-                <CommentButton 
-                    hideCommentBtn={ () => setShowNewCommentBtn(false) } /> :
-                <Editor hideEditor={ () => setShowNewCommentBtn(true) } 
-                    handleSubmit={ handleNewThread } /> }
-                { threads.map(thread => (
-                <Thread key={ `${ thread.ancestor.commentId }-thread` } 
-                    postId={ currentPost.postId } setPostResolved={ setPostResolved }
-                    info={{ ...thread, postAuthorId: currentPost.authorId }}
-                    postIsQuestion={ currentPost.isQuestion } 
-                    setPostAnswered={ setPostAnswered }/>)) }
+            { showPost && <>
+            <PostContentSection answered={ postAnswered } 
+                toggleMobilePostDisplay={ toggleMobilePostDisplay }
+                resolved={ postResolved } content={ postContent } 
+                setContent={ setPostContent } /> 
+            <h4 className="text-lg font-base">Comments</h4>
+            <hr className="mb-1"/>
+            { showNewCommentBtn ?
+            <CommentButton 
+                hideCommentBtn={ () => setShowNewCommentBtn(false) } /> :
+            <Editor hideEditor={ () => setShowNewCommentBtn(true) } 
+                handleSubmit={ handleNewThread } /> }
+            { threads.map(thread => (
+            <Thread key={ `${ thread.ancestor.commentId }-thread` } 
+                postId={ currentPost.postId } setPostResolved={ setPostResolved }
+                info={{ ...thread, postAuthorId: currentPost.authorId }}
+                postIsQuestion={ currentPost.isQuestion } 
+                setPostAnswered={ setPostAnswered }/>)) }
             </>}
             <div ref={ loaderRef } className="w-full h-[1px] bg-inherit" />
         </div>

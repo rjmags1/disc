@@ -12,7 +12,10 @@ const INITIAL_LISTING_PANE_WIDTH = 400
 
 
 const PostListingsPane = React.memo(function(props) {
-    const { catPaneRef, categoryFilter, toggleCatPane, setCurrentPost } = props
+    const { 
+        catPaneRef, categoryFilter, toggleCatPane, setCurrentPost,
+        filterRef: filter, listingsPaneRef: listingsPane, toggleMobilePostDisplay
+    } = props
     const [filterText, setFilterText] = useState("")
     const [attributeFilter, setAttributeFilter] = useState("All")
     const [showDropdown, setShowDropdown] = useState(false)
@@ -20,8 +23,6 @@ const PostListingsPane = React.memo(function(props) {
     const [listingPaneWidth, setListingPaneWidth] = useState(
         INITIAL_LISTING_PANE_WIDTH)
 
-    const listingsPane = useRef(null)
-    const filter = useRef(null)
 
     useEffect(() => {
         window.addEventListener('resize', 
@@ -100,7 +101,8 @@ const PostListingsPane = React.memo(function(props) {
                     h-[calc(100%-3rem)] w-full lg:w-[${ INITIAL_LISTING_PANE_WIDTH }px] 
                     relative top-12` }>
                 <PostsInfoList attributeFilter={ attributeFilter } setCurrentPost={ setCurrentPost }
-                    categoryFilter={ categoryFilter } filterText={ filterText } />
+                    categoryFilter={ categoryFilter } filterText={ filterText } 
+                    toggleMobilePostDisplay={ toggleMobilePostDisplay } />
                 <div data-testid="lower-right-divider"
                     onMouseDown={ handleRightDividerMouseDown }
                     className="w-0.5 lg:w-1 bg-zinc-500 hover:cursor-ew-resize" />

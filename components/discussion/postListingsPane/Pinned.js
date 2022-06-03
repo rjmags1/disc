@@ -4,7 +4,7 @@ import { filterTest } from "../../../lib/filter"
 import { PostListingsContext } from "../../../pages/[courseId]/discussion"
 
 const Pinned = React.memo(function(props) {
-    const { catColors, filters, user, setCurrentPost } = props
+    const { catColors, filters, user, setCurrentPost, toggleMobilePostDisplay } = props
     const { specialListings: { pinned } } = useContext(PostListingsContext)
     const filtered = pinned.filter(
         pinned => filterTest(pinned, user, filters))
@@ -22,7 +22,8 @@ const Pinned = React.memo(function(props) {
             { filtered.map((postInfo) => (
                 <PostInfo info={ postInfo } key={ postInfo.postId }
                 categoryColor={ catColors[postInfo.category] } 
-                setCurrentPost={ setCurrentPost } />
+                setCurrentPost={ setCurrentPost } 
+                toggleMobilePostDisplay={ toggleMobilePostDisplay } />
             ))}
             </ul>
         </div>

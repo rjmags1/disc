@@ -10,7 +10,8 @@ import {
 
 import { categoriesToLightRainbowHex } from '../../../lib/colors'
 
-function PostContentSection({ content, resolved, answered, setContent }) {
+function PostContentSection({ 
+    content, resolved, answered, setContent, toggleMobilePostDisplay }) {
     const router = useRouter()
     const { courseId } = router.query
     const Editor = useContext(EditorContext)
@@ -64,6 +65,7 @@ function PostContentSection({ content, resolved, answered, setContent }) {
     return (
         <div data-testid="post-content-container" className="w-full font-thin">
             <PostHeader content={ content } 
+                toggleMobilePostDisplay={ toggleMobilePostDisplay }
                 catColor={ categoriesToColors[content.category] }
                 resolved={ resolved } answered={ answered } />
             { !editing && 

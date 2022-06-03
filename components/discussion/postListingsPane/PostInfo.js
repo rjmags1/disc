@@ -14,9 +14,12 @@ import StaffBanner from "./listingIcons/StaffBanner"
 import CategoryLabel from "./listingIcons/CategoryLabel"
 import Timestamp from "./listingIcons/Timestamp"
 import UnreadDot from "./listingIcons/UnreadDot"
+import { LARGE_MEDIA_BREAKPOINT } from "../../../lib/layout"
 
 
-const PostInfo = React.memo(function ({ info, categoryColor, setCurrentPost }) {
+const PostInfo = React.memo(function ({ 
+    info, categoryColor, setCurrentPost, toggleMobilePostDisplay }) {
+
     const [clicked, setClicked] = useState(false)
     const listingRef = useRef(null)
 
@@ -25,8 +28,11 @@ const PostInfo = React.memo(function ({ info, categoryColor, setCurrentPost }) {
 
     const handleClick = async () => {
         setCurrentPost(info)
+        toggleMobilePostDisplay()
         setClicked(prev => !prev)
-        listingRef.current.style.backgroundColor = "#27272a"
+        if (window.innerWidth >= LARGE_MEDIA_BREAKPOINT) {
+            listingRef.current.style.backgroundColor = "#27272a"
+        }
         const pid = info.postId
         const prevViewed = info.lastViewedAt ? "t" : "f"
         await fetch(

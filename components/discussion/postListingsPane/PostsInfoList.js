@@ -15,7 +15,10 @@ import {
 
 
 const PostsInfoList = React.memo(function(props) {
-    const { categoryFilter, filterText, attributeFilter, setCurrentPost } = props
+    const { 
+        categoryFilter, filterText, attributeFilter, 
+        setCurrentPost, toggleMobilePostDisplay 
+    } = props
     const router = useRouter()
     const { courseId } = router.query
     const initialLoadTime = useContext(TimeContext)
@@ -85,7 +88,8 @@ const PostsInfoList = React.memo(function(props) {
         const filtered = postListings.filter(
             ({ postInfo }) => filterTest(postInfo, user, filters)).map(
                 ({ postInfo, catColor }) => (
-                    <PostInfo categoryColor={ catColor } info={ postInfo }
+                    <PostInfo categoryColor={ catColor } info={ postInfo } 
+                        toggleMobilePostDisplay={ toggleMobilePostDisplay }
                         key={ postInfo.postId } setCurrentPost={ setCurrentPost } />
                 )
             )
@@ -110,11 +114,13 @@ const PostsInfoList = React.memo(function(props) {
             className="w-full overflow-auto" >
             { (!initialLoad && pinnedInfo.length > 0) && 
             <Pinned filters={ filters } catColors={ categoriesToColors }
-                user={ user } setCurrentPost={ setCurrentPost } /> 
+                user={ user } setCurrentPost={ setCurrentPost } 
+                toggleMobilePostDisplay={ toggleMobilePostDisplay } /> 
             }
             { (!initialLoad && announcementsInfo.length > 0) && 
             <Announcements user={ user } catColors={ categoriesToColors }
-                filters={ filters } setCurrentPost={ setCurrentPost } /> 
+                filters={ filters } setCurrentPost={ setCurrentPost } 
+                toggleMobilePostDisplay={ toggleMobilePostDisplay }/> 
             }
             { initialLoad ? 
             <Loading /> : <ul>{ displayedPosts }</ul> 
