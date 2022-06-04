@@ -134,7 +134,10 @@ const Comment = React.memo(function(props) {
                     <div dangerouslySetInnerHTML={{ __html: info.displayContent }}
                         data-testid="comment-container" 
                         className="font-light mt-1" />
-                    : <span className="font-light">deleted</span> 
+                    : 
+                    <div className="font-light" data-testid="comment-container">
+                        deleted
+                    </div> 
                     }
                     { !userDeleted && 
                     <CommentControlPanel 

@@ -154,6 +154,7 @@ function Post({ postContainerRef, toggleMobilePostDisplay }) {
 
     return (
         <div data-testid="post-container" ref={ postContainerRef }
+            id="post-container"
             className="hidden lg:flex flex-col w-full flex-auto 
                 bg-light-gray py-[4%] px-[7%] overflow-y-scroll">
             { neverSelectedPost && <NoPostSelected /> }
