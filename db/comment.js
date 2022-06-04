@@ -304,7 +304,7 @@ const genComments = async function() {
             created_at: createAfter 
         } = justInserted.rows[0]
 
-        const nestedReplies = Math.floor(Math.random() * 10)
+        const nestedReplies = Math.floor(Math.random() * 100)
         await genNestedComments(
             nestedReplies, commenterIds, latestPost, 
             createAfter, queryText, commentId)

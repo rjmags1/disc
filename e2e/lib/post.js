@@ -2,8 +2,8 @@ const { query } = require('./db')
 const { TEST_COURSE_INFO } = require('../lib/course')
 
 exports.TEST_POST_INFO = {
-    id: 112,
-    title: "Qui est sequi."
+    id: 94,
+    title: "Iste et explicabo voluptatem doloribus eos sit veniam neque."
 }
 
 exports.getAllDbTopLevelThreadCommentsDisplayOrder = async (postId) => {
