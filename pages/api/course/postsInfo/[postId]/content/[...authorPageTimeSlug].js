@@ -280,7 +280,7 @@ const ancestorCommentQueryText = (pageNumber) => `
         WHERE post = $1 AND ancestor_comment IS NULL AND created_at < $2
         ORDER BY created_at ASC
         LIMIT ${ TOP_LEVEL_COMMENTS_PER_PAGE + 1 }
-        OFFSET ${ (TOP_LEVEL_COMMENTS_PER_PAGE + 1) * (pageNumber - 1) })
+        OFFSET ${ (TOP_LEVEL_COMMENTS_PER_PAGE) * (pageNumber - 1) })
         AS comments
         LEFT JOIN (SELECT user_id, f_name, l_name, avatar_url AS avatar FROM person)
         AS people 
