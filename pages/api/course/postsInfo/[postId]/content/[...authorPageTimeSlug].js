@@ -52,93 +52,16 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
         if (pageNumber === 1) {
             const postContentQueryText = (userId === authorId ?
-                `SELECT display_content, edit_content, avatar_url, views 
-                FROM (
-                        SELECT post_id, display_content, edit_content, author 
-                        FROM post 
-                        WHERE post_id = $1)
-                    AS post
-                    JOIN (
-                        SELECT user_id, avatar_url AS avatar
-                        FROM person
-                        WHERE user_id = $2)
-                    AS person
-                    ON author = user_id
-                    JOIN avatar_url 
-                    ON avatar_url_id = person.avatar
-                    JOIN (
-                        SELECT COUNT(DISTINCT viewer) AS views, post AS viewed_post
-                        FROM post_view 
-                        WHERE post = $1
-                        GROUP BY viewed_post)
-                    AS post_views
-                    ON post_id = viewed_post;`
-                : 
-                `SELECT display_content, avatar_url, views
-                FROM (
-                    SELECT post_id, display_content, author 
-                    FROM post 
-                    WHERE post_id = $1)
-                AS post
-                JOIN (
-                    SELECT user_id, avatar_url AS avatar
-                    FROM person
-                    WHERE user_id = $2)
-                AS person
-                ON author = user_id
-                JOIN avatar_url 
-                ON avatar_url_id = person.avatar
-                JOIN (
-                    SELECT COUNT(DISTINCT viewer) AS views, post AS viewed_post
-                    FROM post_view 
-                    WHERE post = $1
-                    GROUP BY viewed_post)
-                AS post_views
-                ON post_id = viewed_post;`)
-            postContentQuery = (
-                await clientQuery(dbClient, postContentQueryText, [postId, authorId]))
+                postContentQueryTextWithEC : postContentQueryTextNoEC)
+            postContentQuery = (await clientQuery(
+                dbClient, postContentQueryText, [postId, authorId]))
         }
         else postContentQuery = null
         
-        const ancestorCommentQueryText = `
-        SELECT 
-            comment_id, user_id, f_name, l_name, avatar_url, edit_content, display_content, 
-            created_at, is_resolving, is_answer, endorsed, deleted, anonymous, likes, user_like 
-        FROM
-            (SELECT 
-                comment_id, author, edit_content, display_content, created_at,
-                is_resolving, is_answer, endorsed, deleted, anonymous
-            FROM comment
-            WHERE post = $1 AND ancestor_comment IS NULL AND created_at < $2
-            ORDER BY created_at ASC
-            LIMIT ${ TOP_LEVEL_COMMENTS_PER_PAGE + 1 }
-            OFFSET ${ (TOP_LEVEL_COMMENTS_PER_PAGE + 1) * (pageNumber - 1) })
-            AS comments
-            LEFT JOIN (SELECT user_id, f_name, l_name, avatar_url AS avatar FROM person)
-            AS people 
-            ON user_id = author
-            LEFT JOIN avatar_url ON avatar_url_id = people.avatar
-            LEFT JOIN (SELECT likes, liked_comment_id FROM (
-                SELECT comment_id AS liked_comment_id FROM comment 
-                WHERE post = $1 AND ancestor_comment IS NULL AND created_at < $2) 
-                AS comments 
-                LEFT JOIN (
-                    SELECT COUNT(DISTINCT liker) as likes, comment FROM comment_like 
-                    GROUP BY comment
-                ) AS comment_likes ON comment_likes.comment = comments.liked_comment_id
-            ) AS c_likes
-            ON liked_comment_id = comment_id
-            LEFT JOIN (
-                SELECT comment AS liked_comment, liker AS user_like 
-                FROM comment_like 
-                WHERE liker = $3
-            ) AS user_comment_like
-            ON liked_comment = comment_id
-            ORDER BY created_at ASC;`
-        ancestorCommentQuery = (
-            await clientQuery(
-                dbClient, ancestorCommentQueryText, [
-                    postId, new Date(parsedTimeCutoff), userId]))
+        
+        ancestorCommentQuery = (await clientQuery(
+            dbClient, ancestorCommentQueryText(pageNumber),
+                [postId, new Date(parsedTimeCutoff), userId]))
         const ancestorCommentIds = ancestorCommentQuery.rows.map(
             row => row.comment_id).slice(0, 20)
         
@@ -298,3 +221,85 @@ const descendantQueryTextFromAncestors = (ancestorComments) => {
 
     return tokens.join("")
 }
+
+const postContentQueryTextWithEC = `
+    SELECT display_content, edit_content, avatar_url, views 
+    FROM (
+            SELECT post_id, display_content, edit_content, author 
+            FROM post 
+            WHERE post_id = $1)
+        AS post
+        JOIN (
+            SELECT user_id, avatar_url AS avatar
+            FROM person
+            WHERE user_id = $2)
+        AS person
+        ON author = user_id
+        JOIN avatar_url 
+        ON avatar_url_id = person.avatar
+        JOIN (
+            SELECT COUNT(DISTINCT viewer) AS views, post AS viewed_post
+            FROM post_view 
+            WHERE post = $1
+            GROUP BY viewed_post)
+        AS post_views
+        ON post_id = viewed_post;`
+
+const postContentQueryTextNoEC = `
+    SELECT display_content, avatar_url, views
+    FROM (
+        SELECT post_id, display_content, author 
+        FROM post 
+        WHERE post_id = $1)
+    AS post
+    JOIN (
+        SELECT user_id, avatar_url AS avatar
+        FROM person
+        WHERE user_id = $2)
+    AS person
+    ON author = user_id
+    JOIN avatar_url 
+    ON avatar_url_id = person.avatar
+    JOIN (
+        SELECT COUNT(DISTINCT viewer) AS views, post AS viewed_post
+        FROM post_view 
+        WHERE post = $1
+        GROUP BY viewed_post)
+    AS post_views
+    ON post_id = viewed_post;`
+
+const ancestorCommentQueryText = (pageNumber) => `
+    SELECT 
+        comment_id, user_id, f_name, l_name, avatar_url, edit_content, display_content, 
+        created_at, is_resolving, is_answer, endorsed, deleted, anonymous, likes, user_like 
+    FROM
+        (SELECT 
+            comment_id, author, edit_content, display_content, created_at,
+            is_resolving, is_answer, endorsed, deleted, anonymous
+        FROM comment
+        WHERE post = $1 AND ancestor_comment IS NULL AND created_at < $2
+        ORDER BY created_at ASC
+        LIMIT ${ TOP_LEVEL_COMMENTS_PER_PAGE + 1 }
+        OFFSET ${ (TOP_LEVEL_COMMENTS_PER_PAGE + 1) * (pageNumber - 1) })
+        AS comments
+        LEFT JOIN (SELECT user_id, f_name, l_name, avatar_url AS avatar FROM person)
+        AS people 
+        ON user_id = author
+        LEFT JOIN avatar_url ON avatar_url_id = people.avatar
+        LEFT JOIN (SELECT likes, liked_comment_id FROM (
+            SELECT comment_id AS liked_comment_id FROM comment 
+            WHERE post = $1 AND ancestor_comment IS NULL AND created_at < $2) 
+            AS comments 
+            LEFT JOIN (
+                SELECT COUNT(DISTINCT liker) as likes, comment FROM comment_like 
+                GROUP BY comment
+            ) AS comment_likes ON comment_likes.comment = comments.liked_comment_id
+        ) AS c_likes
+        ON liked_comment_id = comment_id
+        LEFT JOIN (
+            SELECT comment AS liked_comment, liker AS user_like 
+            FROM comment_like 
+            WHERE liker = $3
+        ) AS user_comment_like
+        ON liked_comment = comment_id
+    ORDER BY created_at ASC;`
