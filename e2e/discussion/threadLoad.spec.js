@@ -8,7 +8,6 @@ const {
     getDbAncestorsLte2Replies,
     stripTagsNewLine,
     getDbAncestorsGt2Replies,
-    getAllAncestorReplyCounts,
     getDbAllReplies
 } = require('../lib/post')
 
