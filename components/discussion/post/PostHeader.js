@@ -5,16 +5,16 @@ function PostHeader({
     content, resolved, answered, catColor, toggleMobilePostDisplay }) {
     return (
         <header>
-            <div className="flex justify-between mb-3 items-center">
-                <h3 data-testid="post-title" className="text-3xl font-medium">
-                    { content.title }
-                </h3>
+            <div className="flex justify-between mb-3 flex-col">
                 { window.innerWidth < LARGE_MEDIA_BREAKPOINT && 
                 <button className="rounded bg-purple border border-white px-2 
-                    h-fit py-0.5 mr-2 hover:bg-violet-800" 
+                    h-fit w-fit mb-2 hover:bg-violet-800" data-testid="post-back-btn"
                     onClick={ toggleMobilePostDisplay }>
                     { "< Back" }
                 </button> }
+                <h3 data-testid="post-title" className="text-3xl font-medium">
+                    { content.title }
+                </h3>
             </div>
             <section className="flex justify-between my-2 mb-3 h-[55px] 
                 whitespace-nowrap" data-testid="post-stats-bar">

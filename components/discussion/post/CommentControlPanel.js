@@ -12,7 +12,7 @@ import { useUser } from '../../../lib/hooks'
 
 function CommentControlPanel({ controlPanelProps }) {
     const {
-        setPostResolved, setPostAnswered, setUserDeleted, setEndorsed,
+        setPostResolved, setPostAnswered, setUserDeleted, setEndorsed, endorsed,
         likes, setLikes, setCommentResolving, setCommentIsAnswer,
         replying, setReplying, editing, setEditing, handleEditSubmit,
         handleReplySubmit, info, isAncestor, commentIsAnswer, commentResolving
@@ -33,7 +33,7 @@ function CommentControlPanel({ controlPanelProps }) {
     return (
         <>
             <div className="mt-2 flex h-[12px] items-center text-xs
-                font-normal opacity-50">
+                font-normal opacity-50" data-testid="comment-control-panel">
                 <div data-testid="comment-like-counter" className="flex h-[12px] items-center">
                     <span className="mr-0.5">{ likes }</span>
                     <img src="/heart.png" width="11" className="mr-1 mt-[1px]"/>

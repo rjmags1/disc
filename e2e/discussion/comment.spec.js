@@ -1,5 +1,10 @@
 const { test, expect } = require('@playwright/test')
-const { login, TESTUSER_REGISTERED } = require('../lib/auth')
+const {
+    login, 
+    TESTUSER_REGISTERED,
+    TESTUSER_STAFF,
+    TESTUSER_ADMIN
+} = require('../lib/auth')
 const { TEST_COURSE_INFO } = require('../lib/course')
 const { 
     getAllDbTopLevelThreadCommentsDisplayOrder, 
@@ -12,17 +17,23 @@ const {
     assertOnCommentContent,
     baseAssertOnCommentControlPanel
 } = require('../lib/post')
+const { loadAllPosts } = require('../lib/postListings')
 
 
-test.beforeEach(async ({ page, isMobile }) => {
-    await login(page, TESTUSER_REGISTERED)
+test.beforeEach(async ({ page, isMobile }, { title: testTitle }) => {
+    let userToLogin
+    if (testTitle === 'staff user') userToLogin = TESTUSER_STAFF
+    else if (testTitle === 'admin user') userToLogin = TESTUSER_ADMIN
+    else userToLogin = TESTUSER_REGISTERED
+
+    await login(page, userToLogin)
 
     await expect(page.locator('nav').
         locator('text=/dashboard/i')).toBeVisible()
 
     const { term, code, section, name: testCourseName } = TEST_COURSE_INFO
     await Promise.all([
-        page.locator(`text=/^${ testCourseName }$/i`).click(),
+        page.locator(`text=/^${ testCourseName }$/i`).nth(0).click(),
         page.waitForSelector(`text=/${ testCourseName } - ${ term }/i`)
     ])
 
@@ -45,10 +56,10 @@ test.beforeEach(async ({ page, isMobile }) => {
 })
 
 test.describe('comment information correctly displayed to user', async () => {
-    test.setTimeout(60000)
     
     test('non-user authored post; non-admin, non-staff user', 
     async ({ page, browserName }) => {
+        test.setTimeout(60000)
         const { userId: loggedInStudentUserId } = TESTUSER_REGISTERED
 
         const displayOrderDbComments = (
@@ -73,6 +84,91 @@ test.describe('comment information correctly displayed to user', async () => {
             await assertOnCommentContent(dbCommentInfo, commentBox, browserName)
             await baseAssertOnCommentControlPanel(
                 dbCommentInfo, commentBox, loggedInStudentUserId)
+        }
+    })
+
+    test('user authored question post; non-admin, non-staff user',
+    async ({ page, isMobile }) => {
+        if (isMobile) {
+            await Promise.all([
+                page.locator('[data-testid=post-back-btn]').click(),
+                page.waitForSelector(
+                    '[data-testid=post-listings-container]')
+            ])
+        }
+        await loadAllPosts(page)
+
+        const questionPostListingLocator = page.locator(
+            '[data-testid=post-info-container]', {
+                has: page.locator('[data-testid=question-icon]'),
+                hasText: TESTUSER_REGISTERED.fullName }).nth(0)
+        const postInfoTitle = await questionPostListingLocator.locator(
+            '[data-testid=post-info-title]').innerText()
+        await Promise.all([
+            questionPostListingLocator.click(),
+            page.waitForSelector('[data-testid=post-content-container]', {
+                hasText: postInfoTitle })
+        ])
+        
+        const commentControlPanelLocator = page.locator(
+            '[data-testid=comment-control-panel]')
+        const numComments = await commentControlPanelLocator.count()
+        for (let i = 0; i < numComments; i++) {
+            await expect(commentControlPanelLocator.nth(i).locator(
+                '[data-testid=comment-mark-answer-btn]')).toBeVisible()
+        }
+    })
+
+    test('user authored normal post; non-admin, non-staff user',
+    async ({ page, isMobile }) => {
+        if (isMobile) {
+            await Promise.all([
+                page.locator('[data-testid=post-back-btn]').click(),
+                page.waitForSelector(
+                    '[data-testid=post-listings-container]')
+            ])
+        }
+        await loadAllPosts(page)
+
+        const normalPostListingLocator = page.locator(
+            '[data-testid=post-info-container]', {
+                has: page.locator('[data-testid=normal-post-icon]'),
+                hasText: TESTUSER_REGISTERED.fullName
+            }).nth(0)
+        const postInfoTitle = await normalPostListingLocator.locator(
+            '[data-testid=post-info-title]').innerText()
+        await Promise.all([
+            normalPostListingLocator.click(),
+            page.waitForSelector('[data-testid=post-content-container]', {
+                hasText: postInfoTitle })
+        ])
+        
+        const commentControlPanelLocator = page.locator(
+            '[data-testid=comment-control-panel]')
+        const numComments = await commentControlPanelLocator.count()
+        for (let i = 0; i < numComments; i++) {
+            await expect(commentControlPanelLocator.nth(i).locator(
+                '[data-testid=comment-mark-resolving-btn]')).toBeVisible()
+        }
+    })
+
+    test('staff user', async ({ page }) => {
+        const commentControlPanelLocator = page.locator(
+            '[data-testid=comment-control-panel]')
+        const numCommentsLoaded = await commentControlPanelLocator.count()
+        for (let i = 0; i < numCommentsLoaded; i++) {
+            await expect(commentControlPanelLocator.nth(i).locator(
+                '[data-testid=comment-endorse-btn]')).toBeVisible()
+        }
+    })
+
+    test('admin user', async ({ page }) => {
+        const commentControlPanelLocator = page.locator(
+            '[data-testid=comment-control-panel]')
+        const numCommentsLoaded = await commentControlPanelLocator.count()
+        for (let i = 0; i < numCommentsLoaded; i++) {
+            await expect(commentControlPanelLocator.nth(i).locator(
+                '[data-testid=comment-delete-button]')).toBeVisible()
         }
     })
 })

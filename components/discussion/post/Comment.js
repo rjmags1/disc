@@ -103,7 +103,7 @@ const Comment = React.memo(function(props) {
 
 
     const controlPanelProps = {
-        setPostResolved, setPostAnswered, setUserDeleted, setEndorsed,
+        setPostResolved, setPostAnswered, setUserDeleted, setEndorsed, endorsed,
         likes, setLikes, setCommentResolving, setCommentIsAnswer,
         replying, setReplying, editing, setEditing, handleEditSubmit,
         handleReplySubmit, info, isAncestor, commentIsAnswer, commentResolving
@@ -118,7 +118,7 @@ const Comment = React.memo(function(props) {
             { !isAncestor && <div className="mt-4" /> }
             <div data-testid="comment-box-container" 
                 className="w-full flex items-start justify-start py-2"
-                style={{ paddingLeft: `${ depth * 10 }px`}} >
+                style={{ paddingLeft: `${ Math.min(depth * 3, 40) }%`}} >
                 <CommentBadges headerProps={ headerProps } />
                 <div data-testid="comment-content-container" 
                     className="pl-2 -mt-0.5 w-full flex-col items-start 

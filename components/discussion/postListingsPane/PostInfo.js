@@ -59,7 +59,8 @@ const PostInfo = React.memo(function ({
                     <div className="-mr-2"/>
                 </div>
             </div>
-            <span className="py-1 w-full truncate text-sm font-extralight">
+            <span className="py-1 w-full truncate text-sm font-extralight"
+                data-testid="post-info-title">
                 { info.title }
             </span>
             <div className="flex justify-between">

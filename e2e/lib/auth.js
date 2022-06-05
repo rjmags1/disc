@@ -6,6 +6,22 @@ exports.TESTUSER_REGISTERED = {
     organization: "Hogwarts",
 }
 
+exports.TESTUSER_STAFF = {
+    userId: 3,
+    fullName: "Albus Dumbledore",
+    email: "albus@hogwarts.edu",
+    password: "albuspassword",
+    organization: "Hogwarts"
+}
+
+exports.TESTUSER_ADMIN = {
+    userId: 1,
+    fullName: `${process.env.ADMIN_F_NAME} ${process.env.ADMIN_L_NAME}`,
+    email: `${process.env.ADMIN_EMAIL}`,
+    password: "rjspassword",
+    organization: "Hogwarts"
+}
+
 exports.TESTUSER_UNREGISTERED = {
     email: "unregtest@test.com",
     password: "unregtestpassword",
