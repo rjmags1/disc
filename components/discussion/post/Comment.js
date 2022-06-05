@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Timestamp from '../postListingsPane/listingIcons/Timestamp'
 import CommentControlPanel from './CommentControlPanel'
-import CommentHeader from './CommentHeader'
+import CommentBadges from './CommentBadges'
 
 
 const Comment = React.memo(function(props) {
@@ -119,12 +119,12 @@ const Comment = React.memo(function(props) {
             <div data-testid="comment-box-container" 
                 className="w-full flex items-start justify-start py-2"
                 style={{ paddingLeft: `${ depth * 10 }px`}} >
-                <CommentHeader headerProps={ headerProps } />
+                <CommentBadges headerProps={ headerProps } />
                 <div data-testid="comment-content-container" 
                     className="pl-2 -mt-0.5 w-full flex-col items-start 
                         justify-start text-sm font-thin">
-                    <h6 data-testid="comment-header">
-                        <span className="font-light">
+                    <h6>
+                        <span className="font-light" data-testid="comment-author">
                             { userDeleted || info.anonymous ? "anonymous" : info.author }
                         </span>
                         { !userDeleted && 

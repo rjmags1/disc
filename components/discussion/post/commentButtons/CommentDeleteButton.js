@@ -14,7 +14,8 @@ const CommentDeleteButton = React.memo(function(props) {
     }
 
     return (
-        <button className="px-1 hover:opacity-60" onClick={ handleClick } >
+        <button className="px-1 hover:opacity-60" onClick={ handleClick } 
+            data-testid="comment-delete-button">
             DELETE
         </button>
     )

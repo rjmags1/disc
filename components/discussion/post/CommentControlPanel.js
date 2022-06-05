@@ -34,8 +34,10 @@ function CommentControlPanel({ controlPanelProps }) {
         <>
             <div className="mt-2 flex h-[12px] items-center text-xs
                 font-normal opacity-50">
-                <span className="mr-0.5">{ likes }</span>
-                <img src="/heart.png" width="11" className="mr-1"/>
+                <div data-testid="comment-like-counter" className="flex h-[12px] items-center">
+                    <span className="mr-0.5">{ likes }</span>
+                    <img src="/heart.png" width="11" className="mr-1 mt-[1px]"/>
+                </div>
                 <CommentLikeButton initialLiked={ info.liked } postId={ postId }
                     setDisplayedLikes={ setLikes } commentId={ info.commentId } />
                 {!replying &&

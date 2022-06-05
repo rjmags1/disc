@@ -1,21 +1,23 @@
-function CommentHeader({ headerProps }) {
+function CommentBadges({ headerProps }) {
     const { 
         info, userDeleted, commentResolving, commentIsAnswer, endorsed
     } = headerProps
 
     return (
         <div className="flex flex-col justify-start items-center" >
-            <img width="40" className="rounded-full" src={ 
-                    info.anonymous || userDeleted ? 
+            <img width="40" className="rounded-full" data-testid="comment-prof-pic" 
+                    src={ info.anonymous || userDeleted ? 
                     "/profile-button-img.png" : info.avatarUrl }/>
             <div className='flex-col items-center justify-center my-2'>
                 { (commentResolving || commentIsAnswer) && 
-                    <img className="ml-[1px]" width="19" src="/checkmark.png" /> }
+                    <img className="ml-[1px]" width="19" src="/checkmark.png" 
+                        data-testid="comment-check-icon" /> }
                 { endorsed &&
                 <>
                     {(commentResolving || commentIsAnswer) && <div className='h-[0.5rem]'/> }
                     <span className="h-[20px] w-[21px]" >
-                        <img src="/endorsed.png" width="20"/>
+                        <img src="/endorsed.png" width="20" 
+                            data-testid="comment-endorsed-icon" />
                     </span>
                 </>
                 }
@@ -24,4 +26,4 @@ function CommentHeader({ headerProps }) {
     )
 }
 
-export default CommentHeader
+export default CommentBadges
