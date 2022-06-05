@@ -118,14 +118,14 @@ const Comment = React.memo(function(props) {
             { !isAncestor && <div className="mt-4" /> }
             <div data-testid="comment-box-container" 
                 className="w-full flex items-start justify-start py-2"
-                style={{ paddingLeft: `${ depth * 5 }%`}} >
+                style={{ paddingLeft: `${ depth * 10 }px`}} >
                 <CommentHeader headerProps={ headerProps } />
                 <div data-testid="comment-content-container" 
                     className="pl-2 -mt-0.5 w-full flex-col items-start 
                         justify-start text-sm font-thin">
                     <h6 data-testid="comment-header">
                         <span className="font-light">
-                            { userDeleted ? "anonymous" : info.author }
+                            { userDeleted || info.anonymous ? "anonymous" : info.author }
                         </span>
                         { !userDeleted && 
                         <Timestamp createdAt={ new Date(info.createdAt) }/> }
