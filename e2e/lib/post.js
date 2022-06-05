@@ -1,5 +1,4 @@
 const { query } = require('./db')
-const { TEST_COURSE_INFO } = require('../lib/course')
 
 exports.TEST_POST_INFO = {
     id: 94,
@@ -73,4 +72,59 @@ exports.lazyLoadAllTopLevelPageComments = async (page) => {
     
     const numLoaded = await numCommentsOnPage(page)
     return numLoaded
+}
+
+exports.getDbAncestorsLte2Replies = async () => {
+    const allAncestorInfo = await getAllAncestorReplyCounts()
+    return allAncestorInfo.filter(ancestorInfo => ancestorInfo.replies < 3)
+}
+
+const getAllAncestorReplyCounts = async () => {
+    const queryText = `
+        WITH 
+        thread_reply_counts AS (
+            SELECT ancestor_comment, COUNT(DISTINCT comment_id) AS count
+            FROM comment 
+            WHERE ancestor_comment IS NOT NULL AND post = $1
+            GROUP BY ancestor_comment),
+        ancestor_comments AS (
+            SELECT comment_id, display_content, deleted
+            FROM comment 
+            WHERE ancestor_comment IS NULL AND post = $1)
+
+        SELECT * FROM 
+        ancestor_comments LEFT JOIN thread_reply_counts 
+        ON comment_id = ancestor_comment;
+    `
+    const replyCountsQuery = await query(
+        queryText, [this.TEST_POST_INFO.id])
+
+    return replyCountsQuery.rows.map(row => ({
+        comment_id: row.comment_id, 
+        display_content: row.display_content,
+        replies: row.count === null ? 0 : parseInt(row.count),
+        deleted: row.deleted
+    }))
+}
+
+exports.stripTagsNewLine = (s) => {
+    const noTags = s.slice(3, s.length - 4)
+    return (noTags[noTags.length - 1] === '\n' ? 
+        noTags.slice(0, noTags.length - 1) : noTags)
+} 
+
+exports.getDbAncestorsGt2Replies = async () => {
+    const allAncestorInfo = await getAllAncestorReplyCounts()
+    return allAncestorInfo.filter(ancestorInfo => ancestorInfo.replies > 2)
+}
+
+exports.getDbAllReplies = async (ancestorId) => {
+    const queryText = `
+        SELECT comment_id, thread_id, display_content, deleted
+        FROM comment WHERE ancestor_comment = $1
+        ORDER BY thread_id ASC;`
+    
+    const dbRepliesQuery = await query(queryText, [ancestorId])
+
+    return dbRepliesQuery.rows
 }
