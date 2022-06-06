@@ -51,7 +51,7 @@ test.describe('like and reply buttons - always displayed', async () => {
 
     // failures fairly likely if running with multiple workers 
     // pinging same db resource simultaneously. 
-    // npm run e2e-serial to deal with this
+    // npm run e2e-serial to ensure failures resulting from faulty impl.
     test('like button', async ({ page }) => {
         const {
             dbCommentInfo, pageCommentInfo
@@ -70,7 +70,7 @@ test.describe('like and reply buttons - always displayed', async () => {
     })
 
     test('reply button', async ({ page }) => {
-        test.slow()
+
         const firstDisplayedAncestorCommentBoxLocator = page.locator(
             '[data-testid=comment-box-container]').nth(0)
         const replyButtonLocator = (
