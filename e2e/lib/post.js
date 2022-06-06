@@ -3,6 +3,9 @@ const { expect } = require('@playwright/test')
 const { 
     toTimestampString, fixNodePgUTCTimeInterpretation 
 } = require('./time')
+const { TESTUSER_REGISTERED } = require('./auth')
+const { getAllNonDeletedDbPostsInPageOrder } = require('./postListings')
+const { TEST_COURSE_INFO } = require('./course')
 
 const ANONYMOUS_AVATAR_URL = "/profile-button-img.png"
 
@@ -359,4 +362,180 @@ exports.getNewestCommentIdFromDb = async () => {
     const testCommentIdQuery = await query(testCommentIdQueryText)
 
     return testCommentIdQuery.rows[0].newest_comment
+}
+
+const assertFirstUserCommentEditInDb = async (newComment) => {
+    const queryText = `
+        SELECT display_content FROM comment
+        WHERE post = $1 AND author = $2
+        ORDER BY created_at ASC
+        LIMIT 1;`
+    const newCommentQuery = await query(queryText, [ // display content is html
+        this.TEST_POST_INFO.id, TESTUSER_REGISTERED.userId])
+    expect(newCommentQuery.rows[0].display_content).toMatch(
+        new RegExp(newComment))
+}
+
+exports.editAndAssertOnEditedPageComment = (
+async (page, commentBoxLocator, newComment) => {
+    const editorLocator = page.locator(
+        '#quill-editor-container').locator('.ql-editor')
+    const commentEditButtonLocator = commentBoxLocator.locator(
+        '[data-testid=comment-edit-button]')
+    await Promise.all([
+        commentEditButtonLocator.click(),
+        editorLocator.waitFor()
+    ])
+
+    // no fill method on locator
+    const editorElement = await editorLocator.elementHandle()
+    const commentContainerLocator = commentBoxLocator.locator(
+        '[data-testid=comment-container]')
+    await editorElement.fill(newComment)
+    await Promise.all([
+        commentBoxLocator.locator(
+            '[data-testid=editor-submit-button]').click(),
+        commentContainerLocator.locator(
+            `text=${ newComment }`).waitFor()
+    ])
+    await assertFirstUserCommentEditInDb(newComment)
+    let editedCommentText = await commentContainerLocator.innerText()
+    // get rid of safari and quill auto inserted term. newlines
+    editedCommentText = this.stripTerminatingNewlines(editedCommentText)
+    expect(editedCommentText).toBe(newComment)
+})
+
+exports.stripTerminatingNewlines = (s) => {
+    while (s.length > 0 && s[s.length - 1] === '\n') {
+        s = s.slice(0, s.length - 1)
+    }
+    return s
+}
+
+exports.dbAssertResetFirstUserAuthoredCommentDeleted = (
+async (deletedComment) => {
+    await new Promise(res => setTimeout(res, 1000))
+    const firstCommentInfoQueryText = `
+        SELECT comment_id, deleted, display_content FROM comment
+        WHERE post = $1 AND author = $2
+        ORDER BY created_at ASC
+        LIMIT 1;`
+    const firstCommentInfoQuery = await query(firstCommentInfoQueryText, [
+        this.TEST_POST_INFO.id, TESTUSER_REGISTERED.userId])
+    const {
+        comment_id, deleted, display_content 
+    } = firstCommentInfoQuery.rows[0]
+    // reset no matter what
+    await query(`
+        UPDATE comment SET deleted = $2 WHERE comment_id = $1;`,
+        [comment_id, false])
+    // make sure we have right comment then check if it was deleted prior to reset
+    expect(display_content).toMatch(new RegExp(
+        this.stripTerminatingNewlines(deletedComment)))
+    expect(deleted).toBe(true)
+
+    
+})
+
+exports.dbAssertFirstUserAuthoredPostFirstCommentResAnsDelta = (
+async (normalPost, initialStatus) => {
+    const dbPostsPageOrder = await getAllNonDeletedDbPostsInPageOrder(
+        TEST_COURSE_INFO.courseId)
+    let relevantPostDbRow
+    for (const row of dbPostsPageOrder) {
+        if (normalPost && !row.is_question && 
+            TESTUSER_REGISTERED.userId === row.user_id) {
+            relevantPostDbRow = row
+            break
+        }
+        if (!normalPost && row.is_question && 
+            TESTUSER_REGISTERED.userId === row.user_id) {
+            relevantPostDbRow = row
+            break
+        }
+    }
+    const firstCommentDbRow = (
+        await this.getAllDbTopLevelThreadCommentsDisplayOrder(
+            relevantPostDbRow.post_id))[0]
+    
+    if (normalPost) {
+        expect(relevantPostDbRow.resolved).toBe(!initialStatus)
+        expect(firstCommentDbRow.is_resolving).toBe(!initialStatus)
+    }
+    else {
+        expect(relevantPostDbRow.answered).toBe(!initialStatus)
+        expect(firstCommentDbRow.is_answer).toBe(!initialStatus)
+    }
+})
+
+exports.assertOnCorrectResolveAnswerButtonLabels = (
+async (page, initialStatus, resolve) => {
+
+    await this.lazyLoadAllTopLevelPageComments(page)
+    const commentBoxLocator = page.locator(
+        '[data-testid=comment-box-container]')
+    const numTopLevelComments = await commentBoxLocator.count()
+    const resolvingAnswerTextSelector = resolve ? 
+        'text=/unmark as resolving/i' : 'text=/unmark as answer/i'
+    let numResolvingAnswerComments = 0
+    for (let i = 0; i < numTopLevelComments; i++) {
+        const commentIsResolvingAnswer = await commentBoxLocator.nth(i).locator(
+            resolvingAnswerTextSelector).isVisible()
+        if (!initialStatus) expect(commentIsResolvingAnswer).toBe(false)
+        else numResolvingAnswerComments += commentIsResolvingAnswer ? 1 : 0
+    }
+    if (initialStatus) {
+        expect(numResolvingAnswerComments).toBeGreaterThan(0)
+    } 
+})
+
+exports.clickResolveAnswerButtonUiAssert = (
+async (page, initialStatus, isMobile, resolve) => {
+    const firstUserAuthoredNormalPostListingLocator = page.locator(
+        '[data-testid=post-info-container]', {
+            hasText: TESTUSER_REGISTERED.fullName ,
+            has: page.locator(resolve ? 
+                '[data-testid=normal-post-icon]' : 
+                '[data-testid=question-icon]')
+        }).nth(0)
+    const commentBoxLocator = page.locator(
+        '[data-testid=comment-box-container]')
+    const resolvingAnswerTextSelector = resolve ? 
+        'text=/unmark as resolving/i' : 'text=/unmark as answer/i'
+    const firstResolveAnswerBtn = page.locator(resolve ?
+        '[data-testid=comment-mark-resolving-btn]' :
+        '[data-testid=comment-mark-answer-btn]').nth(0)
+    const unresolvingUnanswerTextSelector = resolve ? 
+        'text=/^mark as resolving$/i' : 'text=/^mark as answer$/i'
+    await Promise.all([
+        firstResolveAnswerBtn.click(),
+        firstResolveAnswerBtn.locator(initialStatus ?
+            unresolvingUnanswerTextSelector : resolvingAnswerTextSelector
+                ).waitFor()
+    ])
+    const newFirstResolveAnswerBtnLabel = await firstResolveAnswerBtn.innerText()
+    expect((resolve ? /unmark as resolving/i : /unmark as answer/i).test(
+        newFirstResolveAnswerBtnLabel)).toBe(!initialStatus)
+    const newCheckmarkPresent = await commentBoxLocator.nth(0).locator(
+        '[data-testid=comment-check-icon]').isVisible()
+    expect(newCheckmarkPresent).toBe(!initialStatus)
+    const newPostStatusResolvedStampPresent = await page.locator(
+        '[data-testid=post-stats-bar]').locator(resolve ?
+            'text=/resolved/i' : 'text=/answered/i').isVisible()
+    expect(newPostStatusResolvedStampPresent).toBe(!initialStatus)
+    if (isMobile) {
+        await page.locator('[data-testid=post-back-btn]').click()
+    }
+    const postListingMarkedResolved = (
+        await firstUserAuthoredNormalPostListingLocator.locator(
+            '[data-testid=green-checkmark-icon]').isVisible())
+    expect(postListingMarkedResolved).toBe(!initialStatus)
+})
+
+exports.dbAssertFirstCommentEndorse = async (initialStatus) => {
+    const firstCommentDbRow = (
+        await this.getAllDbTopLevelThreadCommentsDisplayOrder(
+            this.TEST_POST_INFO.id))[0]
+    
+    expect(firstCommentDbRow.endorsed).toBe(!initialStatus)
 }

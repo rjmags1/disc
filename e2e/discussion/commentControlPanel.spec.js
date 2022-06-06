@@ -9,17 +9,33 @@ const {
     getFirstDisplayedCommentPageAndDbInfo, 
     TEST_POST_INFO, 
     assertOnCommentLikeUnlike, 
-    removeTestCommentFromDb
+    removeTestCommentFromDb,
+    editAndAssertOnEditedPageComment,
+    stripTerminatingNewlines,
+    dbAssertResetFirstUserAuthoredCommentDeleted,
+    lazyLoadAllTopLevelPageComments,
+    dbAssertFirstUserAuthoredPostFirstCommentResAnsDelta,
+    assertOnCorrectResolveAnswerButtonLabels,
+    clickResolveAnswerButtonUiAssert,
+    dbAssertFirstCommentEndorse
 } = require('../lib/post')
+const { loadAllPosts } = require('../lib/postListings')
 
+
+// NOTE: ----------------------------------------------v
+// these tests should be run serially with npm run e2e-serial.
+// this is because most of these tests perform actions that alter
+// a single database record twice in a row. the results
+// of that test instance and those of the same test with different browser
+// binaries depend on the consecutiveness of each individual test instance's
+// database record interactions. running non-serially, ie with multiple
+// workers, makes each worker interrupt the others' consecutive calls
+// to the relevant database record, resulting
+// in false test failures and inappropriately altered database records
 
 test.beforeEach(async ({ page, isMobile }, { title: testTitle }) => {
-    let userToLogin
-    if (testTitle === 'staff user - endorse btn') userToLogin = TESTUSER_STAFF
-    else userToLogin = TESTUSER_REGISTERED
-
-    await login(page, userToLogin)
-
+    await login(page, testTitle === 'endorse btn' ?
+        TESTUSER_STAFF : TESTUSER_REGISTERED)
     await expect(page.locator('nav').
         locator('text=/dashboard/i')).toBeVisible()
 
@@ -28,12 +44,9 @@ test.beforeEach(async ({ page, isMobile }, { title: testTitle }) => {
         page.locator(`text=/^${ testCourseName }$/i`).nth(0).click(),
         page.waitForSelector(`text=/${ testCourseName } - ${ term }/i`)
     ])
-
     const title = await page.title()
     expect(title).toMatch(new RegExp(
         `${ term } ${ code }-${ section } - Discussion`, "i"))
-    
-    
     if (!isMobile) await expect(
         page.locator("[data-testid=no-post-selected-icon]")).toBeVisible()
 
@@ -49,9 +62,6 @@ test.beforeEach(async ({ page, isMobile }, { title: testTitle }) => {
 
 test.describe('like and reply buttons - always displayed', async () => {
 
-    // failures fairly likely if running with multiple workers 
-    // pinging same db resource simultaneously. 
-    // npm run e2e-serial to ensure failures resulting from faulty impl.
     test('like button', async ({ page }) => {
         const {
             dbCommentInfo, pageCommentInfo
@@ -98,5 +108,150 @@ test.describe('like and reply buttons - always displayed', async () => {
         ])
 
         await removeTestCommentFromDb()
+    })
+})
+
+test.describe('comment edit and delete buttons', async () => {
+    test.setTimeout(10000)
+
+    test('edit button', async ({ page }) => {
+        const firstUserAuthoredCommentBoxLocator = page.locator(
+            '[data-testid=comment-box-container]', {
+                hasText: TESTUSER_REGISTERED.fullName }).nth(0)
+        const prevComment = await firstUserAuthoredCommentBoxLocator.locator(
+            '[data-testid=comment-container]').innerText() 
+        // quill editor inserts newlines at the end of paragraphs
+        // safari has similar newline insertion behavior
+        // only care about inner newlines for this assertion
+        const noNewlinesPrevComment = stripTerminatingNewlines(prevComment)
+
+        await editAndAssertOnEditedPageComment(
+            page, firstUserAuthoredCommentBoxLocator, "Voluptatibus quod eum.")
+
+        await editAndAssertOnEditedPageComment( // reset
+            page, firstUserAuthoredCommentBoxLocator, noNewlinesPrevComment)
+    })
+
+    test('delete button', async ({ page }) => {
+        const firstUserAuthoredCommentThread = page.locator(
+            '[data-testid=thread-container]', {
+                hasText: TESTUSER_REGISTERED.fullName })
+        const firstUserAuthoredCommentBoxLocator = page.locator(
+            '[data-testid=comment-box-container]', {
+                hasText: TESTUSER_REGISTERED.fullName }).nth(0)
+        const commentContent = await firstUserAuthoredCommentBoxLocator.locator(
+            '[data-testid=comment-container]').innerText()
+        
+        await Promise.all([
+            firstUserAuthoredCommentBoxLocator.locator(
+                '[data-testid=comment-delete-button]').click(),
+            firstUserAuthoredCommentThread.locator(
+                '[data-testid=comment-container]', {
+                    hasText: 'deleted' })
+        ])
+
+        await dbAssertResetFirstUserAuthoredCommentDeleted(commentContent)
+    })
+})
+
+test.describe('mark resolving btn, mark answer btn, endorse btn', async () => {
+    test.setTimeout(10000)
+
+    test('mark resolving button', async ({ page, isMobile }) => {
+        if (isMobile) {
+            await page.locator('[data-testid=post-back-btn]').click()
+        }
+        await loadAllPosts(page)
+        const firstUserAuthoredNormalPostListingLocator = page.locator(
+            '[data-testid=post-info-container]', {
+                hasText: TESTUSER_REGISTERED.fullName ,
+                has: page.locator('[data-testid=normal-post-icon]')}).nth(0)
+        const thePostTitle = (
+            await firstUserAuthoredNormalPostListingLocator.locator(
+                '[data-testid=post-info-title]').innerText())
+        const initialResolvedStatus = (
+            await firstUserAuthoredNormalPostListingLocator.locator(
+                '[data-testid=green-checkmark-icon]').isVisible())
+        const firstResolveBtn = page.locator(
+            '[data-testid=comment-mark-resolving-btn]').nth(0)
+        await Promise.all([
+            firstUserAuthoredNormalPostListingLocator.click(),
+            page.locator('[data-testid=post-container]', {
+                hasText: thePostTitle }).waitFor()
+        ])
+
+        await assertOnCorrectResolveAnswerButtonLabels(
+            page, initialResolvedStatus, true)
+        await clickResolveAnswerButtonUiAssert(
+            page, initialResolvedStatus, isMobile, true
+        ) // brings ui back to listings on mobile
+        await dbAssertFirstUserAuthoredPostFirstCommentResAnsDelta(
+            true, initialResolvedStatus)
+        
+        //reset
+        if (isMobile) {
+            await firstUserAuthoredNormalPostListingLocator.click()
+        }
+        await firstResolveBtn.click()
+    })
+
+    test('mark answer button', async ({ page, isMobile }) => {
+        if (isMobile) {
+            await page.locator('[data-testid=post-back-btn]').click()
+        }
+        await loadAllPosts(page)
+        const firstUserAuthoredQuestionPostListingLocator = page.locator(
+            '[data-testid=post-info-container]', {
+                hasText: TESTUSER_REGISTERED.fullName,
+                has: page.locator('[data-testid=question-icon]') }).nth(0)
+        const thePostTitle = (
+            await firstUserAuthoredQuestionPostListingLocator.locator(
+                '[data-testid=post-info-title]').innerText())
+        const initialAnsweredStatus = (
+            await firstUserAuthoredQuestionPostListingLocator.locator(
+                '[data-testid=green-checkmark-icon]').isVisible())
+        const firstAnswerBtn = page.locator(
+            '[data-testid=comment-mark-answer-btn]').nth(0)
+        await Promise.all([
+            firstUserAuthoredQuestionPostListingLocator.click(),
+            page.locator('[data-testid=post-container]', {
+                hasText: thePostTitle }).waitFor()
+        ])
+
+        await assertOnCorrectResolveAnswerButtonLabels(
+            page, initialAnsweredStatus, false)
+        await clickResolveAnswerButtonUiAssert( 
+            page, initialAnsweredStatus, isMobile, false
+        ) // brings ui back to listings on mobile
+        await dbAssertFirstUserAuthoredPostFirstCommentResAnsDelta(
+            false, initialAnsweredStatus)
+
+        //reset
+        if (isMobile) {
+            await firstUserAuthoredQuestionPostListingLocator.click()
+        }
+        await firstAnswerBtn.click()
+    })
+
+    test('endorse btn', async ({ page }) => {
+        const commentBoxLocator = page.locator(
+            '[data-testid=comment-box-container]').nth(0)
+        const endorseButtonLocator = commentBoxLocator.locator(
+            '[data-testid=comment-endorse-btn]')
+        await expect(endorseButtonLocator).toBeVisible()
+        const endorsedIconLocator = commentBoxLocator.locator(
+            '[data-testid=comment-endorsed-icon]')
+        const initialEndorsed = await endorsedIconLocator.isVisible()
+
+        await Promise.all([
+            endorseButtonLocator.click(),
+            endorsedIconLocator.waitFor({
+                state: initialEndorsed ? 'hidden' : 'visible' })
+        ])
+
+        await dbAssertFirstCommentEndorse(initialEndorsed)
+
+        //reset
+        await endorseButtonLocator.click()
     })
 })
