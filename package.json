@@ -18,7 +18,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest --watch",
-    "e2e": "npx playwright test"
+    "e2e": "npx playwright test",
+    "e2e-serial": "npx playwright test --workers=1"
   },
   "devDependencies": {
     "@faker-js/faker": "^6.1.2",

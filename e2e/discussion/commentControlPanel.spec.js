@@ -5,6 +5,13 @@ const {
     TESTUSER_STAFF
 } = require('../lib/auth')
 const { TEST_COURSE_INFO } = require('../lib/course')
+const { 
+    getFirstDisplayedCommentPageAndDbInfo, 
+    TEST_POST_INFO, 
+    assertOnCommentLikeUnlike, 
+    removeTestCommentFromDb
+} = require('../lib/post')
+
 
 test.beforeEach(async ({ page, isMobile }, { title: testTitle }) => {
     let userToLogin
@@ -38,4 +45,58 @@ test.beforeEach(async ({ page, isMobile }, { title: testTitle }) => {
         expect(page.locator(
             "[data-testid=thread-container]").nth(0)).toBeVisible()
     ])
+})
+
+test.describe('like and reply buttons - always displayed', async () => {
+
+    // failures fairly likely if running with multiple workers 
+    // pinging same db resource simultaneously. 
+    // npm run e2e-serial to deal with this
+    test('like button', async ({ page }) => {
+        const {
+            dbCommentInfo, pageCommentInfo
+        } = await getFirstDisplayedCommentPageAndDbInfo(page, TEST_POST_INFO.id)
+        const { pageAuthor, pageComment, pageLikes } = pageCommentInfo
+        const { dbAuthor, dbComment, dbLikes } = dbCommentInfo
+        expect([pageAuthor, pageLikes]).toEqual([
+            dbAuthor, dbLikes])
+        expect(pageComment).toMatch(new RegExp(dbComment))
+
+        const commentBoxLocator = page.locator(
+            '[data-testid=comment-box-container]').nth(0)
+        
+        await assertOnCommentLikeUnlike(
+            commentBoxLocator, pageLikes, TEST_POST_INFO.id)
+    })
+
+    test('reply button', async ({ page }) => {
+        test.slow()
+        const firstDisplayedAncestorCommentBoxLocator = page.locator(
+            '[data-testid=comment-box-container]').nth(0)
+        const replyButtonLocator = (
+            firstDisplayedAncestorCommentBoxLocator.locator(
+                '[data-testid=comment-reply-button]'))
+
+        await replyButtonLocator.click()
+        const editorLocator = page.locator(
+            '#quill-editor-container').locator('.ql-editor')
+        await expect(editorLocator).toBeVisible()
+        
+        const replyInputLocator = editorLocator.locator('text=test reply')
+        await Promise.all([
+            editorLocator.type("test reply"),
+            replyInputLocator.waitFor()
+        ])
+        const editorSubmitButtonLocator = page.locator(
+            '[data-testid=editor-submit-button]')
+        const newCommentLocator = page.locator(
+            '[data-testid=comment-box-container]').nth(1).locator(
+                'text=test reply')
+        await Promise.all([
+            editorSubmitButtonLocator.click(),
+            newCommentLocator.waitFor()
+        ])
+
+        await removeTestCommentFromDb()
+    })
 })

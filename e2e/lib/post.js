@@ -3,7 +3,6 @@ const { expect } = require('@playwright/test')
 const { 
     toTimestampString, fixNodePgUTCTimeInterpretation 
 } = require('./time')
-const { clearPreviewData } = require('next/dist/server/api-utils')
 
 const ANONYMOUS_AVATAR_URL = "/profile-button-img.png"
 
@@ -263,3 +262,101 @@ async (dbCommentInfo, commentBoxLocator, userId) => {
     expect(editPresent).toBe(userId === authorId)
     expect(deletePresent).toBe(userId === authorId)
 })
+
+exports.getFirstDisplayedPostCommentDbInfo = async (postId) => {
+    const queryText = `
+        SELECT f_name, l_name, display_content, likes FROM 
+            (SELECT author, display_content, comment_id
+            FROM comment WHERE post = $1 AND ancestor_comment IS NULL
+            ORDER BY created_at ASC
+            LIMIT 1)
+        AS the_comment
+        LEFT JOIN person ON the_comment.author = person.user_id
+        LEFT JOIN 
+            (SELECT comment AS liked_comment, COUNT(DISTINCT liker) AS likes 
+            FROM comment_like GROUP BY liked_comment)
+        AS comment_likes 
+        ON liked_comment = comment_id;`
+    
+    const firstDisplayedPostCommentQuery = await query(queryText, [postId])
+    const {
+        f_name, l_name, display_content, likes 
+    } = firstDisplayedPostCommentQuery.rows[0]
+    return {
+        dbAuthor: `${ f_name } ${ l_name }`,
+        dbComment: this.stripTagsNewLine(display_content),
+        dbLikes: likes === null ? 0 : parseInt(likes)
+    }
+}
+
+exports.getFirstDisplayedCommentPageAndDbInfo = async (page, postId) => {
+    const commentBoxLocator = page.locator(
+        '[data-testid=comment-box-container]').nth(0)
+    const pageAuthor = await commentBoxLocator.locator(
+        '[data-testid=comment-author]').innerText()
+    const pageComment = await commentBoxLocator.locator(
+        '[data-testid=comment-container]').innerText()
+    const numLikes = await commentBoxLocator.locator(
+        '[data-testid=comment-like-counter]').innerText()
+    const pageCommentInfo = {
+        pageAuthor, pageComment, pageLikes: parseInt(numLikes) }
+
+    const dbCommentInfo = await this.getFirstDisplayedPostCommentDbInfo(postId)
+
+    return { pageCommentInfo, dbCommentInfo }
+}
+
+const clickCommentLike = async (commentLikeButtonLocator) => {
+    const preClickLabel = await commentLikeButtonLocator.innerText()
+    const postClickLabel = (new RegExp('unlike', 'i').test(preClickLabel) ?
+        'like' : 'unlike')
+    const postClickLabelLocator = commentLikeButtonLocator.locator(
+        `text=/${ postClickLabel }/i`)
+    await Promise.all([
+        commentLikeButtonLocator.click(),
+        postClickLabelLocator.waitFor()
+    ])
+}
+
+exports.assertOnCommentLikeUnlike = (
+async (commentBoxLocator, preClickLikes, postId) => {
+    const commentLikeButtonLocator = commentBoxLocator.locator(
+        '[data-testid=comment-like-button]')
+    const commentLikeCounterLocator = commentBoxLocator.locator(
+        '[data-testid=comment-like-counter]')
+    const initialLabel = await commentLikeButtonLocator.innerText()
+
+    await clickCommentLike(commentLikeButtonLocator)
+    const postClickInc = (
+        new RegExp('unlike', 'i').test(initialLabel) ? -1 : 1)
+    const postClickPageLikes = postClickInc + preClickLikes
+    const updatedLikeCounterLocator = commentLikeCounterLocator.locator(
+        `text=${ postClickPageLikes }`)
+    await updatedLikeCounterLocator.waitFor()
+    const { dbLikes: postClickDbLikes } = (
+        await this.getFirstDisplayedPostCommentDbInfo(postId))
+    expect(parseInt(postClickPageLikes)).toBe(postClickDbLikes)
+
+    await clickCommentLike(commentLikeButtonLocator)
+    const resetLikeCounterLocator = commentLikeCounterLocator.locator(
+        `text=${ preClickLikes }`)
+    await resetLikeCounterLocator.waitFor()
+    const { dbLikes: postSecondClickDbLikes } = (
+        await this.getFirstDisplayedPostCommentDbInfo(postId))
+    expect(preClickLikes).toBe(postSecondClickDbLikes)
+})
+
+exports.removeTestCommentFromDb = async () => {
+    const testCommentId = await this.getNewestCommentIdFromDb()
+    const removeTestCommentQueryText = `
+        DELETE FROM comment WHERE comment_id = $1;`
+    await query(removeTestCommentQueryText, [testCommentId])
+}
+
+exports.getNewestCommentIdFromDb = async () => {
+    const testCommentIdQueryText = `
+        SELECT MAX(comment_id) AS newest_comment FROM comment;`
+    const testCommentIdQuery = await query(testCommentIdQueryText)
+
+    return testCommentIdQuery.rows[0].newest_comment
+}

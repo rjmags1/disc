@@ -2,7 +2,7 @@ const { devices } =  require('@playwright/test')
 
 const config = {
     timeout: 5 * 1000,
-    retries: 1,
+    retries: 0,
     testDir: './e2e',
     globalSetup: './e2e.setup.js',
     outputDir: './e2e/testOutput',

@@ -51,21 +51,22 @@ function Editor({ hideEditor, handleSubmit, editContent, isPost, editingPost }) 
             <div id="quill-editor-container" ref={ editorRef } 
                 className="text-white rounded-b-[10px]" 
                 style={ isPost ? { fontSize: '1rem', fontWeight: 200 } : {} } />
-            <div className="flex mb-2">
-                <button className="mt-4 bg-purple py-0.5 px-2 rounded border
+            <div className="flex mb-2 items-center mt-3 ml-2">
+                <button className="h-full bg-purple py-0.5 px-2 rounded border
                     border-white hover:bg-violet-800" onClick={ handleSubmitClick }
-                    style={ isPost ? { paddingLeft: '2rem', paddingRight: '2rem' } : {} }>
+                    style={ isPost ? { paddingLeft: '2rem', paddingRight: '2rem' } : {} }
+                    data-testid="editor-submit-button">
                     { isPost && !editingPost ? "Post" : "Submit" }
                 </button>
                 { !isPost && 
-                <button className="mx-2 mt-2 py-0.5 opacity-60 underline 
+                <button className="mx-2 px-2 h-full py-0.5 opacity-60 underline 
                     hover:opacity-30 font-thin text-sm" 
                     onClick={ () => setAnonymous(prev => !prev) }>
                     { anonymous ? "Unmark anonymous" : "Mark anonymous" }
                 </button> }
                 { (!isPost || editingPost) && 
-                <button className="mt-2 py-0.5 opacity-60 underline 
-                    hover:opacity-30 font-thin text-sm mx-2" 
+                <button className="h-full py-0.5 opacity-60 underline 
+                    hover:opacity-30 font-thin text-sm" 
                     style={ editingPost ? { marginTop: '1rem' } : {} } 
                     onClick={ removeToolbarAndEditor }>
                     Cancel
