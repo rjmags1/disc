@@ -10,22 +10,11 @@ function WatchButton({ watched }) {
         postListings, setPostListings, specialListings, setSpecialListings 
     } = useContext(PostListingsContext)
     const [status, setStatus] = useState(watched)
-    const [loading, setLoading] = useState(false)
-
-    useEffect(() => {
-        if (!buttonRef.current) return
-
-        buttonRef.current.style.backgroundColor = loading ? 
-            "#18181b" : ""
-
-    }, [loading])
 
     const handleClick = async () => {
-        if (loading) return
-
         const newStatus = !status
         setStatus(prevStatus => !prevStatus)
-        setLoading(true)
+        buttonRef.current.disabled = true
         try {
             const resp = await fetch(
                 `/api/course/postsInfo/${ currentPost.postId }/watch/${ newStatus }`,
@@ -42,17 +31,15 @@ function WatchButton({ watched }) {
             }
         }
         catch (error) { setStatus(!newStatus) }
-        finally { setLoading(false) }
+        finally { buttonRef.current.disabled = false }
     }
     
-
     return (
         <div data-testid="post-watch-button-container" className="h-[25px] text-sm" >
             <button className="flex items-center justify-center rounded
                 h-full bg-rose-400 hover:bg-rose-500 border border-white
                 hover:cursor-pointer px-1.5 w-max" ref={ buttonRef } onClick={ handleClick } >
                 <span>{ status ? "Unwatch" : "Watch" }</span>
-                { loading && <ButtonLoading />}
             </button>
         </div>
     ) 

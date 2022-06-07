@@ -11,22 +11,11 @@ function EndorseButton({ endorsed }) {
         postListings, setPostListings, specialListings, setSpecialListings 
     } = useContext(PostListingsContext)
     const [status, setStatus] = useState(endorsed)
-    const [loading, setLoading] = useState(false)
-
-    useEffect(() => {
-        if (!buttonRef.current) return
-
-        buttonRef.current.style.backgroundColor = loading ? 
-            "#18181b" : ""
-
-    }, [loading])
 
     const handleClick = async () => {
-        if (loading) return
-
         const newStatus = !status
         setStatus(newStatus)
-        setLoading(true)
+        buttonRef.current.disabled = true
         try {
             const resp = await fetch(
                 `/api/course/postsInfo/${ currentPost.postId }/endorse/${ newStatus }`,
@@ -41,7 +30,7 @@ function EndorseButton({ endorsed }) {
             }
         }
         catch (error) { setStatus(!newStatus) }
-        finally { setLoading(false) }
+        finally { buttonRef.current.disabled = false }
     }
 
     return (
@@ -49,9 +38,8 @@ function EndorseButton({ endorsed }) {
             className="h-[25px] text-sm">
             <button className="w-max px-1.5 h-full bg-blue-600 rounded border 
                 border-white hover:bg-blue-700 hover:cursor-pointer"
-                onClick={ handleClick }>
+                onClick={ handleClick } ref={ buttonRef }>
                 <span>{ status ? "Unendorse" : "Endorse" }</span>
-                { loading && <ButtonLoading /> }
             </button>
         </div>
     )

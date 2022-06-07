@@ -10,22 +10,11 @@ function LikeButton({ liked }) {
         postListings, setPostListings, specialListings, setSpecialListings 
     } = useContext(PostListingsContext)
     const [status, setStatus] = useState(liked)
-    const [loading, setLoading] = useState(false)
-
-    useEffect(() => {
-        if (!buttonRef.current) return
-
-        buttonRef.current.style.backgroundColor = loading ? 
-            "#18181b" : ""
-
-    }, [loading])
     
     const handleClick = async () => {
-        if (loading) return
-
         const newStatus = !status
         setStatus(newStatus)
-        setLoading(true)
+        buttonRef.current.disabled = true
         try {
             const resp = await fetch(
                 `/api/course/postsInfo/${ currentPost.postId }/like/${ newStatus }`,
@@ -41,7 +30,7 @@ function LikeButton({ liked }) {
             }
         }
         catch (error) { setStatus(!newStatus) }
-        finally { setLoading(false) }
+        finally { buttonRef.current.disabled = false }
     }
 
 
@@ -51,7 +40,6 @@ function LikeButton({ liked }) {
                 h-full rounded bg-sky-500 hover:bg-sky-600 border border-white 
                 hover:cursor-pointer" ref={ buttonRef } onClick={ handleClick }>
                 <span>{ status ? "Unlike" : "Like" }</span>
-                { loading && <ButtonLoading /> }
             </button>
         </div>
     )

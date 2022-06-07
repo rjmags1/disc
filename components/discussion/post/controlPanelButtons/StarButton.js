@@ -10,22 +10,11 @@ function StarButton({ starred }) {
         postListings, setPostListings, specialListings, setSpecialListings 
     } = useContext(PostListingsContext)
     const [status, setStatus] = useState(starred)
-    const [loading, setLoading] = useState(false)
-
-    useEffect(() => {
-        if (!buttonRef.current) return
-
-        buttonRef.current.style.backgroundColor = loading ? 
-            "#18181b" : ""
-
-    }, [loading])
 
     const handleClick = async () => {
-        if (loading) return
-
         const newStatus = !status
         setStatus(prevStatus => !prevStatus)
-        setLoading(true)
+        buttonRef.current.disabled = true
         try {
             const resp = await fetch(
                 `/api/course/postsInfo/${ currentPost.postId }/star/${ newStatus }`,
@@ -42,7 +31,7 @@ function StarButton({ starred }) {
             }
         }
         catch (error) { setStatus(!newStatus) }
-        finally { setLoading(false) }
+        finally { buttonRef.current.disabled = false }
     }
 
     return (
@@ -51,7 +40,6 @@ function StarButton({ starred }) {
                 h-full bg-yellow-500 hover:bg-yellow-800 border border-white 
                 hover:cursor-pointer" ref={ buttonRef } onClick={ handleClick }>
                 <span>{ status ? "Unstar" : "Star" }</span>
-                { loading && <ButtonLoading /> }
             </button>
         </div>
     )
