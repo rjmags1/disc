@@ -13,7 +13,6 @@ const {
     editAndAssertOnEditedPageComment,
     stripTerminatingNewlines,
     dbAssertResetFirstUserAuthoredCommentDeleted,
-    lazyLoadAllTopLevelPageComments,
     dbAssertFirstUserAuthoredPostFirstCommentResAnsDelta,
     assertOnCorrectResolveAnswerButtonLabels,
     clickResolveAnswerButtonUiAssert,
