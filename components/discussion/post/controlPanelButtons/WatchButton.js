@@ -47,7 +47,7 @@ function WatchButton({ watched }) {
     
 
     return (
-        <div data-testid="watched-button-container" className="h-[25px] text-sm" >
+        <div data-testid="post-watch-button-container" className="h-[25px] text-sm" >
             <button className="flex items-center justify-center rounded
                 h-full bg-rose-400 hover:bg-rose-500 border border-white
                 hover:cursor-pointer px-1.5 w-max" ref={ buttonRef } onClick={ handleClick } >

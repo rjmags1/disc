@@ -46,7 +46,7 @@ function StarButton({ starred }) {
     }
 
     return (
-        <div data-testid="starred-button-container" className="h-[25px] text-sm">
+        <div data-testid="post-star-button-container" className="h-[25px] text-sm">
             <button className="flex items-center justify-center w-max px-1.5 rounded
                 h-full bg-yellow-500 hover:bg-yellow-800 border border-white 
                 hover:cursor-pointer" ref={ buttonRef } onClick={ handleClick }>

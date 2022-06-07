@@ -46,7 +46,7 @@ function LikeButton({ liked }) {
 
 
     return (
-        <div data-testid="like-button-container" className="h-[25px] text-sm">
+        <div data-testid="post-like-button-container" className="h-[25px] text-sm">
             <button className="flex items-center justify-center w-max px-1.5 
                 h-full rounded bg-sky-500 hover:bg-sky-600 border border-white 
                 hover:cursor-pointer" ref={ buttonRef } onClick={ handleClick }>

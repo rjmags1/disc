@@ -3,9 +3,11 @@ const { expect } = require('@playwright/test')
 const { 
     toTimestampString, fixNodePgUTCTimeInterpretation 
 } = require('./time')
-const { TESTUSER_REGISTERED } = require('./auth')
-const { getAllNonDeletedDbPostsInPageOrder } = require('./postListings')
+const { TESTUSER_REGISTERED, TESTUSER_STAFF } = require('./auth')
+const { getAllNonDeletedDbPostsInPageOrder, getDbCoursePostsRevChronOrder } = require('./postListings')
 const { TEST_COURSE_INFO } = require('./course')
+const { getDbCourseCategories } = require('./categories')
+const { rows } = require('pg/lib/defaults')
 
 const ANONYMOUS_AVATAR_URL = "/profile-button-img.png"
 
@@ -548,4 +550,183 @@ exports.assertOnNewestCommentInDb = async (comment, postId) => {
     const newestCommentQuery = await query(queryText, [postId])
     const { display_content } = newestCommentQuery.rows[0]
     expect(display_content).toMatch(new RegExp(comment))
+}
+
+const getPostViewsLikesComments = async (postId) => {
+    const queryText = `
+        WITH post_views AS (
+            SELECT post AS viewed_post, COUNT(DISTINCT viewer) AS views
+            FROM post_view WHERE post = $1 GROUP BY viewed_post),
+            post_likes AS
+            (SELECT post AS liked_post, COUNT(DISTINCT liker) AS likes
+            FROM post_like WHERE post = $1 GROUP BY liked_post),
+            post_comments AS
+            (SELECT post AS commented_post, COUNT(DISTINCT comment_id) AS comments
+            FROM comment WHERE post = $1 GROUP BY commented_post)
+        SELECT views, likes, comments FROM post_views 
+        LEFT JOIN post_likes ON viewed_post = liked_post
+        LEFT JOIN post_comments ON viewed_post = commented_post;`
+
+    const postInfoQuery = await query(queryText, [postId])
+    const row = postInfoQuery.rows[0]
+    return {
+        views: parseInt(row.views || 0),
+        likes: parseInt(row.likes || 0),
+        comments: parseInt(row.comments || 0)
+    }
+}
+
+const removeTags = s => {
+    const keepChars = []
+    let inTag = false
+    for (const c of s) {
+        if (inTag) {
+            if (c === '>') inTag = false
+            continue
+        }
+        if (c === '<') inTag = true
+        keepChars.push(c)
+    }
+
+    return keepChars.join('')
+}
+
+const getUserLikedPost = async (userId, postId) => {
+    const queryText= `
+        SELECT post_like_id FROM post_like WHERE liker = $1 AND post = $2;`
+    const userLikeQuery = await query(queryText, [userId, postId])
+    return !!userLikeQuery.rows.length
+}
+
+const getDbPostContent = async (postId) => {
+    const queryText = `SELECT display_content FROM post WHERE post_id = $1;`
+    const displayContentQuery = await query(queryText, [postId])
+    return displayContentQuery.rows[0].display_content
+}
+
+const stripBrackets = s => {
+    const keepChars = []
+    for (const c of s) {
+        if (c == '<') continue
+        keepChars.push(c)
+    }
+
+    return keepChars.join('')
+}
+
+const stripStartTermNewlines = s => {
+    let start
+    for (let i = 0; i < s.length; i++) {
+        if (s[i] === '\n') continue
+        start = i
+        break
+    }
+    let end
+    for (let i = s.length - 1; i >= 0; i--) {
+        if (s[i] === '\n') continue
+        end = i
+        break
+    }
+
+    return s.slice(start, end + 1)
+}
+
+exports.assertOnPostContent = async (dbRow, page) => {
+    const {
+        post_id, user_id: author_id, created_at, category_name, 
+        anonymous, title, resolved, answered
+    } = dbRow
+
+    await new Promise(res => setTimeout(res, 100))
+    const answeredLabelPresent = await page.locator(
+        '[data-testid=post-stats-bar]').locator(
+            'text=/answered/i').isVisible()
+    const resolvedLabelPresent = await page.locator(
+        '[data-testid=post-stats-bar]').locator(
+            'text=/resolved/i').isVisible()
+    expect(answeredLabelPresent).toBe(answered)
+    expect(resolvedLabelPresent).toBe(resolved)
+
+    const authorInfo = await this.getAvatarUrlAndName(author_id)
+    const { avatar_url, f_name, l_name } = authorInfo
+
+    const pageTitle = await page.locator(
+        '[data-testid=post-title]').innerText()
+    expect(title).toMatch(new RegExp(
+        this.stripTerminatingNewlines(pageTitle)))
+    const pageAuthorAvatarUrl = await page.locator(
+        '[data-testid=post-author-avatar-img]').getAttribute('src')
+    expect(pageAuthorAvatarUrl).toBe(
+        anonymous ? ANONYMOUS_AVATAR_URL : avatar_url)
+    const pageAuthorName = await page.locator(
+        '[data-testid=post-author-header]').innerText()
+    expect(anonymous ? 'Anonymous' : `${ f_name } ${ l_name }`).toBe(
+        pageAuthorName)
+    const dbTimestamp = toTimestampString(
+        fixNodePgUTCTimeInterpretation(created_at))
+    const pageTimestamp = await page.locator(
+        '[data-testid=post-stats-bar]').locator(
+            '[data-testid=timestamp]').innerText()
+    expect(dbTimestamp).toBe(pageTimestamp)
+    const pageCategory = await page.locator(
+        '[data-testid=post-category]').innerText()
+    expect(this.stripTerminatingNewlines(pageCategory)).toBe(
+        category_name)
+    const {
+        views: dbViews, likes: dbLikes, comments: dbComments 
+    } = await getPostViewsLikesComments(post_id)
+    const pageViews = parseInt(await page.locator(
+        '[data-testid=post-views]').innerText())
+    const pageLikes = parseInt(await page.locator(
+        '[data-testid=post-likes]').innerText())
+    const pageComments = parseInt(await page.locator(
+        '[data-testid=post-comments]').innerText())
+    expect([dbViews, dbLikes, dbComments]).toEqual([
+        pageViews, pageLikes, pageComments])
+    const pagePost = await page.locator(
+        '[data-testid=post-display-content]').innerText()
+    const dbPost = stripBrackets(
+        this.stripTerminatingNewlines(
+            removeTags(await getDbPostContent(post_id))))
+    for (const sentence of dbPost.split('.')) {
+        expect(pagePost).toMatch(new RegExp(sentence))
+    }
+}
+
+exports.assertOnPostControlPanel = async (dbRow, page, userId) => {
+    const postLikeButtonLocator = page.locator(
+        '[data-testid=post-like-button-container]')
+    await expect(postLikeButtonLocator).toBeVisible()
+    const userLiked = await getUserLikedPost(
+        TESTUSER_REGISTERED.userId, dbRow.post_id)
+    const likeButtonLabel = stripStartTermNewlines(
+        await postLikeButtonLocator.innerText())
+    expect(likeButtonLabel).toMatch(
+        new RegExp(userLiked ? /^unlike$/i : /^like$/i))
+
+    const postWatchButtonLocator = page.locator(
+        '[data-testid=post-watch-button-container]')
+    await expect(postWatchButtonLocator).toBeVisible()
+    const watchButtonLabel = await postWatchButtonLocator.innerText()
+    expect(watchButtonLabel).toMatch(
+        new RegExp(!!dbRow.watch_id ? /unwatch/i : /watch/i))
+
+    const postStarButtonLocator = page.locator(
+        '[data-testid=post-star-button-container]')
+    await expect(postStarButtonLocator).toBeVisible()
+    const starButtonLabel = await postStarButtonLocator.innerText()
+    expect(starButtonLabel).toMatch(
+        new RegExp(!!dbRow.star_id ? /unstar/i : /star/i))
+    
+    const endorseButtonLocator = page.locator(
+        '[data-testid=post-endorse-button-container]')
+    const endorseButtonPresent = await endorseButtonLocator.isVisible()
+    expect(endorseButtonPresent).toBe(userId === TESTUSER_STAFF.userId)
+
+    const { user_id: author_id } = dbRow
+    const editButtonPresent = await page.locator(
+        '[data-testid=post-edit-button-container]').isVisible()
+    const deleteButtonPresent = await page.locator(
+        '[data-testid=post-delete-button-container]').isVisible()
+    expect(editButtonPresent && deleteButtonPresent).toBe(userId === author_id)
 }

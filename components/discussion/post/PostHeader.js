@@ -24,23 +24,27 @@ function PostHeader({
                     { flexDirection: "column"  } : {} }>
                 <div className="flex flex-none pr-4 items-center">
                     <img width="55" className="rounded-full"
+                        data-testid="post-author-avatar-img"
                         src={ content.anonymous ? 
                             "/profile-button-img.png" : content.avatarUrl }/>
                     <div className="flex flex-col justify-center h-full">
-                        <h4 className="ml-2.5 font-normal">
+                        <h4 className="ml-2.5 font-normal" 
+                            data-testid="post-author-header">
                             { content.anonymous ? 
                             "Anonymous" : content.author }
                         </h4>
                         <h5 className="text-xs py-1 font-extralight">
                             <Timestamp createdAt={ new Date(content.createdAt) }/>
                             <span className="-ml-1 mr-1.5">in</span>
-                            <span style={{ color: catColor }} >
+                            <span style={{ color: catColor }} 
+                                data-testid="post-category">
                                 { content.category }
                             </span>
                         </h5>
                     </div>
                 </div>
-                <div className="flex text-xs h-full overflow-hidden font-normal">
+                <div className="flex text-xs h-full overflow-hidden 
+                    font-normal items-center">
                     { (resolved || answered) && 
                     <div className="h-full flex items-center my-0.5 mr-2">
                         <span className="text-base text-green-500 py-0.5
@@ -49,7 +53,7 @@ function PostHeader({
                         </span>
                     </div> }
                     <div className="flex flex-col justify-center 
-                        items-center mx-2" style={ 
+                        items-center mx-2" data-testid="post-views" style={ 
                             window.innerWidth < SMALL_MEDIA_BREAKPOINT ? 
                             { flexDirection: "row", gap: '5px', marginTop: '3px' } : {}}>
                         <h4 className="text-lg w-full text-center" style={
@@ -60,7 +64,7 @@ function PostHeader({
                         <h6>views</h6>
                     </div>
                     <div className="flex flex-col justify-center 
-                        items-center mx-2" style={ 
+                        items-center mx-2" data-testid="post-likes" style={ 
                             window.innerWidth < SMALL_MEDIA_BREAKPOINT ? 
                             { flexDirection: "row", gap: '5px', marginTop: '3px' } : {}}>
                         <h4 className="text-lg w-full text-center" style={
@@ -71,7 +75,7 @@ function PostHeader({
                         <h6>likes</h6>
                     </div>
                     <div className="flex flex-col justify-center 
-                        items-center mx-2" style={ 
+                        items-center mx-2" data-testid="post-comments" style={ 
                             window.innerWidth < SMALL_MEDIA_BREAKPOINT ? 
                             { flexDirection: "row", gap: '5px', marginTop: '3px' } : {}}>
                         <h4 className="text-lg w-full text-center" style={
