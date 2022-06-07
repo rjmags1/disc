@@ -2,12 +2,13 @@ const { TEST_COURSE_INFO } = require('../lib/course')
 const { query } = require('../lib/db')
 const { expect } = require('@playwright/test')
 
-const getDbCourseCategories = async () => {
+const getDbCourseCategories = async (map=false) => {
     const categoriesQueryText = `
-        SELECT name FROM post_category WHERE course = $1;`
+        SELECT category_id, name FROM post_category WHERE course = $1;`
     const categoriesQueryParams = [TEST_COURSE_INFO.courseId]
     const categoriesQuery = await query(
         categoriesQueryText, categoriesQueryParams)
+    if (map) return categoriesQuery.rows
 
     const dbCategories = categoriesQuery.rows.map(row => row.name)
 
