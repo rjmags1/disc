@@ -539,3 +539,13 @@ exports.dbAssertFirstCommentEndorse = async (initialStatus) => {
     
     expect(firstCommentDbRow.endorsed).toBe(!initialStatus)
 }
+
+exports.assertOnNewestCommentInDb = async (comment, postId) => {
+    const queryText = `
+        SELECT display_content, created_at FROM comment
+        WHERE post = $1
+        ORDER BY created_at DESC LIMIT 1`
+    const newestCommentQuery = await query(queryText, [postId])
+    const { display_content } = newestCommentQuery.rows[0]
+    expect(display_content).toMatch(new RegExp(comment))
+}
