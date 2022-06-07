@@ -1,4 +1,6 @@
-import { LARGE_MEDIA_BREAKPOINT } from "../../../lib/layout"
+import { 
+    LARGE_MEDIA_BREAKPOINT, SMALL_MEDIA_BREAKPOINT 
+} from "../../../lib/layout"
 import Timestamp from "../postListingsPane/listingIcons/Timestamp"
 
 function PostHeader({
@@ -16,9 +18,11 @@ function PostHeader({
                     { content.title }
                 </h3>
             </div>
-            <section className="flex justify-between my-2 mb-3 h-[55px] 
-                whitespace-nowrap" data-testid="post-stats-bar">
-                <div className="flex flex-none pr-4">
+            <section className="flex justify-between my-2 mb-3 h-fit 
+                whitespace-nowrap" data-testid="post-stats-bar"
+                style={ window.innerWidth < SMALL_MEDIA_BREAKPOINT ?
+                    { flexDirection: "column"  } : {} }>
+                <div className="flex flex-none pr-4 items-center">
                     <img width="55" className="rounded-full"
                         src={ content.anonymous ? 
                             "/profile-button-img.png" : content.avatarUrl }/>
@@ -45,22 +49,34 @@ function PostHeader({
                         </span>
                     </div> }
                     <div className="flex flex-col justify-center 
-                        items-center mx-2">
-                        <h4 className="text-lg w-full text-center">
+                        items-center mx-2" style={ 
+                            window.innerWidth < SMALL_MEDIA_BREAKPOINT ? 
+                            { flexDirection: "row", gap: '5px', marginTop: '3px' } : {}}>
+                        <h4 className="text-lg w-full text-center" style={
+                            window.innerWidth < SMALL_MEDIA_BREAKPOINT ? 
+                            { fontSize: 'medium' } : {}}>
                             { content.views }
                         </h4>
                         <h6>views</h6>
                     </div>
                     <div className="flex flex-col justify-center 
-                        items-center mx-2">
-                        <h4 className="text-lg w-full text-center">
+                        items-center mx-2" style={ 
+                            window.innerWidth < SMALL_MEDIA_BREAKPOINT ? 
+                            { flexDirection: "row", gap: '5px', marginTop: '3px' } : {}}>
+                        <h4 className="text-lg w-full text-center" style={
+                            window.innerWidth < SMALL_MEDIA_BREAKPOINT ? 
+                            { fontSize: 'medium' } : {}}>
                             { content.likes }
                         </h4>
                         <h6>likes</h6>
                     </div>
                     <div className="flex flex-col justify-center 
-                        items-center mx-2">
-                        <h4 className="text-lg w-full text-center">
+                        items-center mx-2" style={ 
+                            window.innerWidth < SMALL_MEDIA_BREAKPOINT ? 
+                            { flexDirection: "row", gap: '5px', marginTop: '3px' } : {}}>
+                        <h4 className="text-lg w-full text-center" style={
+                            window.innerWidth < SMALL_MEDIA_BREAKPOINT ? 
+                            { fontSize: 'medium' } : {}}>
                             { content.comments }
                         </h4>
                         <h6>comments</h6>
