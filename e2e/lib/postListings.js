@@ -81,7 +81,8 @@ const getAllNonDeletedDbPostsInPageOrder = async (courseId) => {
     const announcementDbRows = getAnnouncementsFromDbRows(dbPosts)
     const regularDbRows = getNonPinnedNonAnnouncementFromDbRows(dbPosts)
     
-    return [...pinnedDbRows, ...announcementDbRows, ...regularDbRows]
+    return [...pinnedDbRows, ...announcementDbRows, ...regularDbRows].filter(
+        row => !row.deleted)
 }
 
 const checkIfAttributeSelected = async (attribute, attributeLocator) => {
@@ -242,7 +243,7 @@ const closeAttributeFilter = async (page) => {
 
 const bigPostsQueryText = `
 SELECT
-    post_id, title, category_name, created_at,
+    post_id, title, category_name, created_at, deleted, anonymous,
     is_question, resolved, answered, endorsed, is_announcement, pinned,
     f_name, l_name, user_id, private, author_is_staff, author_is_instructor,
     star_id, watch_id, last_viewed_at, likes, comments, latest_comment_time
