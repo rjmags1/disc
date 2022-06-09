@@ -40,7 +40,8 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
     const rows = announcementsPinnedsQuery.rows
     const announcements = [], pinned = []
-    rows.forEach(row => {
+    rows.filter(r => !r.deleted && 
+        (!r.private || r.private && r.user_id === userId)).forEach(row => {
         const processed = processRow(row)
         if (processed.pinned) pinned.push(processed)
         else announcements.push(processed)
@@ -57,6 +58,7 @@ const processRow = (row) => ({
     title: row.title,
     categoryId: row.category_id,
     category: row.category_name,
+    deleted: row.deleted,
     createdAt: 
         fixNodePgUTCTimeInterpretation(row.created_at),
     pinned: row.pinned,
@@ -83,7 +85,7 @@ const processRow = (row) => ({
 
 const announcementsPinnedsQueryText = `
 SELECT
-    post_id, title, category_name, category_id, created_at,
+    post_id, title, category_name, category_id, created_at, liker, deleted,
     is_question, resolved, answered, endorsed, pinned, is_announcement,
     f_name, l_name, user_id, private, author_is_staff, author_is_instructor,
     star_id, watch_id, last_viewed_at, likes, comments, latest_comment_time
