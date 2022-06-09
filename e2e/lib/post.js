@@ -822,3 +822,45 @@ async (button, status, postListingLocator, postTitle, isMobile, page) => {
     if (uiStatus !== undefined) expect(uiStatus).toBe(status)
     else return numLikes
 })
+
+exports.editPost = async (page, editorLocator, text) => {
+    const editorPresent = await editorLocator.isVisible()
+    if (!editorPresent) {
+        await Promise.all([
+            page.locator('[data-testid=post-edit-button-container]').click(),
+            editorLocator.waitFor()
+        ])
+    }
+    await editorLocator.fill(text)
+    const newEditorContents = await editorLocator.innerText()
+    expect(newEditorContents).toMatch(new RegExp(text))
+    await Promise.all([
+        page.locator('[data-testid=editor-submit-button]').click(),
+        editorLocator.waitFor({ state: 'hidden' }),
+        page.locator('[data-testid=post-display-content]').waitFor()
+    ])
+}
+
+exports.dbAssertEditedPost = async (text, postId) => {
+    const displayContentQueryText = `
+        SELECT display_content FROM post WHERE post_id = $1;`
+    const displayContentQueryParams = [postId]
+    const displayContentQuery = await query(
+        displayContentQueryText, displayContentQueryParams)
+
+    const displayContent = this.stripTagsNewLine(
+        displayContentQuery.rows[0].display_content)
+    for (const sentence of displayContent.split('.')) {
+        expect(text).toMatch(new RegExp(sentence))
+    }
+}
+
+exports.stripSlashNewlines = (s) => {
+    const keepChars = []
+    for (const c of s) {
+        if (c === '/' || c === '\n') continue
+        keepChars.push(c)
+    }
+
+    return keepChars.join('')
+}
