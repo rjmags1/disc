@@ -8,7 +8,7 @@ import StarButton from './controlPanelButtons/StarButton'
 import WatchButton from './controlPanelButtons/WatchButton'
 import EditButton from './controlPanelButtons/EditButton'
 
-function PostControlPanel({ editPost }) {
+function PostControlPanel({ editPost, toggleMobilePostDisplay }) {
     const { currentPost } = useContext(PostContext)
 
     const { user } = useUser()
@@ -19,13 +19,15 @@ function PostControlPanel({ editPost }) {
 
     return (
         <section data-testid="post-control-panel-container" 
-            className="w-max flex mb-3 gap-[3%]">
+            className="w-full flex flex-wrap sm:flex-nowrap 
+                gap-[1%] h-[60px]">
             <LikeButton liked={ currentPost.liked } />
             <WatchButton watched={ currentPost.watched }/>
             { userIsAuthor && <EditButton editPost={ editPost } /> }
             <StarButton starred={ currentPost.starred } />
             { canEndorse && <EndorseButton endorsed={ currentPost.endorsed } /> }
-            { canDelete && !currentPost.deleted && <DeleteButton /> }
+            { canDelete && !currentPost.deleted && 
+            <DeleteButton toggleMobilePostDisplay={ toggleMobilePostDisplay } /> }
         </section>
     )
 }

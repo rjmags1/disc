@@ -69,7 +69,8 @@ function PostContentSection({
                 catColor={ categoriesToColors[content.category] }
                 resolved={ resolved } answered={ answered } />
             { !editing && 
-            <PostControlPanel editPost={ () => setEditing(true) } /> }
+            <PostControlPanel editPost={ () => setEditing(true) } 
+                toggleMobilePostDisplay={ toggleMobilePostDisplay } /> }
             { editing ? 
             <div>
                 <Editor editContent={ content.editContent } isPost editingPost 
@@ -78,7 +79,7 @@ function PostContentSection({
             </div> : 
             <section data-testid="post-display-content" 
                 dangerouslySetInnerHTML={{ __html: content.displayContent }} 
-                className="font-light my-8" /> }
+                className="font-light mb-[30px]" /> }
         </div>
     )
 }
@@ -140,7 +141,6 @@ const listingReplaced = (listings, idx, newListing) => {
 }
 
 const getEditedIdx = (listings, postId, special) => {
-    console.log(listings, postId, special)
     for (let i = 0; i < listings.length; i++) {
         const listing = listings[i]
         const listingPostId = special ? listing.postId : listing.postInfo.postId

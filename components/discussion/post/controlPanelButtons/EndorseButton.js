@@ -1,6 +1,5 @@
 import { useState, useContext, useRef, useEffect } from 'react'
 import { PostContext, PostListingsContext } from '../../../../pages/[courseId]/discussion'
-import ButtonLoading from '../../../lib/ButtonLoading'
 import { syncListingWithBoolInteraction } from '../../../../lib/uiSync'
 
 

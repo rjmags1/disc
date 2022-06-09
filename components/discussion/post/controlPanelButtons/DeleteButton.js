@@ -3,7 +3,7 @@ import { PostContext, PostListingsContext } from '../../../../pages/[courseId]/d
 import ButtonLoading from '../../../lib/ButtonLoading'
 import { syncListingWithBoolInteraction } from '../../../../lib/uiSync'
 
-function DeleteButton() {
+function DeleteButton({ toggleMobilePostDisplay }) {
     const buttonRef = useRef(null)
     const { currentPost, setCurrentPost } = useContext(PostContext)
     const {
@@ -36,6 +36,7 @@ function DeleteButton() {
             syncListingWithBoolInteraction(
                 "delete", listings, setListings, currentPost, true)
             setCurrentPost(null)
+            toggleMobilePostDisplay()
         }
         catch (error) { setLoading(false) }
     }

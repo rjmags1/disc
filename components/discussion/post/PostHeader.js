@@ -44,7 +44,9 @@ function PostHeader({
                     </div>
                 </div>
                 <div className="flex text-xs h-full overflow-hidden 
-                    font-normal items-center">
+                    font-normal items-center" style={ 
+                        window.innerWidth < SMALL_MEDIA_BREAKPOINT ?
+                        { marginTop: '2%'} : {}}>
                     { (resolved || answered) && 
                     <div className="h-full flex items-center my-0.5 mr-2">
                         <span className="text-base text-green-500 py-0.5

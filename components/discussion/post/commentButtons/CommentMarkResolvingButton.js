@@ -39,7 +39,7 @@ const CommentMarkResolvingButton = React.memo(function(props) {
     }
 
     return (
-        <button className="px-1 hover:opacity-60" onClick={ handleClick }
+        <button className="px-1 hover:opacity-60 whitespace-nowrap" onClick={ handleClick }
             data-testid="comment-mark-resolving-btn">
             { isResolving ? "UNMARK AS RESOLVING" : "MARK AS RESOLVING" }
         </button>
