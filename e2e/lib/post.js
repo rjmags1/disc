@@ -4,10 +4,8 @@ const {
     toTimestampString, fixNodePgUTCTimeInterpretation 
 } = require('./time')
 const { TESTUSER_REGISTERED, TESTUSER_STAFF } = require('./auth')
-const { getAllNonDeletedDbPostsInPageOrder, getDbCoursePostsRevChronOrder } = require('./postListings')
+const { getAllNonDeletedDbPostsInPageOrder, } = require('./postListings')
 const { TEST_COURSE_INFO } = require('./course')
-const { getDbCourseCategories } = require('./categories')
-const { rows } = require('pg/lib/defaults')
 
 const ANONYMOUS_AVATAR_URL = "/profile-button-img.png"
 
@@ -693,7 +691,7 @@ exports.assertOnPostContent = async (dbRow, page) => {
     }
 }
 
-exports.assertOnPostControlPanel = async (dbRow, page, userId) => {
+exports.assertOnPostControlPanelContent = async (dbRow, page, userId) => {
     const postLikeButtonLocator = page.locator(
         '[data-testid=post-like-button-container]')
     await expect(postLikeButtonLocator).toBeVisible()
@@ -730,3 +728,97 @@ exports.assertOnPostControlPanel = async (dbRow, page, userId) => {
         '[data-testid=post-delete-button-container]').isVisible()
     expect(editButtonPresent && deleteButtonPresent).toBe(userId === author_id)
 }
+
+exports.dbAssertPostControlPanelBooleanButton = (
+async (button, newStatus, postId, userId) => {
+    let table, userColumn
+    if (button === 'Like') {
+        table = 'post_like'
+        userColumn = 'liker'
+    } 
+    else if (button === 'Watch') {
+        table = 'post_watch'
+        userColumn = 'watcher'
+    }
+    else if (button === 'Star') {
+        table = 'post_star'
+        userColumn = 'starrer'
+    }
+    let queryText, queryParams
+    if (button === 'Endorse' || button === 'Delete') {
+        queryText = `
+            SELECT ${ button === 'Endorse' ? 'endorsed'  : 'deleted' } 
+            FROM post WHERE post_id = $1;`
+        queryParams = [postId]
+    }
+    else {
+        queryText = `
+            SELECT * FROM ${ table } WHERE post = $1 AND ${ userColumn } = $2;`
+        queryParams = [postId, userId]
+    }
+
+    const checkQuery = await query(queryText, queryParams)
+    let dbStatus
+    if (button === 'Like' || 
+        button === 'Watch' || 
+        button === 'Star') dbStatus = !!checkQuery.rows.length
+    else dbStatus = checkQuery.rows[0][
+        button === 'Endorse' ? 'endorsed' : 'deleted']
+
+    expect(dbStatus).toBe(newStatus)
+})
+
+exports.getPostIdFromTitle = async (title) => {
+    const queryText = `SELECT post_id FROM post WHERE title = $1;`
+    const queryParams = [title]
+    const postIdQuery = await query(queryText, queryParams)
+    
+    return postIdQuery.rows[0].post_id
+}
+
+exports.dbUndeletePost = async (postId) => {
+    const queryText = `UPDATE post SET deleted = $1 WHERE post_id = $2;`
+    const queryParams = [false, postId]
+    await query(queryText, queryParams)
+}
+
+exports.uiAssertPostControlPanelBooleanButton = (
+async (button, status, postListingLocator, postTitle, isMobile, page) => {
+    const notDeleted = button !== 'Delete' || !status
+   if (isMobile && notDeleted) await Promise.all([
+        page.locator('[data-testid=post-back-btn]').click(),
+        postListingLocator.waitFor()
+    ])
+    let numLikes, uiStatus
+    if (button === 'Like') {
+        const likeIconVisible = (
+            await postListingLocator.locator(
+                '[data-testid=likes-icon]').isVisible())
+        numLikes = !likeIconVisible ? 0 : parseInt(
+            await postListingLocator.locator(
+                '[data-testid=likes-icon]').innerText())
+    }
+    else if (button === 'Watch') {
+        uiStatus = await postListingLocator.locator(
+            '[data-testid=watching-icon]').isVisible()
+    }
+    else if (button === 'Star') {
+        uiStatus = await postListingLocator.locator(
+            '[data-testid=star-icon]').isVisible()
+    }
+    else if (button === 'Endorse') {
+        uiStatus = await postListingLocator.locator(
+            '[data-testid=endorsed-icon]').isVisible()
+    }
+    else { // button === 'Delete'
+        const t = await postListingLocator.locator(
+            '[data-testid=post-info-title]').innerText()
+        uiStatus = !(new RegExp(t, 'i')).test(postTitle)
+    }
+
+    if (isMobile && (button !== 'Delete' || !status)) {
+        await postListingLocator.click()
+    }
+    if (uiStatus !== undefined) expect(uiStatus).toBe(status)
+    else return numLikes
+})
