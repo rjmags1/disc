@@ -7,6 +7,7 @@ import LikeButton from './controlPanelButtons/LikeButton'
 import StarButton from './controlPanelButtons/StarButton'
 import WatchButton from './controlPanelButtons/WatchButton'
 import EditButton from './controlPanelButtons/EditButton'
+import { SMALL_MEDIA_BREAKPOINT } from '../../../lib/layout'
 
 function PostControlPanel({ editPost, toggleMobilePostDisplay }) {
     const { currentPost } = useContext(PostContext)
@@ -19,8 +20,9 @@ function PostControlPanel({ editPost, toggleMobilePostDisplay }) {
 
     return (
         <section data-testid="post-control-panel-container" 
-            className="w-full flex flex-wrap sm:flex-nowrap 
-                gap-[1%] h-[60px]">
+            className="w-full flex flex-wrap sm:flex-nowrap gap-[2%] h-[60px]" 
+                style={ window.innerWidth < SMALL_MEDIA_BREAKPOINT ?
+                    { marginBottom: '5%' } : {}}>
             <LikeButton liked={ currentPost.liked } />
             <WatchButton watched={ currentPost.watched }/>
             { userIsAuthor && <EditButton editPost={ editPost } /> }

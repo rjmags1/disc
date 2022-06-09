@@ -55,9 +55,9 @@ function PostHeader({
                         </span>
                     </div> }
                     <div className="flex flex-col justify-center 
-                        items-center mx-2" data-testid="post-views" style={ 
+                        items-center mx-2 h-full" data-testid="post-views" style={ 
                             window.innerWidth < SMALL_MEDIA_BREAKPOINT ? 
-                            { flexDirection: "row", gap: '5px', marginTop: '3px' } : {}}>
+                            { flexDirection: "row", gap: '5px' } : {}}>
                         <h4 className="text-lg w-full text-center" style={
                             window.innerWidth < SMALL_MEDIA_BREAKPOINT ? 
                             { fontSize: 'medium' } : {}}>
@@ -66,9 +66,9 @@ function PostHeader({
                         <h6>views</h6>
                     </div>
                     <div className="flex flex-col justify-center 
-                        items-center mx-2" data-testid="post-likes" style={ 
+                        items-center mx-2 h-full" data-testid="post-likes" style={ 
                             window.innerWidth < SMALL_MEDIA_BREAKPOINT ? 
-                            { flexDirection: "row", gap: '5px', marginTop: '3px' } : {}}>
+                            { flexDirection: "row", gap: '5px' } : {}}>
                         <h4 className="text-lg w-full text-center" style={
                             window.innerWidth < SMALL_MEDIA_BREAKPOINT ? 
                             { fontSize: 'medium' } : {}}>
@@ -79,7 +79,7 @@ function PostHeader({
                     <div className="flex flex-col justify-center 
                         items-center mx-2" data-testid="post-comments" style={ 
                             window.innerWidth < SMALL_MEDIA_BREAKPOINT ? 
-                            { flexDirection: "row", gap: '5px', marginTop: '3px' } : {}}>
+                            { flexDirection: "row", gap: '5px' } : {}}>
                         <h4 className="text-lg w-full text-center" style={
                             window.innerWidth < SMALL_MEDIA_BREAKPOINT ? 
                             { fontSize: 'medium' } : {}}>
