@@ -22,14 +22,12 @@ export default withIronSessionApiRoute(async function(req, resp) {
     const commentId = parseInt(req.query.commentId, 10)
     const postId = parseInt(req.query.postId)
     const slug = req.query.boolInteractionStatusSlug
-    //console.log(userId, commentId, slug)
-    console.log(postId, commentId, slug)
-    if (!postId || postId < 0 || !commentId || commentId < 1 || !slug || slug.length !== 2) {
+    if (!postId || postId < 0 || !commentId || 
+        commentId < 1 || !slug || slug.length !== 2) {
         resp.status(400).json({ message: "bad url params" })
         return
     }
     const [boolInteraction, status] = slug
-    console.log(boolInteraction, status)
     if (BOOLEAN_COMMENT_INTERACTIONS.indexOf(boolInteraction) === -1 || 
         STATUSES.indexOf(status) === -1) {
         resp.status(400).json({ message: "bad url params" })
@@ -73,7 +71,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
     }
 
 
-    let client, queryFailure
+    let client, queryFailure, shouldUpdatePost
     try {
         client = await getClientFromPool()
         const needCheck = !!checkQueryText
@@ -96,21 +94,23 @@ export default withIronSessionApiRoute(async function(req, resp) {
         else { // interaction status represented by boolean col in post table
             const mayAffectPostInfo = (
                 boolInteraction === "resolve" || boolInteraction === "answer")
-            if (!mayAffectPostInfo) {
-                await clientQuery(client, updateQueryText, params)
-            }
-            else {
-                await clientQuery(client, updateQueryText, params)
-
-                let shouldUpdatePost = true
+            await clientQuery(client, updateQueryText, params)
+            if (mayAffectPostInfo) {
+                shouldUpdatePost = true
+                const shouldUpdatePostQuery = (boolInteraction === "resolve" ?
+                    (await clientQuery(
+                        client, checkUnresolvePostQueryText, [postId]))
+                    : (await clientQuery(
+                        client, checkUnanswerPostQueryText, [postId])))
                 if (status === "false") {
-                    const shouldUpdatePostQuery = (boolInteraction === "resolve" ?
-                        (await clientQuery(
-                            client, checkUnresolvePostQueryText, [postId]))
-                        : (await clientQuery(
-                            client, checkUnanswerPostQueryText, [postId])))
-                    shouldUpdatePost = shouldUpdatePostQuery.rows.length > 0
+                    shouldUpdatePost = boolInteraction === "resolve" ? 
+                        parseInt(shouldUpdatePostQuery.rows[0].resolving_comments) === 0 :
+                        parseInt(shouldUpdatePostQuery.rows[0].answering_comments) === 0
                 }
+                else shouldUpdatePost = boolInteraction === "resolve" ? 
+                    parseInt(shouldUpdatePostQuery.rows[0].resolving_comments) === 1 :
+                    parseInt(shouldUpdatePostQuery.rows[0].answering_comments) === 1
+
                 if (shouldUpdatePost) {
                     await clientQuery(client, postUpdateQueryText, [postId, status])
                 }
@@ -128,6 +128,9 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
 
 
-    resp.status(200).json({ boolInteraction, status, userId })
+    resp.status(200).json({ 
+        boolInteraction, status, userId, 
+        postAnsResAltered: !!shouldUpdatePost 
+    })
 
 }, sessionOptions)

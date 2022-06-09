@@ -19,9 +19,10 @@ const CommentMarkResolvingButton = React.memo(function(props) {
                 `/api/course/postsInfo/${ postId }/content/replies/info/${ commentInfo.commentId }/resolve/${ newStatus }`,
                 { method: "PUT" })
             if (!resp.ok) return // return if backend update failed
+            const { postAnsResAltered } = await resp.json()
 
             // update ui to reflect new comment and post resolution status
-            setPostResolved(newStatus) 
+            if (postAnsResAltered) setPostResolved(newStatus) 
             setCommentResolving(newStatus)
 
             const listings = currentPost.pinned || currentPost.isAnnouncement ? 
@@ -30,7 +31,7 @@ const CommentMarkResolvingButton = React.memo(function(props) {
                 setSpecialListings : setPostListings
             // rerender associated listings based on resolution status 
             // (ie, remove checkmark or add one)
-            syncListingWithBoolInteraction(
+            if (postAnsResAltered) syncListingWithBoolInteraction(
                 "resolve", listings, setListings, currentPost, newStatus)
         }
         catch (error) {

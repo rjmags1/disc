@@ -20,7 +20,7 @@ function PostControlPanel({ editPost, toggleMobilePostDisplay }) {
 
     return (
         <section data-testid="post-control-panel-container" 
-            className="w-full flex flex-wrap sm:flex-nowrap gap-[2%] h-[60px]" 
+            className="w-full flex flex-wrap sm:flex-nowrap gap-2 h-[60px]" 
                 style={ window.innerWidth < SMALL_MEDIA_BREAKPOINT ?
                     { marginBottom: '5%' } : {}}>
             <LikeButton liked={ currentPost.liked } />
