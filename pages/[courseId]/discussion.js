@@ -146,6 +146,7 @@ function Discussion() {
                     data-testid="posts-section">
                     <PostListingsPane catPaneRef={ catPaneRef }
                         filterRef={ filterRef } listingsPaneRef={ listingsPaneRef }
+                        showHiddenPane={ showHiddenPane }
                         toggleCatPane={ 
                             () => setShowHiddenPane(!showHiddenPane) }
                         toggleMobilePostDisplay={ toggleMobilePostDisplay }

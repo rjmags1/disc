@@ -13,7 +13,7 @@ const INITIAL_LISTING_PANE_WIDTH = 400
 
 const PostListingsPane = React.memo(function(props) {
     const { 
-        catPaneRef, categoryFilter, toggleCatPane, setCurrentPost, newPost,
+        catPaneRef, categoryFilter, toggleCatPane, setCurrentPost, newPost, showHiddenPane,
         filterRef: filter, listingsPaneRef: listingsPane, toggleMobilePostDisplay
     } = props
     const [filterText, setFilterText] = useState("")
@@ -82,7 +82,7 @@ const PostListingsPane = React.memo(function(props) {
                 className={ `fixed w-full md:w-[calc(100%-180px)] 
                 lg:w-[${ INITIAL_LISTING_PANE_WIDTH }px] z-10
                 flex items-center justify-start bg-zinc-900` }>
-                <CategoryHamburger toggleCatPane={ toggleCatPane } />
+                <CategoryHamburger toggleCatPane={ toggleCatPane } showHiddenPane={ showHiddenPane } />
                 <PostInfoTextSearchFilter setFilterText={ setFilterText }/>
                 <PostAttributesDropdownButton show={ showDropdown } 
                     handleClick={ () => setShowDropdown(!showDropdown) } />
