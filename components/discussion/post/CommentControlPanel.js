@@ -67,7 +67,7 @@ function CommentControlPanel({ controlPanelProps }) {
             <Editor hideEditor={ 
                 replying ? () => setReplying(false) : () => setEditing(false) } 
                 handleSubmit={ replying ? handleReplySubmit : handleEditSubmit }
-                editContent={ info.editContent } /> }
+                editContent={ info.editContent } editingComment={ editing }/> }
         </>
     )
 }

@@ -3,7 +3,7 @@ import { sanitize } from 'dompurify'
 import { useRef, useEffect, useState } from 'react'
 
 
-function Editor({ hideEditor, handleSubmit, editContent, isPost, editingPost }) {
+function Editor({ hideEditor, handleSubmit, editContent, isPost, editingPost, editingComment }) {
     const [tick, setTick] = useState(0)
     const [anonymous, setAnonymous] = useState(false)
     const [quill, setQuill] = useState(null)
@@ -15,7 +15,9 @@ function Editor({ hideEditor, handleSubmit, editContent, isPost, editingPost }) 
         if (!editorRef.current || tick > 0) return
 
         const newQuill = new Quill(editorRef.current, { theme: 'snow' })
-        if (!!editContent) newQuill.setContents(editContent)
+        if (!!editContent && (editingComment || editingPost)) {
+            newQuill.setContents(editContent)
+        }
         setQuill(newQuill)
         setTick(prev => prev + 1)
         
