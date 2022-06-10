@@ -150,7 +150,7 @@ function Discussion() {
                             () => setShowHiddenPane(!showHiddenPane) }
                         toggleMobilePostDisplay={ toggleMobilePostDisplay }
                         categoryFilter={ categoryFilter } 
-                        setCurrentPost={ setCurrentPost }/>
+                        setCurrentPost={ setCurrentPost } newPost={ newPost } />
                     { newPost ? 
                     <NewPost exitNewPost={ () => setNewPost(false) } /> 
                     : <Post postContainerRef={ postContainerRef } 
