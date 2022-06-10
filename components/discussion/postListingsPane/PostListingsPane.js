@@ -1,10 +1,10 @@
-import React, { useState, useRef, useLayoutEffect, useEffect } from 'react'
+import React, { useState, useLayoutEffect, useEffect } from 'react'
 import PostsInfoList from './PostsInfoList'
 import PostInfoTextSearchFilter from './PostInfoTextSearchFilter'
 import PostAttributesDropdownButton from './PostAttributesDropdownButton'
 import PostAttributesDropdown from './PostAttributesDropdown'
 import CategoryHamburger from '../categoryPane/CategoryHamburger'
-import { LARGE_MEDIA_BREAKPOINT } from '../../../lib/layout'
+import { LARGE_MEDIA_BREAKPOINT, SMALL_MEDIA_BREAKPOINT } from '../../../lib/layout'
 
 const MAX_LISTING_PANE_WIDTH = 450
 const MIN_LISTING_PANE_WIDTH = 250
@@ -13,7 +13,7 @@ const INITIAL_LISTING_PANE_WIDTH = 400
 
 const PostListingsPane = React.memo(function(props) {
     const { 
-        catPaneRef, categoryFilter, toggleCatPane, setCurrentPost,
+        catPaneRef, categoryFilter, toggleCatPane, setCurrentPost, newPost,
         filterRef: filter, listingsPaneRef: listingsPane, toggleMobilePostDisplay
     } = props
     const [filterText, setFilterText] = useState("")
@@ -76,7 +76,7 @@ const PostListingsPane = React.memo(function(props) {
         setShowDropdown(false)
     }
 
-    return (
+    return newPost && window.innerWidth < SMALL_MEDIA_BREAKPOINT ? null : (
         <>
             <section data-testid="filter-container" ref={ filter } 
                 className={ `fixed w-full md:w-[calc(100%-180px)] 

@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import Loading from '../../lib/Loading'
 import Category from './Category'
 import { RAINBOW_HEX } from '../../../lib/colors'
-import { LARGE_MEDIA_BREAKPOINT } from '../../../lib/layout'
+import { LARGE_MEDIA_BREAKPOINT, SMALL_MEDIA_BREAKPOINT } from '../../../lib/layout'
 
 function CategoryPane({ catPaneRef, changeCategoryFilter, setNewPost, newPost }) {
     const MAX_CAT_PANE_WIDTH = 400
@@ -58,7 +58,7 @@ function CategoryPane({ catPaneRef, changeCategoryFilter, setNewPost, newPost })
                 key={ i } />))
     )
 
-    return (
+    return newPost && window.innerWidth < SMALL_MEDIA_BREAKPOINT ? null : (
         <section data-testid="category-pane-container" ref={ catPaneRef }
             className={ `hidden md:flex bg-zinc-800 text-white justify-between
                w-[180px] flex-none lg:w-[${ INITIAL_CAT_PANE_WIDTH }px]` } >
@@ -68,7 +68,7 @@ function CategoryPane({ catPaneRef, changeCategoryFilter, setNewPost, newPost })
                 { !newPost && 
                 <button className='w-[90%] bg-purple border border-white
                     rounded py-1 mb-3 mt-1 hover:bg-violet-800 font-mono' 
-                    onClick={ () => setNewPost(true) }>
+                    onClick={ () => setNewPost(true) } data-testid="new-post-btn">
                     + New Post
                 </button> }
                 <header className="w-full">
