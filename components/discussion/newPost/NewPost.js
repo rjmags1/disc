@@ -100,7 +100,7 @@ function NewPost({ exitNewPost }) {
                         </select>
                     </label>
                     <div className='flex justify-around mt-4 bg-purple border 
-                        border-white rounded-lg px-2 py-1 overflow-hidden'>
+                        border-white rounded-lg px-2 py-1 overflow-hidden flex-wrap'>
                         <PostBooleanAttribute label="Private" 
                             stateSetter={ () => setIsPrivate(prev => !prev) } />
                         <PostBooleanAttribute label="Question"
@@ -144,7 +144,7 @@ const handleBackendUpdateSuccess = (
         )
     }
     else {
-        const catColor = categoriesToColors[category]
+        const catColor = categoriesToColors[newPostInfo.category]
         newPostInfo = { postInfo: newPostInfo, catColor }
         setPostListings([newPostInfo, ...postListings])
     }

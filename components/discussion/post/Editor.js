@@ -51,7 +51,7 @@ function Editor({ hideEditor, handleSubmit, editContent, isPost, editingPost }) 
             <div id="quill-editor-container" ref={ editorRef } 
                 className="text-white rounded-b-[10px]" 
                 style={ isPost ? { fontSize: '1rem', fontWeight: 200 } : {} } />
-            <div className="flex mb-2 items-center mt-3 ml-2 gap-3">
+            <div className="flex mb-2 items-center mt-3 gap-3">
                 <button className="h-full bg-purple rounded border py-0.5 px-2
                     border-white hover:bg-violet-800" onClick={ handleSubmitClick }
                     style={ isPost ? { paddingLeft: '2rem', paddingRight: '2rem' } : {} }
