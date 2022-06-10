@@ -101,7 +101,7 @@ function NotificationsMenu() {
     const watchActivityMsg = `
         Email me when there is activity in a thread I'm watching`
     const myPostActivityMsg = `
-        Email me when someone replies to my thread`
+        Email me when someone comments on my post`
     const myCommentReplyMsg = `
         Email me when someone replies to my comment`
     const mentionMsg = `
