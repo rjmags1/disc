@@ -85,7 +85,12 @@ const PostsInfoList = React.memo(function(props) {
         if (!user) return
 
         const filters = [categoryFilter, filterText, attributeFilter]
-        const filtered = postListings.filter(
+        const idSet = new Set()
+        const filtered = postListings.filter((l) => {
+            const alreadyAdded = idSet.has(l.postInfo.postId)
+            idSet.add(l.postInfo.postId)
+            return !alreadyAdded
+        }).filter(
             ({ postInfo }) => filterTest(postInfo, user, filters)).map(
                 ({ postInfo, catColor }) => (
                     <PostInfo categoryColor={ catColor } info={ postInfo } 

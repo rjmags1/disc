@@ -6,7 +6,12 @@ import { PostListingsContext } from "../../../pages/[courseId]/discussion"
 const Pinned = React.memo(function(props) {
     const { catColors, filters, user, setCurrentPost, toggleMobilePostDisplay } = props
     const { specialListings: { pinned } } = useContext(PostListingsContext)
-    const filtered = pinned.filter(
+    const idSet = new Set()
+    const filtered = pinned.filter(l => {
+        const alreadyAdded = idSet.has(l.postId)
+        idSet.add(l.postId)
+        return !alreadyAdded
+    }).filter(
         pinned => filterTest(pinned, user, filters))
         
     if (filtered.length === 0) return null

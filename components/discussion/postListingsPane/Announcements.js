@@ -6,7 +6,12 @@ import { PostListingsContext } from "../../../pages/[courseId]/discussion"
 const Announcements = React.memo(function(props) {
     const { catColors, filters, user, setCurrentPost, toggleMobilePostDisplay } = props
     const { specialListings: { announcements } } = useContext(PostListingsContext)
-    const filtered = announcements.filter(
+    const idSet = new Set()
+    const filtered = announcements.filter(l => {
+        const alreadyAdded = idSet.has(l.postId)
+        idSet.add(l.postId)
+        return !alreadyAdded
+    }).filter(
         ann => filterTest(ann, user, filters))
         
     if (filtered.length === 0) return null
