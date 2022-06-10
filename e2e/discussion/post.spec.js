@@ -14,7 +14,8 @@ const {
     uiAssertPostControlPanelBooleanButton,
     editPost,
     dbAssertEditedPost,
-    stripSlashNewlines
+    stripSlashNewlines,
+    stripTerminatingNewlines
 } = require('../lib/post')
 const { getAllNonDeletedDbPostsInPageOrder } = require('../lib/postListings')
 
@@ -168,6 +169,8 @@ test.describe('post control panel', async () => {
         expect(editedPostContent).toMatch(new RegExp(editText))
         await dbAssertEditedPost(editText, testPostId)
 
-        await editPost(page, editorLocator, oldTextContent) // reset 
+        // reset without quill newlines
+        await editPost(page, editorLocator, 
+            stripTerminatingNewlines(oldTextContent)) 
     })
 })
