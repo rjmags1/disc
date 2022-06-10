@@ -67,7 +67,8 @@ function CategoryPane({ catPaneRef, changeCategoryFilter, setNewPost, newPost })
                     overflow-hidden my-2">
                 { !newPost && 
                 <button className='w-[90%] bg-purple border border-white
-                    rounded py-1 mb-3 mt-1 hover:bg-violet-800 font-mono' 
+                    rounded py-1 mb-3 mt-1 hover:bg-violet-800 font-mono
+                    whitespace-nowrap truncate' 
                     onClick={ () => setNewPost(true) } data-testid="new-post-btn">
                     + New Post
                 </button> }
