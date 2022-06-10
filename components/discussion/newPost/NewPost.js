@@ -81,13 +81,14 @@ function NewPost({ exitNewPost }) {
                 <label className="flex flex-col">
                     <input type="text" className="bg-inherit border-b border-b-white 
                         min-w-[60%] focus:outline-none max-w-max font-light"
+                        data-testid="new-post-title-input"
                         value={ title } onChange={ e => setTitle(e.target.value) } />
                     <span className='font-thin text-md'>Title</span>
                 </label>
                 <section className='flex flex-col'>
                     <label className='mt-2 flex font-thin text-md h-fit'>
                         <span className='mr-2 h-fit'>Category:</span>
-                        <select value={ category } 
+                        <select value={ category } data-testid="new-post-category-select"
                             onChange={ e => setCategory(e.target.value) } 
                             className="bg-light-gray border-b border-white 
                                 w-fit h-fit font-light" >

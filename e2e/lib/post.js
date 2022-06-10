@@ -864,3 +864,63 @@ exports.stripSlashNewlines = (s) => {
 
     return keepChars.join('')
 }
+
+exports.dbAssertThenRemoveTestPostFromDb = async (pageTitle) => {
+    const dbTitleQueryText = `SELECT title FROM post WHERE post_id = (
+        SELECT MAX(post_id) FROM post);`
+    const dbTitleQuery = await query(dbTitleQueryText)
+    const dbTitle = dbTitleQuery.rows[0].title
+    expect(dbTitle).toMatch(new RegExp(pageTitle))
+
+    const removeQueryText = 
+    `DELETE FROM post WHERE post_id = (
+        SELECT MAX(post_id) FROM post);`
+    await query(removeQueryText)
+}
+
+exports.assertOnPostControlPanelButtonLabelChange = (
+async (falseLabel, trueLabel, preClickButtonStatus, buttonLocator, page) => {
+    if (falseLabel === 'Delete') {
+        let visStatus = true
+        while (visStatus) {
+            visStatus = await page.locator(
+                '[data-testid=post-content-container]').isVisible()
+        }
+    }
+    else {
+        const newLabel = await buttonLocator.innerText()
+        expect(newLabel).toMatch(new RegExp(preClickButtonStatus ?
+            falseLabel : trueLabel))
+    }
+})
+
+exports.writeAssertOnNewPost = async (editorLocator, page, testTitle) => {
+    const preEntryEditorText = await editorLocator.innerText()
+    expect(this.stripTerminatingNewlines(preEntryEditorText).length).toBe(0)
+    const testContent = "test post content"
+    await editorLocator.type(testContent)
+    const postEntryEditorText = await editorLocator.innerText()
+    expect(postEntryEditorText).toMatch(new RegExp(
+        this.stripTerminatingNewlines(testContent)))
+
+    const newListingLocator = page.locator(
+        '[data-testid=post-info-container]').locator(
+            `text=${ testTitle }`)
+    await Promise.all([
+        page.locator('[data-testid=editor-submit-button]').click(),
+        page.locator('[data-testid=new-post-container]').waitFor({
+            state: 'hidden' }),
+        newListingLocator.waitFor()
+    ])
+    await Promise.all([page.reload(), newListingLocator.waitFor()])
+}
+
+exports.checkPostAttribute = async (postAttributeCheckLocator) => {
+    const preClickCheck = (
+        await postAttributeCheckLocator.isChecked())
+    expect(preClickCheck).toBe(false)
+    await postAttributeCheckLocator.check()
+    const postClickCheck = (
+        await postAttributeCheckLocator.isChecked())
+    expect(postClickCheck).toBe(true)
+}

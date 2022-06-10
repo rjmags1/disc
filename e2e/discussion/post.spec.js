@@ -15,15 +15,21 @@ const {
     editPost,
     dbAssertEditedPost,
     stripSlashNewlines,
-    stripTerminatingNewlines
+    stripTerminatingNewlines,
+    dbAssertThenRemoveTestPostFromDb,
+    assertOnPostControlPanelButtonLabelChange,
+    writeAssertOnNewPost,
+    checkPostAttribute
 } = require('../lib/post')
+const { getDbCourseCategories } = require('../lib/categories')
 const { getAllNonDeletedDbPostsInPageOrder } = require('../lib/postListings')
 
 // NOTE: these tests should be run with npm run e2e-serial
 
 test.beforeEach(async ({ page }, { title: testTitle }) => {
-    await login(page, testTitle === 'displayed post content' ? 
-        TESTUSER_REGISTERED : TESTUSER_STAFF)
+    await login(page, 
+        testTitle === 'displayed post content' ? 
+            TESTUSER_REGISTERED : TESTUSER_STAFF)
     await expect(page.locator('nav').
         locator('text=/dashboard/i')).toBeVisible()
 
@@ -85,7 +91,6 @@ test.describe('post control panel', async () => {
         const postTitle = await page.locator(
             '[data-testid=post-title]').innerText()
         const testPostId = await getPostIdFromTitle(postTitle)
-
         const locators = [
             page.locator('[data-testid=post-like-button-container]'),
             page.locator('[data-testid=post-watch-button-container]'),
@@ -108,18 +113,9 @@ test.describe('post control panel', async () => {
                 postListingLocator, postTitle, isMobile, page)
 
             await locator.click()
-            if (falseLabels[i] === 'Delete') {
-                let visStatus = true
-                while (visStatus) {
-                    visStatus = await page.locator(
-                        '[data-testid=post-content-container]').isVisible()
-                }
-            }
-            else {
-                const newLabel = await locator.innerText()
-                expect(newLabel).toMatch(new RegExp(preClickUiStatus ?
-                    falseLabels[i] : trueLabels[i]))
-            }            
+            await assertOnPostControlPanelButtonLabelChange(
+                falseLabels[i], trueLabels[i], preClickUiStatus, locator, page)
+                        
             await new Promise(res => setTimeout(res, 300))
             const postClickLikes = await uiAssertPostControlPanelBooleanButton(
                 falseLabels[i], !preClickUiStatus, 
@@ -133,9 +129,7 @@ test.describe('post control panel', async () => {
                 testPostId, TESTUSER_STAFF.userId)
 
             // reset
-            if (falseLabels[i] === 'Delete') {
-                await dbUndeletePost(testPostId)
-            }
+            if (falseLabels[i] === 'Delete') await dbUndeletePost(testPostId)
             else await locator.click()
         }
     })
@@ -172,5 +166,47 @@ test.describe('post control panel', async () => {
         // reset without quill newlines
         await editPost(page, editorLocator, 
             stripTerminatingNewlines(oldTextContent)) 
+    })
+})
+
+test.describe('new post', async () => {    
+    test('new post button, form fxn', async ({ page, isMobile }) => {
+        if (isMobile) {
+            await page.locator('[data-testid=category-menu-hamburger]').click()
+        }
+        await Promise.all([
+            page.locator('[data-testid=new-post-btn]').click(),
+            page.locator('[data-testid=new-post-container]', {
+                hasText: 'New Post' }).waitFor(),
+            page.locator('[data-testid=category-menu-hamburger]').waitFor(
+                { state: 'hidden' })
+        ])
+        
+        const testTitle = "test post title"
+        await page.locator(
+            '[data-testid=new-post-title-input]').type(testTitle)
+        const dbCategories = await getDbCourseCategories()
+        const categorySelectLocator = page.locator(
+            '[data-testid=new-post-category-select]')
+        const randIdx = Math.floor(Math.random() * dbCategories.length)
+        await Promise.all([
+            categorySelectLocator.selectOption(`${ dbCategories[randIdx] }`),
+            categorySelectLocator.locator(`text=${ dbCategories[randIdx] }`) 
+        ])
+        const postAttributeCheckLocator = page.locator(
+            '[data-testid=post-attribute-checkbox]')
+        const numChecks = await postAttributeCheckLocator.count()
+        expect(numChecks).toBe(5)
+        for (let i = 0; i < numChecks; i++) {
+            const checkLabel = await postAttributeCheckLocator.nth(i).innerText()
+            if (/private/i.test(checkLabel)) continue
+            await checkPostAttribute(postAttributeCheckLocator.nth(i))
+        }
+
+        const editorLocator = page.locator(
+            '#quill-editor-container').locator('.ql-editor')
+        await writeAssertOnNewPost(editorLocator, page, testTitle)
+        
+        await dbAssertThenRemoveTestPostFromDb(testTitle)
     })
 })
