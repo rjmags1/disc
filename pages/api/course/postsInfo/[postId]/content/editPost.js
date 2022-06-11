@@ -37,7 +37,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
         if (!editFailure) {
             const mentions = parseForMentionTokens(displayContent)
             if (mentions.length > 0) await genMentionNotifsInDb(
-                client, mentions, postId, false)
+                client, mentions, postId, false, new Date(Date.now()))
         }
     }
     catch (error) {

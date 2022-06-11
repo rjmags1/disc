@@ -31,6 +31,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
     let insertPostQuery, insertFailure, client
     try {
         client = await getClientFromPool()
+        const parsedCreatedAt = new Date(createdAt)
         const insertPostQueryText = `
             WITH course_categories AS (
                 SELECT category_id, name FROM post_category WHERE course = $1)
@@ -50,7 +51,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
         const insertPostQueryParams = [
             courseId,
             category,
-            userId, new Date(createdAt), title, editContent,
+            userId, parsedCreatedAt, title, editContent,
             displayContent, isPinned, isQuestion, isAnnouncement,
             isPrivate, isAnonymous
         ]
@@ -63,7 +64,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
             const mentions = parseForMentionTokens(displayContent)
             if (mentions.length > 0) {
                 await genMentionNotifsInDb(client, mentions, 
-                    insertPostQuery.rows[0].post_id, true)
+                    insertPostQuery.rows[0].post_id, true, parsedCreatedAt)
             }
         }
     }

@@ -147,6 +147,7 @@ CREATE TABLE notification (
     is_user_comment_reply_noti boolean DEFAULT FALSE,
     is_mention_noti boolean DEFAULT FALSE,
     is_announcement_noti boolean DEFAULT FALSE,
+    created_at timestamp NOT NULL,
     UNIQUE (person, gen_comment, gen_post, is_watch_noti, 
         is_user_post_activity_noti, is_user_comment_reply_noti,
         is_mention_noti, is_announcement_noti)

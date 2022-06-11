@@ -28,6 +28,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
     let insertCommentQuery, insertFailure, client
     try {
         client = await getClientFromPool()
+        const parsedCreatedAt = new Date(createdAt)
         const insertCommentQueryText = `
             INSERT INTO comment (
                 author, post, ancestor_comment, thread_id, edit_content,
@@ -37,7 +38,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
             RETURNING *;`
         const insertCommentQueryParams = [
             userId, post, ancestorComment, threadId, editContent, displayContent,
-            new Date(createdAt), false, false, false, false, anonymous
+            parsedCreatedAt, false, false, false, false, anonymous
         ]
 
         insertCommentQuery = (await clientQuery(
@@ -46,13 +47,14 @@ export default withIronSessionApiRoute(async function(req, resp) {
         
         if (!insertFailure) {
             const postId = post, commentId = insertCommentQuery.rows[0].comment_id
-            await genWatchNotifsInDb(client, postId, commentId)
-            await genUserPostActivityNotifInDb(client, commentId, postId)
+            await genWatchNotifsInDb(client, postId, commentId, parsedCreatedAt)
+            await genUserPostActivityNotifInDb(
+                client, commentId, postId, parsedCreatedAt)
             if (ancestorComment !== null) await genCommentReplyNotifInDb(
-                client, ancestorComment, threadId, commentId)
+                client, ancestorComment, threadId, commentId, parsedCreatedAt)
             const mentions = parseForMentionTokens(displayContent)
             if (mentions.length > 0) await genMentionNotifsInDb(
-                client, mentions, commentId, false)
+                client, mentions, commentId, false, parsedCreatedAt)
         }
     }
     catch (error) {
@@ -111,63 +113,59 @@ const invalidParams = (reqBody) => {
     if (typeof(anonymous) !== 'boolean') return true
 }
 
-const getWatchNotifPeopleQueryText = `
-    SELECT watcher FROM post_watch WHERE post = $1;`
-const genWatchNotifsQueryArgs = (watchers, genCommentId) => {
+const genWatchNotifsQueryArgs = (watchers, genCommentId, createdAt) => {
     const tokens = [
-        "INSERT INTO notification (gen_comment, is_watch_noti, person) VALUES "]
-    const params = [genCommentId, true]
+        `INSERT INTO notification 
+        (gen_comment, is_watch_noti, created_at, person) VALUES `]
+    const params = [genCommentId, true, createdAt]
     for (let i = 0; i < watchers.length; i++) {
         params.push(watchers[i])
         tokens.push(i < watchers.length - 1 ? 
-            `($1, $2, $${i + 3}), ` : `($1, $2, $${i + 3});`)
+            `($1, $2, $3, $${i + 4}), ` : `($1, $2, $3, $${i + 4});`)
     }
 
     return [tokens.join(''), params]
 }
 
-const genWatchNotifsInDb = async (client, postId, commentId) => {
+    const genWatchNotifsInDb = async (client, postId, commentId, createdAt) => {
+    const getWatchNotifPeopleQueryText = `
+        SELECT watcher FROM post_watch WHERE post = $1;`
     const watchersQuery = await clientQuery(
         client, getWatchNotifPeopleQueryText, [postId])
     const watcherIds = watchersQuery.rows.map(r => r.watcher)
     if (watcherIds.length === 0) return
 
-    await clientQuery(client, ...genWatchNotifsQueryArgs(watcherIds, commentId))
+    await clientQuery(client, ...genWatchNotifsQueryArgs(watcherIds, commentId, createdAt))
 }
 
 const genUserPostActivityNotifInDb = (
-async (client, commentId, postId) => {
+async (client, commentId, postId, createdAt) => {
     const postAuthorQuery = await clientQuery(
         client, 'SELECT author FROM post WHERE post_id = $1;', [postId])
     const postAuthorId = postAuthorQuery.rows[0].author
     const genNotifQueryText = `
         INSERT INTO notification 
-        (person, is_user_post_activity_noti, gen_comment)
-        VALUES ($1, $2, $3);`
-    await clientQuery(client, genNotifQueryText, [postAuthorId, true, commentId])
+        (person, is_user_post_activity_noti, gen_comment, created_at)
+        VALUES ($1, $2, $3, $4);`
+    await clientQuery(client, genNotifQueryText, [postAuthorId, true, commentId, createdAt])
 })
 
 const genCommentReplyNotifInDb = (
-async (client, ancestorCommentId, replyThreadId, genCommentId) => {
+async (client, ancestorCommentId, replyThreadId, genCommentId, createdAt) => {
     const repliedToCommentQueryText = `
-        SELECT comment_id FROM comment 
+        SELECT comment_id, author FROM comment 
         WHERE ancestor_comment = $1 AND thread_id = (
             SELECT MAX(thread_id) FROM comment 
             WHERE ancestor_comment = $1 AND thread_id < $2);`
     const repliedToCommentQuery = await clientQuery(
         client, repliedToCommentQueryText, [ancestorCommentId, replyThreadId])
 
-    const repliedToCommentId = repliedToCommentQuery.rows[0].comment_id
-    const notifiedPersonQueryText = `
-        SELECT author FROM comment WHERE comment_id = $1;`
-    const notifiedPersonQuery = await clientQuery(
-        client, notifiedPersonQueryText, [repliedToCommentId])
-
-    const notifiedPersonId = notifiedPersonQuery.rows[0].author
+    const notifiedPersonId = repliedToCommentQuery.rows[0].author
     const genReplyNotifQueryText = `
         INSERT INTO notification 
-        (person, gen_comment, is_user_comment_reply_noti)
+        (person, gen_comment, is_user_comment_reply_noti, created_at)
         VALUES ($1, $2, $3);`
     await clientQuery(
-        client, genReplyNotifQueryText, [notifiedPersonId, genCommentId, true])
+        client, genReplyNotifQueryText, [
+            notifiedPersonId, genCommentId, true, createdAt])
 })
