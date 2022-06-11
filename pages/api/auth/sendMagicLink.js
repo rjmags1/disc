@@ -92,7 +92,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
         }
         await sendEmail(
             email, 
-            "disc <donotreply@disc.com>", 
+            process.env.SES_REG_FROM_EMAIL, 
             "Email login link", 
             message)
     }

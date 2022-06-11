@@ -47,7 +47,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
     try {
         await sendEmail(
             primaryEmail, 
-            "disc <donotreply@disc.com>", 
+            process.env.SES_REG_FROM_EMAIL, 
             "Reset password link", 
             message)
     }
