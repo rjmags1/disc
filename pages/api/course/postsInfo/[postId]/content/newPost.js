@@ -1,6 +1,11 @@
 import { sessionOptions } from "../../../../../../lib/session"
 import { withIronSessionApiRoute } from "iron-session/next"
-import { query } from '../../../../../../db/index'
+import { 
+    getClientFromPool, clientQuery, releaseClient 
+} from '../../../../../../db/index'
+import { 
+    genMentionNotifsInDb, parseForMentionTokens 
+} from "../../../../../../lib/mention"
 
 export default withIronSessionApiRoute(async function(req, resp) {
     if (req.method !== 'POST') {
@@ -11,7 +16,6 @@ export default withIronSessionApiRoute(async function(req, resp) {
         resp.status(200).json({ message: "not authenticated" })
         return
     }
-    console.log(req.body)
     if (invalidParams(req.body)) {
         resp.status(400).json({ message: "suppled params invalid" })
         return
@@ -24,8 +28,9 @@ export default withIronSessionApiRoute(async function(req, resp) {
         user_id: userId, f_name: firstName, l_name: lastName,
         is_staff: isStaff, is_instructor: isInstructor
     } = req.session.user
-    let insertPostQuery, insertFailure
+    let insertPostQuery, insertFailure, client
     try {
+        client = await getClientFromPool()
         const insertPostQueryText = `
             WITH course_categories AS (
                 SELECT category_id, name FROM post_category WHERE course = $1)
@@ -50,12 +55,24 @@ export default withIronSessionApiRoute(async function(req, resp) {
             isPrivate, isAnonymous
         ]
 
-        insertPostQuery = await query(
-            insertPostQueryText, insertPostQueryParams)
+        insertPostQuery = await clientQuery(
+            client, insertPostQueryText, insertPostQueryParams)
         insertFailure = insertPostQuery.rows.length === 0
+
+        if (!insertFailure) {
+            const mentions = parseForMentionTokens(displayContent)
+            if (mentions.length > 0) {
+                await genMentionNotifsInDb(client, mentions, 
+                    insertPostQuery.rows[0].post_id, true)
+            }
+        }
     }
     catch (error) {
         insertFailure = true
+        console.error(error)
+    }
+    finally {
+        await releaseClient(client)
     }
     if (insertFailure) {
         resp.status(500).json({ message: "internal server error"} )
