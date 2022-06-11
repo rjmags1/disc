@@ -1,6 +1,11 @@
 import { sessionOptions } from "../../../../../../lib/session"
 import { withIronSessionApiRoute } from "iron-session/next"
-import { query } from '../../../../../../db/index'
+import { 
+    getClientFromPool, clientQuery, releaseClient 
+} from '../../../../../../db/index'
+import {
+    parseForMentionTokens, genMentionNotifsInDb 
+} from "../../../../../../lib/mention"
 
 export default withIronSessionApiRoute(async function(req, resp) {
     if (req.method !== 'PUT') {
@@ -17,20 +22,30 @@ export default withIronSessionApiRoute(async function(req, resp) {
         return
     }
 
-    let editCommentQuery, editFailure
+    let editCommentQuery, editFailure, client
     try {
+        client = await getClientFromPool()
         const editCommentQueryText = `
             UPDATE comment 
             SET edit_content = $1, display_content = $2
             WHERE comment_id = $3
             RETURNING comment_id, edit_content, display_content;`
-        editCommentQuery = await query(editCommentQueryText, [
+        editCommentQuery = await clientQuery(client, editCommentQueryText, [
             editContent, displayContent, commentId])
         editFailure = editCommentQuery.rows.length === 0
+
+        if (!editFailure) {
+            const mentions = parseForMentionTokens(displayContent)
+            if (mentions.length > 0) await genMentionNotifsInDb(
+                client, mentions, commentId, false)
+        }
     }
     catch (error) {
         editFailure = true
         console.error(error)
+    }
+    finally {
+        await releaseClient(client)
     }
     if (editFailure) {
         resp.status(500).json({ message: "internal server error" })
