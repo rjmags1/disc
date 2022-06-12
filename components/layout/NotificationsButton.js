@@ -14,10 +14,10 @@ function NotificationsButton() {
     } = useNotifications(afterTime)
 
     useEffect(() => {
-        const iid = setInterval(
-            () => setAfterTime(Date.now()), 3 * 60 * 1000)
+        setIntervalId(setInterval(() => {
+            if (!showNotifs) setAfterTime(Date.now())
+        }, 5 * 60 * 1000))
 
-        setIntervalId(iid)
         return () => { clearInterval(intervalId) }
     }, [])
 
@@ -27,20 +27,26 @@ function NotificationsButton() {
         setNotifications([...loadedNotifs, ...notifications])
     }, [loadedNotifs])
 
+    const handleBellClick = () => {
+        if (!showNotifs) setAfterTime(notifications.length === 0 ? 0 : Date.now())
+        setShowNotifs(prev => !prev)
+    }
+
     return (
         <OutsideClickHandler onOutsideClick={ () => setShowNotifs(false) }>
             <button data-testid="notifications-button-container"
                 className="hidden sm:block p-3 relative" 
-                onClick={ () => setShowNotifs(prev => !prev)}>
+                onClick={ handleBellClick }>
                 <img src="/notifications-bell.png" width="32" height="32"/>
                 {showNotifs &&
                 <ul className='bg-purple z-10 absolute w-[75vw] md:w-[50vw] 
-                    lg:w-[25vw] -right-[40px] mt-[8px] flex items-center border-b
+                    lg:w-[25vw] -right-[42px] mt-[8px] flex items-center border-b
                     justify-center flex-col rounded-b border-x border-white shadow-xl'
                     data-testid="notifications-list">
-                    { loadingNotifs ? 
-                    <ButtonLoading /> : 
-                    notifications.map((notifInfo, i) => 
+                    { loadingNotifs && <div className='py-3'><ButtonLoading /></div> }
+                    { !loadingNotifs && notifications.length === 0 &&
+                    <p className='text-white p-2'>You have 0 notifications.</p>}
+                    { notifications.length > 0 && notifications.map((notifInfo, i) => 
                     <Notification info={ notifInfo } key={ i } 
                         last={ i === notifications.length - 1 }/>)}
                 </ul>}
