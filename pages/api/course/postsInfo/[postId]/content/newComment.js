@@ -7,6 +7,8 @@ import {
     genMentionNotifsInDb, parseForMentionTokens 
 } from "../../../../../../lib/mention"
 
+const THREAD_ID_TOKEN_LENGTH = 5
+
 export default withIronSessionApiRoute(async function(req, resp) {
     if (req.method !== 'POST') {
         resp.status(405).json({ message: "invalid method" })
@@ -147,24 +149,34 @@ async (client, commentId, postId, createdAt) => {
         INSERT INTO notification 
         (person, is_user_post_activity_noti, gen_comment, created_at)
         VALUES ($1, $2, $3, $4);`
-    await clientQuery(client, genNotifQueryText, [postAuthorId, true, commentId, createdAt])
+    await clientQuery(client, genNotifQueryText, 
+        [postAuthorId, true, commentId, createdAt])
 })
 
 const genCommentReplyNotifInDb = (
 async (client, ancestorCommentId, replyThreadId, genCommentId, createdAt) => {
-    const repliedToCommentQueryText = `
-        SELECT comment_id, author FROM comment 
-        WHERE ancestor_comment = $1 AND thread_id = (
-            SELECT MAX(thread_id) FROM comment 
-            WHERE ancestor_comment = $1 AND thread_id < $2);`
-    const repliedToCommentQuery = await clientQuery(
-        client, repliedToCommentQueryText, [ancestorCommentId, replyThreadId])
+    const ancestorReply = replyThreadId.length === THREAD_ID_TOKEN_LENGTH
+    let repliedToCommentQuery
+    if (ancestorReply) {
+        repliedToCommentQuery = await clientQuery(client,
+            `SELECT comment_id, author FROM comment WHERE comment_id = $1;`,
+            [ancestorCommentId])
+    }
+    else {
+        const repliedToCommentQueryText = `
+            SELECT comment_id, author FROM comment 
+            WHERE ancestor_comment = $1 AND thread_id = (
+                SELECT MAX(thread_id) FROM comment 
+                WHERE ancestor_comment = $1 AND thread_id < $2);`
+        repliedToCommentQuery = await clientQuery(
+            client, repliedToCommentQueryText, [ancestorCommentId, replyThreadId])
+    }
 
     const notifiedPersonId = repliedToCommentQuery.rows[0].author
     const genReplyNotifQueryText = `
         INSERT INTO notification 
         (person, gen_comment, is_user_comment_reply_noti, created_at)
-        VALUES ($1, $2, $3);`
+        VALUES ($1, $2, $3, $4);`
     await clientQuery(
         client, genReplyNotifQueryText, [
             notifiedPersonId, genCommentId, true, createdAt])

@@ -48,15 +48,17 @@ const Thread = React.memo(function(props) {
     }
 
     const calcNewThreadId = (repliedToThreadId) => {
-        if (!repliedToThreadId) return "00001"
+        if (descendantsInfo.length === 0) return "00001"
+        if (!repliedToThreadId) repliedToThreadId = ""
 
-        const newThreadIdLength = ( // addnl 1 for token delim
+        let newThreadIdLength = ( // addnl 1 for token delim
             repliedToThreadId.length + THREAD_ID_TOKEN_LENGTH + 1) 
+        if (repliedToThreadId === "") newThreadIdLength--
         const newCommentSiblingThreadIds = descendantsInfo.map(
             info => info.threadId).filter(
                 threadId => threadId.length === newThreadIdLength).sort()
 
-        if (!newCommentSiblingThreadIds.length) {
+        if (!newCommentSiblingThreadIds.length && !!repliedToThreadId) {
             return repliedToThreadId + ".00001"
         }
 
