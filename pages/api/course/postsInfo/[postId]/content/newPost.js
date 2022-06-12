@@ -66,6 +66,11 @@ export default withIronSessionApiRoute(async function(req, resp) {
                 await genMentionNotifsInDb(client, mentions, 
                     insertPostQuery.rows[0].post_id, true, parsedCreatedAt)
             }
+            if (isAnnouncement) {
+                await genAnnouncementNotifsInDb(
+                    client, courseId, userId, 
+                    insertPostQuery.rows[0].post_id, parsedCreatedAt)
+            }
         }
     }
     catch (error) {
@@ -122,3 +127,26 @@ const invalidParams = (reqBody) => {
     if (typeof(editContent) !== 'object') return true
     if (typeof(courseId) !== 'number') return true
 }
+
+const genAnnouncementNotifsInDb = (
+async (client, courseId, posterId, annId, createdAt) => {
+    const getEnrolledQueryText = `
+        SELECT person AS enrolled_id FROM person_course WHERE course = $1;`
+    const enrolledQuery = await clientQuery(
+        client, getEnrolledQueryText, [courseId])
+    const needNotifIds = enrolledQuery.rows.filter(
+        r => r.enrolled_id !== posterId).map(r => r.enrolled_id)
+    
+    const announcementNotifQueryTokens = [`
+        INSERT INTO notification 
+        (gen_post, is_announcement_noti, created_at, person) VALUES `]
+    const announcementNotifParams = [annId, true, createdAt]
+    for (let i = 0; i < needNotifIds.length; i++) {
+        announcementNotifParams.push(needNotifIds[i])
+        announcementNotifQueryTokens.push(i < needNotifIds.length - 1 ?
+            `($1, $2, $3, $${ i + 4 }), ` : `($1, $2, $3, $${ i + 4 });`)
+    }
+    const announcementNotifQueryText = announcementNotifQueryTokens.join('')
+    await clientQuery(
+        client, announcementNotifQueryText, announcementNotifParams)
+})
