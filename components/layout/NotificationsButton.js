@@ -22,7 +22,7 @@ function NotificationsButton() {
     }, [])
 
     useEffect(() => {
-        if (loadedNotifs.length === 0 || loadingNotifs) return
+        if (!loadedNotifs || loadedNotifs.length === 0 || loadingNotifs) return
 
         setNotifications([...loadedNotifs, ...notifications])
     }, [loadedNotifs])
