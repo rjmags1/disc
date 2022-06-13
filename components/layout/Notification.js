@@ -9,7 +9,7 @@ function Notification({ info, last }) {
     return (
         <li data-testid="notification" className="w-full h-fit text-sm
             border-b border-white text-white py-2 px-2 text-left 
-            leading-relaxed font-semibold hover:bg-zinc-900" 
+            leading-relaxed font-semibold hover:opacity-[85%]" 
             style={ last ? { borderStyle: 'none' } : {}}
             onClick={ handleClick } >
             <p>{ genNotifText(info) }</p>
