@@ -38,6 +38,7 @@ const PostsInfoList = React.memo(function(props) {
     const [loadingMorePosts, setLoadingMorePosts] = useState(false)
     const [apiPage, setApiPage] = useState(1)
     const [displayedPosts, setDisplayedPosts] = useState([])
+    const [loadingFirstPosts, setLoadingFirstPosts] = useState(true)
 
 
     const {
@@ -53,11 +54,13 @@ const PostsInfoList = React.memo(function(props) {
         
         // render loading post icon if not initial load
         setLoadingMorePosts(apiPage > 1) 
+        setLoadingFirstPosts(apiPage === 1)
         const response = await fetch(
             `/api/course/postsInfo/course/${ courseId }/${ apiPage }/${ initialLoadTime }`
         )
         const { nextPage, posts: newPostInfo } = await response.json()
         setLoadedAllPosts(nextPage === null)
+        setLoadingFirstPosts(false)
 
         // put freshly loaded posts into postListingComponents
         const newPosts = newPostInfo.map((postInfo) => {
@@ -104,11 +107,7 @@ const PostsInfoList = React.memo(function(props) {
     }, [postListings, categoryFilter, filterText, attributeFilter, user])
 
 
-    const initialLoad = (
-        ((displayedPosts.length === 0 || postListings.length === 0) && 
-        !(displayedPosts.length === 0 && postListings.length > 0))
-        || loadingAnnouncementsPinned
-    )
+    const initialLoad = loadingFirstPosts || loadingAnnouncementsPinned
     const notLoadingMorePosts = (
         displayedPosts.length > 0 && !loadedAllPosts && !loadingMorePosts)
     const clickedLoadMore = (
@@ -139,7 +138,7 @@ const PostsInfoList = React.memo(function(props) {
                 <PostsLoading />
             </div>
             }
-            { loadedAllPosts && 
+            { loadedAllPosts && displayedPosts.length > 0 &&
             <div className="h-max text-center py-2 bg-zinc-900
                 border-t border-gray-500 border-r">
                 <header><h3>No more posts!</h3></header>
