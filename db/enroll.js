@@ -228,7 +228,12 @@ const enrollStudent = async function(studentId, courseId) {
     const queryText = 
         `INSERT INTO person_course (person, course) VALUES ($1, $2);`
     const queryParams = [studentId, courseId]
-    await query(queryText, queryParams)
+    try {
+        await query(queryText, queryParams)
+    }
+    catch (e) {
+        console.error(e)
+    }
 }
 
 const replaceOverCap = function(
