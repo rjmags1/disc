@@ -1,9 +1,9 @@
 const { test, expect } = require('@playwright/test')
-const { TESTUSER_REGISTERED, emailLogin } = require('../lib/auth')
+const { TESTUSER_ADMIN, emailLogin } = require('../lib/auth')
 
 test.describe('correct email button throttling, button processing status',
     async () => {
-    const registered = TESTUSER_REGISTERED
+    const registered = TESTUSER_ADMIN
 
     // note: testing on email is sufficient because the same processing
     // dynamics apply to logging in normally, besides the fact that the
