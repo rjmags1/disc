@@ -20,6 +20,8 @@ for (const setting of SETTINGS) {
     )
 }
 
+// NOTE: should be run serially with npm run e2e-serial
+
 test.beforeEach(async ({ page }) => {
     await login(page, TESTUSER_REGISTERED)
 
@@ -107,7 +109,7 @@ const getTogglerLabels = async function(page) {
     const labels = [null, null, null, null]
     const pageHtmlRegexes = [
         /email me when there is activity in a thread i'm watching/i,
-        /email me when someone replies to my thread/i,
+        /email me when someone comments on my post/i,
         /email me when someone replies to my comment/i,
         /email me when someone mentions me/i
     ]
@@ -148,7 +150,7 @@ const getPageSettings = async function(page) {
     const pageSettings = [null, null, null, null]
     const pageHtmlRegexes = [
         /email me when there is activity in a thread i'm watching/i,
-        /email me when someone replies to my thread/i,
+        /email me when someone comments on my post/i,
         /email me when someone replies to my comment/i,
         /email me when someone mentions me/i
     ]

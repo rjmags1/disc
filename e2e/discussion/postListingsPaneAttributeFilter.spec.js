@@ -205,23 +205,23 @@ test.describe('post listings pane attribute filter', async () => {
         const postInfoLocator = page.locator("[data-testid=post-info-container]")
         await loadAllPosts(page)
 
-        await selectAnAttribute("Starred", page)
+        await selectAnAttribute("Watching", page)
         await attributeFilterButtonLocator.click()
-        await checkIfAttributeSelected("Starred", attributeLocator)
+        await checkIfAttributeSelected("Watching", attributeLocator)
         await closeAttributeFilter(page)
 
         const displayedDbRows = await getDbRowsDisplayedToUser(
             TEST_COURSE_INFO.courseId, TESTUSER_REGISTERED.userId)
-        const starredDbRows = displayedDbRows.filter(
+        const watchedDbRows = displayedDbRows.filter(
             row => !!row.watch_id)
         const numDisplayedPagePosts = await postInfoLocator.count()
-        const numStarredIcons = await page.locator(
+        const numWatchingIcons = await page.locator(
             "[data-testid=watching-icon]").count()
-        expect(starredDbRows.length).toBe(numDisplayedPagePosts)
-        expect(numDisplayedPagePosts).toBe(numStarredIcons)
+        expect(watchedDbRows.length).toBe(numDisplayedPagePosts)
+        expect(numDisplayedPagePosts).toBe(numWatchingIcons)
 
-        for (let i = 0; i < starredDbRows.length; i++) {
-            const dbRow = starredDbRows[i]
+        for (let i = 0; i < watchedDbRows.length; i++) {
+            const dbRow = watchedDbRows[i]
             const thisPostInfoInnerText = (
                 await postInfoLocator.nth(i).innerText())
             await assertDbRowMatchPagePostText(dbRow, thisPostInfoInnerText)
@@ -348,7 +348,7 @@ test.describe('post listings pane attribute filter', async () => {
         const displayedDbRows = await getDbRowsDisplayedToUser(
             TEST_COURSE_INFO.courseId, TESTUSER_REGISTERED.userId)
         const staffDbRows = displayedDbRows.filter(
-            row => row.author_is_staff || row.author_is_instructor)
+            row => (row.author_is_staff || row.author_is_instructor) && !row.anonymous)
         const numDisplayedPagePosts = await postInfoLocator.count()
         const numStaffBanners = await page.locator(
             "[data-testid=staff-banner]").count()
@@ -380,7 +380,7 @@ test.describe('post listings pane attribute filter', async () => {
         const displayedDbRows = await getDbRowsDisplayedToUser(
             TEST_COURSE_INFO.courseId, TESTUSER_REGISTERED.userId) 
         const testUserAuthoredDbRows = displayedDbRows.filter(
-            row => row.user_id === TESTUSER_REGISTERED.userId)
+            row => row.user_id === TESTUSER_REGISTERED.userId && !row.anonymous)
         const numDisplayedPagePosts = await postInfoLocator.count()
         const numPageTestUserAuthoredPosts = await postInfoLocator.locator(
             `text=${ TESTUSER_REGISTERED.fullName }`).count()

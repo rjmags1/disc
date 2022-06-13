@@ -169,7 +169,7 @@ test.describe('post listings pane content', async () => {
             
             const thisPostInfoLocator = postInfoLocator.nth(i - hiddenOffset)
             const shouldHaveStaffBanner = (
-                dbRow.author_is_instructor || dbRow.author_is_staff)
+                (dbRow.author_is_instructor || dbRow.author_is_staff) && !dbRow.anonymous)
             const staffBannerDisplayed = await thisPostInfoLocator.locator(
                 "[data-testid=staff-banner]").isVisible()
             expect(shouldHaveStaffBanner).toBe(staffBannerDisplayed)

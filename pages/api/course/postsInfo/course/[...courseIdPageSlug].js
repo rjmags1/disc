@@ -154,7 +154,8 @@ const bigPaginatedCourseInfoQueryText = `
                 LEFT JOIN post_like 
                     ON post_like.post = post_id
                 LEFT JOIN (
-                    SELECT comment_id, post AS commented_post FROM comment
+                    SELECT comment_id, post AS commented_post 
+                    FROM comment WHERE NOT deleted
                 ) AS displayed_comments
                     ON commented_post = post_id
                 GROUP BY post_id
@@ -171,7 +172,8 @@ const bigPaginatedCourseInfoQueryText = `
             ) AS course_posts
             LEFT JOIN (
                 SELECT comment_id, post AS commented_post, 
-                created_at AS comment_created_at FROM comment
+                created_at AS comment_created_at 
+                FROM comment WHERE NOT deleted
             ) AS displayed_comments 
             ON commented_post = post_id
             GROUP BY post_id

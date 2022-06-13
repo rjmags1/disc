@@ -157,7 +157,8 @@ const assertDbRowMatchPagePostText = async (dbRow, pagePostInnerText) => {
     expect(pagePostInnerText).toMatch(
         new RegExp(`${ dbRow.category_name }`))
     expect(pagePostInnerText).toMatch(
-        new RegExp(`${ dbRow.f_name } ${ dbRow.l_name }`))
+        new RegExp(dbRow.anonymous ? 
+            "Anonymous" : `${ dbRow.f_name } ${ dbRow.l_name }`))
 }
 
 const assertDbRowMatchPagePost_St_AR_En_Wa_Pi_An = (

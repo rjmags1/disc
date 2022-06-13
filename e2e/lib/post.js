@@ -351,6 +351,9 @@ async (commentBoxLocator, preClickLikes, postId) => {
 
 exports.removeTestCommentFromDb = async () => {
     const testCommentId = await this.getNewestCommentIdFromDb()
+    const removeCommentGenNotifQueryText = `
+        DELETE FROM notification WHERE gen_comment = $1;`
+    await query(removeCommentGenNotifQueryText, [testCommentId])
     const removeTestCommentQueryText = `
         DELETE FROM comment WHERE comment_id = $1;`
     await query(removeTestCommentQueryText, [testCommentId])
@@ -373,8 +376,7 @@ const assertFirstUserCommentEditInDb = async (newComment) => {
     const newCommentQuery = await query(queryText, [ // display content is html
         this.TEST_POST_INFO.id, TESTUSER_REGISTERED.userId])
     expect(newCommentQuery.rows[0].display_content).toMatch(
-        new RegExp(newComment))
-}
+        new RegExp(newComment)) }
 
 exports.editAndAssertOnEditedPageComment = (
 async (page, commentBoxLocator, newComment) => {
@@ -866,16 +868,19 @@ exports.stripSlashNewlines = (s) => {
 }
 
 exports.dbAssertThenRemoveTestPostFromDb = async (pageTitle) => {
-    const dbTitleQueryText = `SELECT title FROM post WHERE post_id = (
+    const dbTitleQueryText = `SELECT title, post_id FROM post WHERE post_id = (
         SELECT MAX(post_id) FROM post);`
     const dbTitleQuery = await query(dbTitleQueryText)
-    const dbTitle = dbTitleQuery.rows[0].title
+    const { title: dbTitle, post_id } = dbTitleQuery.rows[0]
     expect(dbTitle).toMatch(new RegExp(pageTitle))
 
-    const removeQueryText = 
+    const removeTestPostNotifsQueryText = `
+    DELETE FROM notification WHERE gen_post = $1;`
+    await query(removeTestPostNotifsQueryText, [post_id])
+    const removeTestPostQueryText = 
     `DELETE FROM post WHERE post_id = (
         SELECT MAX(post_id) FROM post);`
-    await query(removeQueryText)
+    await query(removeTestPostQueryText)
 }
 
 exports.assertOnPostControlPanelButtonLabelChange = (
