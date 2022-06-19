@@ -3,8 +3,8 @@ const {
     login, 
     TESTUSER_REGISTERED,
     TESTUSER_STAFF
-} = require('../lib/auth')
-const { TEST_COURSE_INFO } = require('../lib/course')
+} = require('../../lib/auth')
+const { TEST_COURSE_INFO } = require('../../lib/course')
 const { 
     getFirstDisplayedCommentPageAndDbInfo, 
     TEST_POST_INFO, 
@@ -17,20 +17,9 @@ const {
     assertOnCorrectResolveAnswerButtonLabels,
     clickResolveAnswerButtonUiAssert,
     dbAssertFirstCommentEndorse
-} = require('../lib/post')
-const { loadAllPosts } = require('../lib/postListings')
+} = require('../../lib/post')
+const { loadAllPosts } = require('../../lib/postListings')
 
-
-// NOTE: ----------------------------------------------v
-// these tests should be run serially with npm run e2e-serial.
-// this is because most of these tests perform actions that alter
-// a single database record twice in a row. the results
-// of that test instance and those of the same test with different browser
-// binaries depend on the consecutiveness of each individual test instance's
-// database record interactions. running non-serially, ie with multiple
-// workers, makes each worker interrupt the others' consecutive calls
-// to the relevant database record, resulting
-// in false test failures and inappropriately altered database records
 
 test.beforeEach(async ({ page, isMobile }, { title: testTitle }) => {
     await login(page, testTitle === 'endorse btn' ?

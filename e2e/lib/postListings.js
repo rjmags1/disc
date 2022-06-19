@@ -1,7 +1,7 @@
 const { TESTUSER_REGISTERED } = require('./auth')
 const { query } = require('./db')
 const { expect } = require('@playwright/test')
-const time = require('../lib/time')
+const time = require('./time')
 
 const getDbCoursePostsRevChronOrder = async (courseId) => {
     try {
@@ -292,7 +292,6 @@ FROM
                 ON post_like.post = post_id
             LEFT JOIN (
                 SELECT comment_id, post AS commented_post FROM comment
-                WHERE NOT deleted
             ) AS displayed_comments
                 ON commented_post = post_id
             GROUP BY post_id
@@ -310,7 +309,6 @@ FROM
         LEFT JOIN (
             SELECT comment_id, post AS commented_post, 
             created_at AS comment_created_at FROM comment
-            WHERE NOT deleted
         ) AS displayed_comments 
         ON commented_post = post_id
         GROUP BY post_id

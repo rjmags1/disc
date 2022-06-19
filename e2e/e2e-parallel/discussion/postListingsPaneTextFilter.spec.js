@@ -1,12 +1,12 @@
 const { test, expect } = require('@playwright/test')
-const { login, TESTUSER_REGISTERED } = require('../lib/auth')
-const { TEST_COURSE_INFO } = require('../lib/course')
+const { login, TESTUSER_REGISTERED } = require('../../lib/auth')
+const { TEST_COURSE_INFO } = require('../../lib/course')
 const { 
     assertDbRowMatchPagePostText,
     getDbRowsDisplayedToUser,
     loadAllPosts
-} = require('../lib/postListings')
-const { getPageCourseCategories } = require('../lib/categories')
+} = require('../../lib/postListings')
+const { getPageCourseCategories } = require('../../lib/categories')
 
 const REGULAR_POSTS_PER_PAGE = 25
 const PINNED_OR_ANNOUNCEMENT = 6

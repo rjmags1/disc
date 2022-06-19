@@ -3,8 +3,8 @@ const {
     login, 
     TESTUSER_REGISTERED,
     TESTUSER_STAFF
-} = require('../lib/auth')
-const { TEST_COURSE_INFO } = require('../lib/course')
+} = require('../../lib/auth')
+const { TEST_COURSE_INFO } = require('../../lib/course')
 const { 
     assertOnPostContent,
     assertOnPostControlPanelContent,
@@ -20,11 +20,10 @@ const {
     assertOnPostControlPanelButtonLabelChange,
     writeAssertOnNewPost,
     checkPostAttribute
-} = require('../lib/post')
-const { getDbCourseCategories } = require('../lib/categories')
-const { getAllNonDeletedDbPostsInPageOrder } = require('../lib/postListings')
+} = require('../../lib/post')
+const { getDbCourseCategories } = require('../../lib/categories')
+const { getAllNonDeletedDbPostsInPageOrder } = require('../../lib/postListings')
 
-// NOTE: these tests should be run with npm run e2e-serial
 
 test.beforeEach(async ({ page }, { title: testTitle }) => {
     await login(page, 

@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test')
-const { login, TESTUSER_REGISTERED } = require('../lib/auth')
-const { TEST_COURSE_INFO } = require('../lib/course')
+const { login, TESTUSER_REGISTERED } = require('../../lib/auth')
+const { TEST_COURSE_INFO } = require('../../lib/course')
 const { 
     loadAllPosts,
     timestamp1LteTimestamp2,
@@ -10,7 +10,7 @@ const {
     assertDbRowMatchPagePostText,
     assertDbRowMatchPagePost_St_AR_En_Wa_Pi_An,
     assertDbRowMatchesPagePostLikesComments
-} = require('../lib/postListings')
+} = require('../../lib/postListings')
 
 const REGULAR_POSTS_PER_PAGE = 25
 const PINNED_OR_ANNOUNCEMENT = 6

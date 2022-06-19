@@ -4,20 +4,20 @@ const {
     TESTUSER_REGISTERED,
     TESTUSER_STAFF,
     TESTUSER_ADMIN
-} = require('../lib/auth')
-const { TEST_COURSE_INFO } = require('../lib/course')
+} = require('../../lib/auth')
+const { TEST_COURSE_INFO } = require('../../lib/course')
 const { 
     getAllDbTopLevelThreadCommentsDisplayOrder, 
     TEST_POST_INFO, 
     lazyLoadAllTopLevelPageComments,
-    getAvatarUrlAndName,
     assertOnCommentAvatar,
     assertOnCommentEndorsedCheckBadges,
     assertOnCommentTimestampAuthor,
     assertOnCommentContent,
-    baseAssertOnCommentControlPanel
-} = require('../lib/post')
-const { loadAllPosts } = require('../lib/postListings')
+    baseAssertOnCommentControlPanel,
+    getAvatarUrlAndNameFromDb
+} = require('../../lib/post')
+const { loadAllPosts } = require('../../lib/postListings')
 
 
 test.beforeEach(async ({ page, isMobile }, { title: testTitle }) => {
@@ -75,7 +75,7 @@ test.describe('comment information correctly displayed to user', async () => {
         for (let i = 0; i < numPageComments; i++) {
             const dbCommentInfo = displayOrderDbComments[i]
             const authorId = dbCommentInfo.author
-            const dbAuthorInfo = await getAvatarUrlAndName(authorId)
+            const dbAuthorInfo = await getAvatarUrlAndNameFromDb(authorId)
             const commentBox = commentBoxLocator.nth(i)
 
             await assertOnCommentAvatar(dbCommentInfo, dbAuthorInfo, commentBox)

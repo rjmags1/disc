@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test')
-const { login, TESTUSER_REGISTERED } = require('../lib/auth')
-const { TEST_COURSE_INFO } = require('../lib/course')
+const { login, TESTUSER_REGISTERED } = require('../../lib/auth')
+const { TEST_COURSE_INFO } = require('../../lib/course')
 const { 
     loadAllPosts,
     checkIfAttributeSelected,
@@ -10,7 +10,7 @@ const {
     openAttributeFilter,
     closeAttributeFilter,
     getDbRowsDisplayedToUser
-} = require('../lib/postListings')
+} = require('../../lib/postListings')
 
 const REGULAR_POSTS_PER_PAGE = 25
 const PINNED_OR_ANNOUNCEMENT = 6

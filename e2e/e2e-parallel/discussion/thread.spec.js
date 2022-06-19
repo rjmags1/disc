@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test')
-const { login, TESTUSER_REGISTERED } = require('../lib/auth')
-const { TEST_COURSE_INFO } = require('../lib/course')
+const { login, TESTUSER_REGISTERED } = require('../../lib/auth')
+const { TEST_COURSE_INFO } = require('../../lib/course')
 const {
     TEST_POST_INFO, 
     getAllDbTopLevelThreadCommentsDisplayOrder, 
@@ -9,7 +9,7 @@ const {
     stripTagsNewLine,
     getDbAncestorsGt2Replies,
     getDbAllReplies
-} = require('../lib/post')
+} = require('../../lib/post')
 
 test.beforeEach(async ({ page, isMobile }) => {
     await login(page, TESTUSER_REGISTERED)

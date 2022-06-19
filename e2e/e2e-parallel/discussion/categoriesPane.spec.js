@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test')
-const { login, TESTUSER_REGISTERED } = require('../lib/auth')
-const { TEST_COURSE_INFO } = require('../lib/course')
-const { RAINBOW_HEX } = require('../lib/colors')
+const { login, TESTUSER_REGISTERED } = require('../../lib/auth')
+const { TEST_COURSE_INFO } = require('../../lib/course')
+const { RAINBOW_HEX } = require('../../lib/colors')
 const { 
     getDbCourseCategories, 
     getPageCourseCategories, 
@@ -11,8 +11,8 @@ const {
     testEachCategoryFilter,
     testGroupedCategoryFilters,
     toggleCategoryStyleAssert
-} = require('../lib/categories')
-const { loadAllPosts } = require('../lib/postListings')
+} = require('../../lib/categories')
+const { loadAllPosts } = require('../../lib/postListings')
 
 
 test.beforeEach(async ({ page }) => {

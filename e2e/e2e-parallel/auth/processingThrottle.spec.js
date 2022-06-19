@@ -1,5 +1,5 @@
 const { test, expect } = require('@playwright/test')
-const { TESTUSER_ADMIN, emailLogin } = require('../lib/auth')
+const { TESTUSER_ADMIN, emailLogin } = require('../../lib/auth')
 
 test.describe('correct email button throttling, button processing status',
     async () => {

@@ -1,5 +1,5 @@
 const { test, expect } = require('@playwright/test')
-const { TESTUSER_REGISTERED, TESTUSER_UNREGISTERED } = require('../lib/auth')
+const { TESTUSER_REGISTERED, TESTUSER_UNREGISTERED } = require('../../lib/auth')
 
 test.describe('valid unregistered inputs rejected', async () => {
     const waitOptions = { timeout: 5 * 1000 }

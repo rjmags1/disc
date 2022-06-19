@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test')
-const { login, TESTUSER_REGISTERED } = require('../lib/auth')
+const { login, TESTUSER_REGISTERED } = require('../../lib/auth')
 const { unsealData } = require('iron-session')
-const { query } = require('../lib/db')
+const { query } = require('../../lib/db')
 
 const NEW_REGISTERED_TEST_USER_EMAIL = "harrysNewEmail@gmail.com"
 

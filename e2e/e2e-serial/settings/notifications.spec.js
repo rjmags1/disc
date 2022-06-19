@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test')
-const { login, TESTUSER_REGISTERED } = require('../lib/auth')
-const { query } = require('../lib/db')
+const { login, TESTUSER_REGISTERED } = require('../../lib/auth')
+const { query } = require('../../lib/db')
 
 const SETTINGS = [
     "watch_email_setting",

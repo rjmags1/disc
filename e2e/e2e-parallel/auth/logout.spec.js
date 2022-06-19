@@ -1,5 +1,5 @@
 const { test, expect } = require('@playwright/test')
-const { login, TESTUSER_REGISTERED } = require('../lib/auth')
+const { login, TESTUSER_REGISTERED } = require('../../lib/auth')
 
 test.describe('logout flow', () => {
     test('logout from index', async ({ page, context }) => {

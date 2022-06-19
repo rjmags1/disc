@@ -1,5 +1,5 @@
 const { test, expect } = require('@playwright/test')
-const { login, emailLogin, TESTUSER_REGISTERED } = require('../lib/auth')
+const { login, emailLogin, TESTUSER_REGISTERED } = require('../../lib/auth')
 
 test.describe('valid registered inputs accepted', async () => {
     test('all three fields filled with valid input -> login success', 

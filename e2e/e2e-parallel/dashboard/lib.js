@@ -1,5 +1,5 @@
-const { query } = require('../lib/db')
-const { TESTUSER_REGISTERED } = require('../lib/auth')
+const { query } = require('../../lib/db')
+const { TESTUSER_REGISTERED } = require('../../lib/auth')
 
 exports.getDbCoursesAsSet = async () => {
     const { userId: testUserId } = TESTUSER_REGISTERED
