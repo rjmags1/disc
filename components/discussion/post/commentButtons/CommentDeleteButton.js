@@ -1,14 +1,15 @@
-import React from "react"
+function CommentDeleteButton({ postId, commentId, markDeleted }) {
 
-const CommentDeleteButton = React.memo(function(props) {
-    const { postId, commentId, markDeleted } = props
     const handleClick = async () => {
+        // optimistically mark the relevant comment as deleted before 
+        // attempting to update the backend, causing the entire control panel
+        // to be removed and the comment content to be obscured
+        markDeleted()
         try {
-            const resp = await fetch(
+            await fetch(
                 `/api/course/postsInfo/${ postId }/content/replies/info/${ commentId }/delete/${ true }`,
                 { method: 'PUT' }
             )
-            if (resp.ok) markDeleted()
         }
         catch (error) { console.error(error) }
     }
@@ -19,6 +20,6 @@ const CommentDeleteButton = React.memo(function(props) {
             DELETE
         </button>
     )
-})
+}
 
 export default CommentDeleteButton
