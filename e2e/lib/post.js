@@ -440,18 +440,18 @@ async (deletedComment) => {
 })
 
 exports.dbAssertFirstUserAuthoredPostFirstCommentResAnsDelta = (
-async (normalPost, initialStatus) => {
+async (normalPost, expectedBtnStatus) => {
     const dbPostsPageOrder = await getAllNonDeletedDbPostsInPageOrder(
         TEST_COURSE_INFO.courseId)
     let relevantPostDbRow
     for (const row of dbPostsPageOrder) {
         if (normalPost && !row.is_question && 
-            TESTUSER_REGISTERED.userId === row.user_id) {
+            TESTUSER_REGISTERED.userId === row.user_id && row.comments > 0) {
             relevantPostDbRow = row
             break
         }
         if (!normalPost && row.is_question && 
-            TESTUSER_REGISTERED.userId === row.user_id) {
+            TESTUSER_REGISTERED.userId === row.user_id && row.comments > 0) {
             relevantPostDbRow = row
             break
         }
@@ -459,79 +459,92 @@ async (normalPost, initialStatus) => {
     const firstCommentDbRow = (
         await this.getAllDbTopLevelThreadCommentsDisplayOrder(
             relevantPostDbRow.post_id))[0]
+    const numResolvingAnswerDbComments = await getNumResolvingAnswers(
+        relevantPostDbRow.post_id)
+    
     
     if (normalPost) {
-        expect(relevantPostDbRow.resolved).toBe(!initialStatus)
-        expect(firstCommentDbRow.is_resolving).toBe(!initialStatus)
+        expect(relevantPostDbRow.resolved).toBe(numResolvingAnswerDbComments > 0)
+        expect(firstCommentDbRow.is_resolving).toBe(expectedBtnStatus)
     }
     else {
-        expect(relevantPostDbRow.answered).toBe(!initialStatus)
-        expect(firstCommentDbRow.is_answer).toBe(!initialStatus)
+        expect(relevantPostDbRow.answered).toBe(numResolvingAnswerDbComments > 0)
+        expect(firstCommentDbRow.is_answer).toBe(expectedBtnStatus)
     }
 })
 
+const getNumResolvingAnswers = async (postId) => {
+    const numResAnsQuery = await query(
+        `SELECT COUNT(*) as res_answers FROM comment 
+        WHERE post = $1 AND (is_resolving OR is_answer) AND NOT deleted;`, 
+        [postId])
+    return numResAnsQuery.rows[0].res_answers
+}
+
+
 exports.assertOnCorrectResolveAnswerButtonLabels = (
-async (page, initialStatus, resolve) => {
+async (page, initialPostStatus, checkingResolveButton) => {
 
     await this.lazyLoadAllTopLevelPageComments(page)
     const commentBoxLocator = page.locator(
         '[data-testid=comment-box-container]')
     const numTopLevelComments = await commentBoxLocator.count()
-    const resolvingAnswerTextSelector = resolve ? 
+    const resolvingAnswerTextSelector = checkingResolveButton ? 
         'text=/unmark as resolving/i' : 'text=/unmark as answer/i'
     let numResolvingAnswerComments = 0
     for (let i = 0; i < numTopLevelComments; i++) {
         const commentIsResolvingAnswer = await commentBoxLocator.nth(i).locator(
             resolvingAnswerTextSelector).isVisible()
-        if (!initialStatus) expect(commentIsResolvingAnswer).toBe(false)
+        if (!initialPostStatus) expect(commentIsResolvingAnswer).toBe(false)
         else numResolvingAnswerComments += commentIsResolvingAnswer ? 1 : 0
     }
-    if (initialStatus) {
+    if (initialPostStatus) {
         expect(numResolvingAnswerComments).toBeGreaterThan(0)
     } 
 })
 
 exports.clickResolveAnswerButtonUiAssert = (
-async (page, initialStatus, isMobile, resolve) => {
-    const firstUserAuthoredNormalPostListingLocator = page.locator(
-        '[data-testid=post-info-container]', {
-            hasText: TESTUSER_REGISTERED.fullName ,
-            has: page.locator(resolve ? 
-                '[data-testid=normal-post-icon]' : 
-                '[data-testid=question-icon]')
-        }).nth(0)
-    const commentBoxLocator = page.locator(
-        '[data-testid=comment-box-container]')
-    const resolvingAnswerTextSelector = resolve ? 
-        'text=/unmark as resolving/i' : 'text=/unmark as answer/i'
-    const firstResolveAnswerBtn = page.locator(resolve ?
+async (page, initialPostStatus, isMobile, checkingResolveButton, listingLocator) => {
+    const commentBoxLocator = page.locator('[data-testid=comment-box-container]')
+    const firstResolveAnswerBtn = page.locator(checkingResolveButton ?
         '[data-testid=comment-mark-resolving-btn]' :
         '[data-testid=comment-mark-answer-btn]').nth(0)
-    const unresolvingUnanswerTextSelector = resolve ? 
+
+    const unresolvingUnanswerTextSelector = checkingResolveButton ? 
         'text=/^mark as resolving$/i' : 'text=/^mark as answer$/i'
+    const resolvingAnswerTextSelector = checkingResolveButton ? 
+        'text=/unmark as resolving/i' : 'text=/unmark as answer/i'
+    const initialFirstResolveAnswerBtnStatus = await firstResolveAnswerBtn.locator(
+        resolvingAnswerTextSelector).isVisible()
+
+    const numResolvingAnswers = await page.locator(
+        resolvingAnswerTextSelector).count()
+    const postStatusShouldChange = (numResolvingAnswers === 0 ||
+        numResolvingAnswers === 1 && initialFirstResolveAnswerBtnStatus)
+    const postClickPostStatus = postStatusShouldChange ? 
+        !initialPostStatus : initialPostStatus
+
     await Promise.all([
         firstResolveAnswerBtn.click(),
-        firstResolveAnswerBtn.locator(initialStatus ?
-            unresolvingUnanswerTextSelector : resolvingAnswerTextSelector
-                ).waitFor()
+        firstResolveAnswerBtn.locator(initialFirstResolveAnswerBtnStatus ?
+            unresolvingUnanswerTextSelector : 
+            resolvingAnswerTextSelector).waitFor()
     ])
-    const newFirstResolveAnswerBtnLabel = await firstResolveAnswerBtn.innerText()
-    expect((resolve ? /unmark as resolving/i : /unmark as answer/i).test(
-        newFirstResolveAnswerBtnLabel)).toBe(!initialStatus)
+
     const newCheckmarkPresent = await commentBoxLocator.nth(0).locator(
         '[data-testid=comment-check-icon]').isVisible()
-    expect(newCheckmarkPresent).toBe(!initialStatus)
+    expect(newCheckmarkPresent).toBe(!initialFirstResolveAnswerBtnStatus)
     const newPostStatusResolvedStampPresent = await page.locator(
-        '[data-testid=post-stats-bar]').locator(resolve ?
+        '[data-testid=post-stats-bar]').locator(checkingResolveButton ?
             'text=/resolved/i' : 'text=/answered/i').isVisible()
-    expect(newPostStatusResolvedStampPresent).toBe(!initialStatus)
+    expect(newPostStatusResolvedStampPresent).toBe(postClickPostStatus)
     if (isMobile) {
         await page.locator('[data-testid=post-back-btn]').click()
     }
     const postListingMarkedResolved = (
-        await firstUserAuthoredNormalPostListingLocator.locator(
+        await listingLocator.locator(
             '[data-testid=green-checkmark-icon]').isVisible())
-    expect(postListingMarkedResolved).toBe(!initialStatus)
+    expect(postListingMarkedResolved).toBe(postClickPostStatus)
 })
 
 exports.dbAssertFirstCommentEndorse = async (initialStatus) => {

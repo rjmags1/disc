@@ -160,19 +160,32 @@ test.describe('mark resolving btn, mark answer btn, endorse btn', async () => {
         if (isMobile) {
             await page.locator('[data-testid=post-back-btn]').click()
         }
+
         await loadAllPosts(page)
-        const firstUserAuthoredNormalPostListingLocator = page.locator(
+        let firstUserAuthoredNormalPostListingLocator = page.locator(
             '[data-testid=post-info-container]', {
-                hasText: TESTUSER_REGISTERED.fullName ,
+                hasText: TESTUSER_REGISTERED.fullName,
                 has: page.locator('[data-testid=normal-post-icon]')}).nth(0)
+        let i = 0
+        while (!(await firstUserAuthoredNormalPostListingLocator.locator(
+            '[data-testid=comments-icon]').isVisible())) {
+            firstUserAuthoredNormalPostListingLocator = page.locator(
+                '[data-testid=post-info-container]', {
+                    hasText: TESTUSER_REGISTERED.fullName,
+                    has: page.locator('[data-testid=normal-post-icon]')
+                }
+            ).nth(++i)
+        }
         const thePostTitle = (
             await firstUserAuthoredNormalPostListingLocator.locator(
                 '[data-testid=post-info-title]').innerText())
-        const initialResolvedStatus = (
+        const initialPostResolvedStatus = (
             await firstUserAuthoredNormalPostListingLocator.locator(
                 '[data-testid=green-checkmark-icon]').isVisible())
         const firstResolveBtn = page.locator(
             '[data-testid=comment-mark-resolving-btn]').nth(0)
+        const initialResolveBtnStatus = await firstResolveBtn.locator(
+            'text=/unmark as resolving/i').isVisible()
         await Promise.all([
             firstUserAuthoredNormalPostListingLocator.click(),
             page.locator('[data-testid=post-container]', {
@@ -180,12 +193,13 @@ test.describe('mark resolving btn, mark answer btn, endorse btn', async () => {
         ])
 
         await assertOnCorrectResolveAnswerButtonLabels(
-            page, initialResolvedStatus, true)
+            page, initialPostResolvedStatus, true)
         await clickResolveAnswerButtonUiAssert(
-            page, initialResolvedStatus, isMobile, true
+            page, initialPostResolvedStatus, isMobile, true,
+            firstUserAuthoredNormalPostListingLocator
         ) // brings ui back to listings on mobile
         await dbAssertFirstUserAuthoredPostFirstCommentResAnsDelta(
-            true, initialResolvedStatus)
+            true, !initialResolveBtnStatus)
         
         //reset
         if (isMobile) {
@@ -198,19 +212,33 @@ test.describe('mark resolving btn, mark answer btn, endorse btn', async () => {
         if (isMobile) {
             await page.locator('[data-testid=post-back-btn]').click()
         }
+
         await loadAllPosts(page)
-        const firstUserAuthoredQuestionPostListingLocator = page.locator(
+        let firstUserAuthoredQuestionPostListingLocator = page.locator(
             '[data-testid=post-info-container]', {
                 hasText: TESTUSER_REGISTERED.fullName,
-                has: page.locator('[data-testid=question-icon]') }).nth(0)
+                has: page.locator('[data-testid=question-icon]')
+            }).nth(0)
+        let i = 0
+        while (!(await firstUserAuthoredQuestionPostListingLocator.locator(
+            '[data-testid=comments-icon]').isVisible())) {
+            firstUserAuthoredQuestionPostListingLocator = page.locator(
+                '[data-testid=post-info-container]', {
+                    hasText: TESTUSER_REGISTERED.fullName,
+                    has: page.locator('[data-testid=question-icon]')
+                }
+            ).nth(++i)
+        }
         const thePostTitle = (
             await firstUserAuthoredQuestionPostListingLocator.locator(
                 '[data-testid=post-info-title]').innerText())
-        const initialAnsweredStatus = (
+        const initialPostAnsweredStatus = (
             await firstUserAuthoredQuestionPostListingLocator.locator(
                 '[data-testid=green-checkmark-icon]').isVisible())
         const firstAnswerBtn = page.locator(
             '[data-testid=comment-mark-answer-btn]').nth(0)
+        const initialAnswerBtnStatus = await firstAnswerBtn.locator(
+            'text=/unmark as answer/i').isVisible()
         await Promise.all([
             firstUserAuthoredQuestionPostListingLocator.click(),
             page.locator('[data-testid=post-container]', {
@@ -218,12 +246,13 @@ test.describe('mark resolving btn, mark answer btn, endorse btn', async () => {
         ])
 
         await assertOnCorrectResolveAnswerButtonLabels(
-            page, initialAnsweredStatus, false)
+            page, initialPostAnsweredStatus, false)
         await clickResolveAnswerButtonUiAssert( 
-            page, initialAnsweredStatus, isMobile, false
+            page, initialPostAnsweredStatus, isMobile, false, 
+            firstUserAuthoredQuestionPostListingLocator
         ) // brings ui back to listings on mobile
         await dbAssertFirstUserAuthoredPostFirstCommentResAnsDelta(
-            false, initialAnsweredStatus)
+            false, !initialAnswerBtnStatus)
 
         //reset
         if (isMobile) {
