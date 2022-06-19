@@ -1,7 +1,7 @@
 import { useState, useContext, useRef, useEffect } from 'react'
 import { 
     PostContext, PostListingsContext 
-} from '../../../../pages/[courseId]/discussion'
+} from '../../../../pages/discussion/[courseId]'
 import ButtonLoading from '../../../lib/ButtonLoading'
 import { syncListingWithBoolInteraction } from '../../../../lib/uiSync'
 import { SMALL_MEDIA_BREAKPOINT } from '../../../../lib/layout'

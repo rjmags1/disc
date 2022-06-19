@@ -11,7 +11,7 @@ import Pinned from './Pinned'
 import Announcements from './Announcements'
 import { 
     TimeContext, PostListingsContext 
-} from '../../../pages/[courseId]/discussion'
+} from '../../../pages/discussion/[courseId]'
 
 
 const PostsInfoList = React.memo(function(props) {

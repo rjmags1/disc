@@ -1,7 +1,7 @@
 import PostInfo from "./PostInfo"
 import React, { useContext } from "react"
 import { filterTest } from "../../../lib/filter"
-import { PostListingsContext } from "../../../pages/[courseId]/discussion"
+import { PostListingsContext } from "../../../pages/discussion/[courseId]"
 
 const Announcements = React.memo(function(props) {
     const { catColors, filters, user, setCurrentPost, toggleMobilePostDisplay } = props

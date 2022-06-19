@@ -6,7 +6,7 @@ import CommentMarkAnswerButton from './commentButtons/CommentMarkAnswerButton'
 import ReplyButton from './commentButtons/ReplyButton'
 import CommentEditButton from './commentButtons/CommentEditButton'
 
-import { EditorContext } from '../../../pages/[courseId]/discussion'
+import { EditorContext } from '../../../pages/discussion/[courseId]'
 import { useContext } from 'react'
 import { useUser } from '../../../lib/hooks'
 

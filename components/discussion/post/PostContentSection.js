@@ -6,7 +6,7 @@ import { useCourse } from '../../../lib/hooks'
 import { useRouter } from 'next/router'
 import { 
     EditorContext, TimeContext 
-} from '../../../pages/[courseId]/discussion'
+} from '../../../pages/discussion/[courseId]'
 
 import { useSWRConfig } from "swr"
 import { sanitize } from "dompurify"

@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 import { useUser } from '../../../lib/hooks'
-import { PostContext } from '../../../pages/[courseId]/discussion'
+import { PostContext } from '../../../pages/discussion/[courseId]'
 import DeleteButton from './controlPanelButtons/DeleteButton'
 import EndorseButton from './controlPanelButtons/EndorseButton'
 import LikeButton from './controlPanelButtons/LikeButton'

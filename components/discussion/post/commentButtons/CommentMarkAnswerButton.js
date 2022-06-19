@@ -1,5 +1,5 @@
 import { useContext, useRef } from "react"
-import { PostContext, PostListingsContext } from "../../../../pages/[courseId]/discussion"
+import { PostContext, PostListingsContext } from "../../../../pages/discussion/[courseId]"
 import { syncListingWithBoolInteraction } from "../../../../lib/uiSync"
 
 function CommentMarkAnswerButton(props) {

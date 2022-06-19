@@ -1,5 +1,5 @@
 import { useContext, useState, useMemo } from 'react'
-import { EditorContext, PostListingsContext } from '../../../pages/[courseId]/discussion'
+import { EditorContext, PostListingsContext } from '../../../pages/discussion/[courseId]'
 import { useCourse, useUser } from '../../../lib/hooks'
 import { useRouter } from 'next/router'
 import { categoriesToLightRainbowHex } from '../../../lib/colors'

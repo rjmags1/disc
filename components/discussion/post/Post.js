@@ -7,7 +7,7 @@ import CommentButton from './controlPanelButtons/CommentButton'
 import { useContext, useEffect, useState, useRef } from 'react'
 import { 
     PostContext, TimeContext, EditorContext 
-} from '../../../pages/[courseId]/discussion'
+} from '../../../pages/discussion/[courseId]'
 import { usePostContent } from '../../../lib/hooks'
 
 

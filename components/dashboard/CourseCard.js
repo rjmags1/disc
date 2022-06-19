@@ -14,7 +14,7 @@ function CourseCard({ id, name, code, section, color }) {
 
     const handleClick = (event) => {
         event.preventDefault()
-        router.push(`/${id}/discussion`)
+        router.push(`/discussion/${id}`)
     }
 
     const displayedCode = `${ code }-${ section }`

@@ -69,14 +69,21 @@ function Discussion() {
     } = useCourse(courseId) // get course info for page header
 
 
-    useEffect(() => {
+    useEffect(() => { // display post on mobile when user clicks a post listing
+
+        // if we're still in initial render cycles or not on mobile viewport,
+        // do nothing
         if (!filterRef.current || 
             !listingsPaneRef.current || 
             !postContainerRef.current) return
         if (window.innerWidth >= LARGE_MEDIA_BREAKPOINT) return
 
+        // hide listings pane and filter bar if post listing clicked else
+        // rely on default styles to display listings + filter
         filterRef.current.style.display = mobileDisplayPost ? "none" : ""
         listingsPaneRef.current.style.display = mobileDisplayPost ? "none" : ""
+            
+        // override default hidden display styles on mobile if post listing clicked
         postContainerRef.current.style.display = mobileDisplayPost ? "block" : "none"
 
     }, [mobileDisplayPost])
@@ -114,6 +121,12 @@ function Discussion() {
         }
     }, [currentPost])
 
+    
+    if (loadingUser || !user.authenticated || loadingCourse) return null
+
+    const { termName, code, section } = course
+    const title = (
+        `${ termName } ${ code }-${ section } - Discussion`)
 
     const changeCategoryFilter = (add, category) => {
         const newFilter = new Set(categoryFilter)
@@ -123,15 +136,11 @@ function Discussion() {
     }
 
     const toggleMobilePostDisplay = () => setMobileDisplayPost(prev => !prev)
-    
-    if (loadingUser || !user.authenticated || loadingCourse) return null
 
-    const { termName, code, section } = course
-    const title = (
-        `${ termName } ${ code }-${ section } - Discussion`)
     return (
         <>
             <Head><title>{ title }</title></Head>
+
             <EditorContext.Provider value={ Editor } >
             <TimeContext.Provider value={ initialLoadTime } >
             <PostListingsContext.Provider value={ postListingsContext } >

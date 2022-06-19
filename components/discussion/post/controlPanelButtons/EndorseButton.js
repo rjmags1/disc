@@ -1,7 +1,7 @@
 import { useState, useContext, useRef } from 'react'
 import { 
     PostContext, PostListingsContext 
-} from '../../../../pages/[courseId]/discussion'
+} from '../../../../pages/discussion/[courseId]'
 import { syncListingWithBoolInteraction } from '../../../../lib/uiSync'
 
 
