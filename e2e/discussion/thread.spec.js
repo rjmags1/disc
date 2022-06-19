@@ -78,18 +78,14 @@ test.describe('top level thread comment loading', async () => {
     
         for (const noViewMoreAncestorComment of dbLte2Replies) {
             const { display_content, deleted } = noViewMoreAncestorComment
-             if (deleted) continue
+            if (deleted) continue
+
             const pageSearchDisplayContent = stripTagsNewLine(display_content)
             const noViewMoreThreadContainerLocator = page.locator(
                 '[data-testid=thread-container]', { 
-                    hasText: pageSearchDisplayContent 
-                })
-            
-            const viewMoreBtnPresent = (
-                await noViewMoreThreadContainerLocator.locator(
-                    '[data-testid=view-more-replies-btn]').count() > 0)
-
-            expect(viewMoreBtnPresent).toBe(false)
+                    hasText: pageSearchDisplayContent })
+            await expect(noViewMoreThreadContainerLocator.locator(
+                '[data-testid=view-more-replies-btn]')).not.toBeVisible()
         }
     })
 
@@ -102,23 +98,15 @@ test.describe('top level thread comment loading', async () => {
         for (const viewMoreAncestorComment of dbGt2Replies) {
             const { display_content, deleted } = viewMoreAncestorComment
             if (deleted) continue
+
             const pageSearchDisplayContent = stripTagsNewLine(display_content)
             const viewMoreThreadContainerLocator = page.locator(
                 '[data-testid=thread-container]', { 
                     hasText: pageSearchDisplayContent 
                 })
-            
-            const viewMoreBtnPresent = (
-                await viewMoreThreadContainerLocator.locator(
-                    '[data-testid=view-more-replies-btn]').count() > 0)
+            await expect(viewMoreThreadContainerLocator.locator(
+                '[data-testid=view-more-replies-btn]')).toBeVisible()
 
-            if (!viewMoreBtnPresent) {
-                console.log(display_content, pageSearchDisplayContent)
-                const asdf = await viewMoreThreadContainerLocator.count()
-                console.log(asdf)
-                console.log(viewMoreAncestorComment)
-            }
-            expect(viewMoreBtnPresent).toBe(true)
         }
     })
 
