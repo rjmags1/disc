@@ -13,7 +13,6 @@ function DeleteButton({ toggleMobilePostDisplay }) {
         postListings, setPostListings, specialListings, setSpecialListings 
     } = useContext(PostListingsContext)
     const [loading, setLoading] = useState(false)
-    console.log(currentPost.postId)
 
     useEffect(() => { 
         // effect for indicating button disabled with gray bg color while the 
