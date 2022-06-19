@@ -35,6 +35,7 @@ function Post({ postContainerRef, toggleMobilePostDisplay }) {
     const [postAnswered, setPostAnswered] = useState(null)
     const [observed, setObserved] = useState(false)
 
+
     const loaderRef = useRef(null) // triggers thread lazy loading on intersxn
     const canLoadMoreContentForPostRef = useRef(
         false
@@ -47,7 +48,8 @@ function Post({ postContainerRef, toggleMobilePostDisplay }) {
         }
     }))
 
-    // get post content, ie author avatar, display and edit content, 
+
+    // get post content, (author avatar, display and edit content)
     // associated with currentPost and apiPage, which is inc on lazy 
     // loader intersxn
     const apiPageArg = currentPost?.postId === postContent?.postId ? apiPage : 1
@@ -79,9 +81,10 @@ function Post({ postContainerRef, toggleMobilePostDisplay }) {
         // or lazy loading more threads associated with this post
         if (!content || loadingPostContent) return
 
-        const { ancestorInfo, descendantInfo, nextPage } = content
+        const { ancestorInfo, descendantInfo, nextPage, postInfo } = content
         const newThreads = ancestorInfo.map(
             ancestorCommentInfo => ({
+                // associate ancestor with its descendants for thread rendering
                 ancestor: ancestorCommentInfo, 
                 descendants: (
                     (!!descendantInfo && 
@@ -90,10 +93,13 @@ function Post({ postContainerRef, toggleMobilePostDisplay }) {
             })
         )
 
-        const newPostSelected = (loadingCommentsFor !== null 
+        const initialPostSelect = loadingCommentsFor === null
+        const newPostSelected = (!initialPostSelect
             && loadingCommentsFor !== currentPost.postId)
-        if (newPostSelected || loadingCommentsFor === null) {
-            setPostContent({ ...currentPost, ...content.postInfo })
+        if (newPostSelected || initialPostSelect) { 
+            // initiate Post component rerender with just-fetched content
+            // if no post has been selected yet or user clicked on new listing
+            setPostContent({ ...currentPost, ...postInfo })
         }
         canLoadMoreContentForPostRef.current = !!nextPage
         setThreads(newPostSelected ? newThreads : [...threads, ...newThreads])
@@ -103,8 +109,8 @@ function Post({ postContainerRef, toggleMobilePostDisplay }) {
 
 
     const handleNewThread = async ({ editContent, displayContent, anonymous }) => {
-        // handles new top-level/ancestor comment submission
-        // talk to backend
+        // handles new top-level/ancestor comment submission, ie
+        // when user clicks new comment button and submits
         const { postId } = currentPost
         const body = { 
             post: postId,
@@ -144,14 +150,16 @@ function Post({ postContainerRef, toggleMobilePostDisplay }) {
         return submitSuccessful
     }
 
+
     const neverSelectedPost = !currentPost
     const loadingNewPost = apiPage === 1 && loadingPostContent
     const postContentSyncedWithCurrentPost = (
         postContent?.postId === currentPost?.postId
-    ) // will be false if new currentPost changed and effect that updates
-      // postContent state has not fired yet
+    ) // will be false if currentPost changed (user clicked on new post listings) 
+      // and effect that updates postContent state has not fired yet. In other words,
+      // will be false when rerenders and effects responsible for displaying new
+      // new post after listing click have not yet completed
     const showPost = !!postContent && postContentSyncedWithCurrentPost
-
     return (
         <div data-testid="post-container" ref={ postContainerRef }
             id="post-container"
@@ -159,24 +167,25 @@ function Post({ postContainerRef, toggleMobilePostDisplay }) {
                 bg-light-gray py-[4%] px-[7%] overflow-y-scroll">
             { neverSelectedPost && <NoPostSelected /> }
             { loadingNewPost && <Loading /> }
-            { showPost && <>
-            <PostContentSection answered={ postAnswered } 
-                toggleMobilePostDisplay={ toggleMobilePostDisplay }
-                resolved={ postResolved } content={ postContent } 
-                setContent={ setPostContent } /> 
-            <h4 className="text-lg font-base">Comments</h4>
-            <hr className="mb-1"/>
-            { showNewCommentBtn ?
-            <CommentButton 
-                hideCommentBtn={ () => setShowNewCommentBtn(false) } /> :
-            <Editor hideEditor={ () => setShowNewCommentBtn(true) } 
-                handleSubmit={ handleNewThread } /> }
-            { threads.map(thread => (
-            <Thread key={ `${ thread.ancestor.commentId }-thread` } 
-                postId={ currentPost.postId } setPostResolved={ setPostResolved }
-                info={{ ...thread, postAuthorId: currentPost.authorId }}
-                postIsQuestion={ currentPost.isQuestion } 
-                setPostAnswered={ setPostAnswered }/>)) }
+            { showPost && 
+            <>
+                <PostContentSection answered={ postAnswered } 
+                    toggleMobilePostDisplay={ toggleMobilePostDisplay }
+                    resolved={ postResolved } content={ postContent } 
+                    setContent={ setPostContent } /> 
+                <h4 className="text-lg font-base">Comments</h4>
+                <hr className="mb-1"/>
+                { showNewCommentBtn ?
+                <CommentButton 
+                    hideCommentBtn={ () => setShowNewCommentBtn(false) } /> :
+                <Editor hideEditor={ () => setShowNewCommentBtn(true) } 
+                    handleSubmit={ handleNewThread } /> }
+                { threads.map(thread => (
+                <Thread key={ `${ thread.ancestor.commentId }-thread` } 
+                    postId={ currentPost.postId } setPostResolved={ setPostResolved }
+                    info={{ ...thread, postAuthorId: currentPost.authorId }}
+                    postIsQuestion={ currentPost.isQuestion } 
+                    setPostAnswered={ setPostAnswered }/>)) }
             </>}
             <div ref={ loaderRef } className="w-full h-[1px] bg-inherit" />
         </div>

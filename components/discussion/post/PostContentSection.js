@@ -5,33 +5,42 @@ import { useState, useContext, useMemo } from 'react'
 import { useCourse } from '../../../lib/hooks'
 import { useRouter } from 'next/router'
 import { 
-    EditorContext, PostListingsContext 
+    EditorContext, TimeContext 
 } from '../../../pages/[courseId]/discussion'
 
+import { useSWRConfig } from "swr"
+import { sanitize } from "dompurify"
 import { categoriesToLightRainbowHex } from '../../../lib/colors'
 
-function PostContentSection({ 
-    content, resolved, answered, setContent, toggleMobilePostDisplay }) {
+function PostContentSection(props) {
+    const {
+        content, resolved, answered, setContent, toggleMobilePostDisplay 
+    } = props
     const router = useRouter()
     const { courseId } = router.query
-    const Editor = useContext(EditorContext)
-    const {
-        postListings, setPostListings, specialListings, setSpecialListings
-    } = useContext(PostListingsContext)
-
+    const Editor = useContext(EditorContext) // get editor component from context
+    const initialLoadTime = useContext(TimeContext)
+    const { mutate } = useSWRConfig()
 
     const [editing, setEditing] = useState(false)
     const { course } = useCourse(courseId)
 
     const categoriesToColors = useMemo(() => {
+        // compute map of course categories to their display colors only
+        // when course selected by user from dashboard changes
         if (!course?.categories) return {}
         return categoriesToLightRainbowHex(course.categories)
     }, [course])
 
 
     const handlePostEdit = async ({ editContent, displayContent }) => {
+        // updates post content in backend on edit, then updates ui
+        // if the backend update was successful
         const body = { 
-            postId: parseInt(content.postId), editContent, displayContent }
+            postId: parseInt(content.postId), 
+            editContent, 
+            displayContent: displayContent
+        }
 
         let backendUpdateSuccessful, editedPostInfo
         try {
@@ -54,9 +63,10 @@ function PostContentSection({
         }
 
         if (backendUpdateSuccessful) {
-            handleSuccessfulEdit(
-                editedPostInfo, setSpecialListings, setPostListings, setContent,
-                postListings, specialListings, categoriesToColors, content)
+            // updates postContext listings as well as post content (the actual post)
+            // currently displayed to user
+            handleSuccessfulEdit( 
+                editedPostInfo, setContent, content, initialLoadTime, mutate)
         }
         setEditing(false)
         return backendUpdateSuccessful
@@ -78,7 +88,11 @@ function PostContentSection({
                     hideEditor={ () => setEditing(false) } />
             </div> : 
             <section data-testid="post-display-content" 
-                dangerouslySetInnerHTML={{ __html: content.displayContent }} 
+                dangerouslySetInnerHTML={{ 
+                    // sanitize user generated html, regardless of its origin
+                    // (frontend -> backend or backend -> frontend)
+                    __html: sanitize(content.displayContent) 
+                }} 
                 className="font-light mb-[30px]" /> }
         </div>
     )
@@ -86,67 +100,26 @@ function PostContentSection({
 
 
 
-const handleSuccessfulEdit = (
-    editedPostInfo, setSpecialListings, setPostListings, setContent,
-    postListings, specialListings, categoriesToColors, content) => {
+const handleSuccessfulEdit = (editedPostInfo, setContent, content, initialLoadTime, mutate) => {
+    // ensures postContext gets updated with edited info in case
+    // user navigates to another post and then clicks on the edited
+    // post listing again, with the aid of a few helpers
 
     const { 
         editContent: newEditContent, 
         displayContent: newDisplayContent,
-        postId: editedPostId
     } = editedPostInfo
-
     editedPostInfo = {
         ...content,  
         editContent: newEditContent,
         displayContent: newDisplayContent
     }
-
-    const specialPost = (
-        editedPostInfo.isAnnouncement || editedPostInfo.pinned)
-    const specialTypes = editedPostInfo.isAnnouncement ? 
-        specialListings.announcements : specialListings.pinned
-    const editedIdx = getEditedIdx(
-        specialPost ? specialTypes : postListings, editedPostId, specialPost)
-
-    if (specialPost) {
-        setSpecialListings(
-            editedPostInfo.isPinned ? {
-                ...specialListings,
-                pinned: listingReplaced(
-                    specialListings.pinned, editedIdx, editedPostInfo)
-            } : {
-                ...specialListings, 
-                announcements: listingReplaced(
-                    specialListings.announcements, editedIdx, editedPostInfo)
-            } 
-        )
-    }
-    else {
-        const catColor = categoriesToColors[content.category]
-        editedPostInfo = { postInfo: editedPostInfo, catColor }
-        setPostListings(
-            listingReplaced(postListings, editedIdx, editedPostInfo))
-    }
-
+    const specialPost = editedPostInfo.isAnnouncement || editedPostInfo.pinned
+    // update the content (update the actual edited post content) displayed to user
+    // and trigger a revalidation of the swr cache key pointing to the edited post
     setContent(specialPost ? editedPostInfo : editedPostInfo.postInfo)
-}
-
-const listingReplaced = (listings, idx, newListing) => {
-    return [
-        ...listings.slice(0, idx), 
-        newListing, 
-        ...listings.slice(idx + 1)
-    ]
-}
-
-const getEditedIdx = (listings, postId, special) => {
-    for (let i = 0; i < listings.length; i++) {
-        const listing = listings[i]
-        const listingPostId = special ? listing.postId : listing.postInfo.postId
-        if (listingPostId === postId) return i
-    }
-    throw new Error()
+    const { postId, authorId } = editedPostInfo
+    mutate(`/api/course/postsInfo/${ postId }/content/${ authorId }/1/${ initialLoadTime }`)
 }
 
 export default PostContentSection

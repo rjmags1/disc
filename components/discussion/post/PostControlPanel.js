@@ -25,9 +25,11 @@ function PostControlPanel({ editPost, toggleMobilePostDisplay }) {
                     { marginBottom: '5%' } : {}}>
             <LikeButton liked={ currentPost.liked } />
             <WatchButton watched={ currentPost.watched }/>
-            { userIsAuthor && <EditButton editPost={ editPost } /> }
+            { userIsAuthor && 
+            <EditButton editPost={ editPost } /> }
             <StarButton starred={ currentPost.starred } />
-            { canEndorse && <EndorseButton endorsed={ currentPost.endorsed } /> }
+            { canEndorse && 
+            <EndorseButton endorsed={ currentPost.endorsed } /> }
             { canDelete && !currentPost.deleted && 
             <DeleteButton toggleMobilePostDisplay={ toggleMobilePostDisplay } /> }
         </section>

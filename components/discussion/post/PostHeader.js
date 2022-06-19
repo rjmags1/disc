@@ -3,26 +3,33 @@ import {
 } from "../../../lib/layout"
 import Timestamp from "../postListingsPane/listingIcons/Timestamp"
 
-function PostHeader({
-    content, resolved, answered, catColor, toggleMobilePostDisplay }) {
+function PostHeader(props) {
+    const { 
+        content, resolved, answered, catColor, toggleMobilePostDisplay 
+    } = props
+
     return (
         <header>
-            <div className="flex justify-between mb-3 flex-col">
+            <div className="flex justify-between my-3 flex-col">
                 { window.innerWidth < LARGE_MEDIA_BREAKPOINT && 
+                // only display back button for returning to post listings on mobile
                 <button className="rounded bg-purple border border-white px-2 
                     h-fit w-fit mb-2 hover:bg-violet-800" data-testid="post-back-btn"
                     onClick={ toggleMobilePostDisplay }>
                     { "< Back" }
                 </button> }
-                <h3 data-testid="post-title" className="text-3xl font-medium">
+                <h3 data-testid="post-title" className="text-3xl font-medium py-2">
                     { content.title }
                 </h3>
             </div>
-            <section className="flex justify-between my-2 mb-3 h-fit 
+            <section className="flex justify-between my-3 h-fit 
                 whitespace-nowrap" data-testid="post-stats-bar"
                 style={ window.innerWidth < SMALL_MEDIA_BREAKPOINT ?
+                    // override default styles and break post stats
+                    // into multiple rows instead of a single row on mobile
                     { flexDirection: "column"  } : {} }>
-                <div className="flex flex-none pr-4 items-center">
+                <div className="flex flex-none pr-4 items-center" 
+                    data-testid="general-post-stats">
                     <img width="55" className="rounded-full"
                         data-testid="post-author-avatar-img"
                         src={ content.anonymous ? 
@@ -43,9 +50,9 @@ function PostHeader({
                         </h5>
                     </div>
                 </div>
-                <div className="flex text-xs h-full overflow-hidden 
-                    font-normal items-center" style={ 
-                        window.innerWidth < SMALL_MEDIA_BREAKPOINT ?
+                <div className="flex text-xs h-full overflow-hidden py-1
+                    font-normal items-center" data-testid="engagement-post-stats" 
+                    style={ window.innerWidth < SMALL_MEDIA_BREAKPOINT ?
                         { marginTop: '2%'} : {}}>
                     { (resolved || answered) && 
                     <div className="h-full flex items-center my-0.5 mr-2">
