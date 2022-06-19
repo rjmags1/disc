@@ -3,22 +3,33 @@ import { sanitize } from 'dompurify'
 import { useRef, useEffect, useState } from 'react'
 
 
-function Editor({ hideEditor, handleSubmit, editContent, isPost, editingPost, editingComment }) {
-    const [tick, setTick] = useState(0)
-    const [anonymous, setAnonymous] = useState(false)
-    const [quill, setQuill] = useState(null)
+function Editor(props) {
+    const { 
+        hideEditor, handleSubmit, editContent, isPost, editingPost, editingComment 
+    } = props
+    const [tick, setTick] = useState(0) // used to trigger rerender
+    const [anonymous, setAnonymous] = useState(
+        false) // if true a new comment or post will be submitted anonymously. 
+               // always false for edited comments or posts
 
     const editorRef = useRef(null)
+    const quillObjectRef = useRef(null)
 
 
     useEffect(() => { // init quill once its container is rendered
         if (!editorRef.current || tick > 0) return
 
-        const newQuill = new Quill(editorRef.current, { theme: 'snow' })
+        // use quill constructor to initialize and insert a quill 
+        // editor into its container, editorRef
+        const newQuill = new Quill(
+            editorRef.current, { theme: 'snow' })
+        
+        // put the comment or post to be edited in the editor if appropriate
         if (!!editContent && (editingComment || editingPost)) {
             newQuill.setContents(editContent)
         }
-        setQuill(newQuill)
+
+        quillObjectRef.current = newQuill
         setTick(prev => prev + 1)
         
     }, [editorRef.current])
@@ -33,15 +44,25 @@ function Editor({ hideEditor, handleSubmit, editContent, isPost, editingPost, ed
     }, [tick])
 
     const removeToolbarAndEditor = () => {
+        // remove the editor toolbar, which should always be handled
+        // from within this component. if passed a custom method for
+        // removing the actual editor, call it, otherwise rely on
+        // this components parents to remove the editor instance
+        // with its own conditional rendering mechanism
         removeToolbar(editorRef.current)
         if (!!hideEditor) hideEditor()
     }
 
     const handleSubmitClick = async () => {
+        // sanitize the generated html from user interactions with the quill
+        // editor, then use the passed handleSubmit method to pass the 
+        // editor contents to the backend. Only remove the editor and toolbar
+        // if the backend update was successful
+
         const sanitizedUserHtmlFromQuill = sanitize(
             editorRef.current.firstElementChild.innerHTML)
         const submitted = await handleSubmit({ 
-            editContent: quill.getContents(),
+            editContent: quillObjectRef.current.getContents(),
             displayContent: sanitizedUserHtmlFromQuill,
             anonymous
         })
@@ -56,7 +77,8 @@ function Editor({ hideEditor, handleSubmit, editContent, isPost, editingPost, ed
             <div className="flex mb-2 items-center mt-3 gap-3">
                 <button className="h-full bg-purple rounded border py-0.5 px-2
                     border-white hover:bg-violet-800" onClick={ handleSubmitClick }
-                    style={ isPost ? { paddingLeft: '2rem', paddingRight: '2rem' } : {} }
+                    style={ isPost ? 
+                        { paddingLeft: '2rem', paddingRight: '2rem' } : {} }
                     data-testid="editor-submit-button">
                     { isPost && !editingPost ? "Post" : "Submit" }
                 </button>
