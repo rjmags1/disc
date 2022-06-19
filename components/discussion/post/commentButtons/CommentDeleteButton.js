@@ -7,7 +7,7 @@ function CommentDeleteButton({ postId, commentId, markDeleted }) {
         markDeleted()
         try {
             await fetch(
-                `/api/course/postsInfo/${ postId }/content/replies/info/${ commentId }/delete/${ true }`,
+                `/api/course/postsInfo/${ postId }/content/booleanCommentInteraction/${ commentId }/delete/${ true }`,
                 { method: 'PUT' }
             )
         }

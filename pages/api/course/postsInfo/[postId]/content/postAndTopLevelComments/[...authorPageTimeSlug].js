@@ -5,14 +5,14 @@ then get first 10: (top level comments, their first 2 replies, and whether there
 then just next 10 above tuples thereafter
 */
 
-import { sessionOptions } from "../../../../../../lib/session"
+import { sessionOptions } from "../../../../../../../lib/session"
 import { withIronSessionApiRoute } from "iron-session/next"
-import { fixNodePgUTCTimeInterpretation } from "../../../../../../lib/time"
+import { fixNodePgUTCTimeInterpretation } from "../../../../../../../lib/time"
 import { 
     getClientFromPool, 
     clientQuery, 
     releaseClient 
-} from "../../../../../../db"
+} from "../../../../../../../db"
 
 const TOP_LEVEL_COMMENTS_PER_PAGE = 20
 const INITIAL_NESTED_COMMENTS = 2

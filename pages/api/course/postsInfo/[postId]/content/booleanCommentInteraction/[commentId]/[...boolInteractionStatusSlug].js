@@ -1,7 +1,7 @@
 import {
     getClientFromPool, clientQuery, releaseClient
-} from '../../../../../../../../../db/index'
-import { sessionOptions } from '../../../../../../../../../lib/session'
+} from '../../../../../../../../db/index'
+import { sessionOptions } from '../../../../../../../../lib/session'
 import { withIronSessionApiRoute } from 'iron-session/next'
 
 const BOOLEAN_COMMENT_INTERACTIONS = [

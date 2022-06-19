@@ -28,7 +28,7 @@ function CommentMarkAnswerButton(props) {
         let backendUpdateSuccessful, postAnsResAltered
         try {
             const resp = await fetch(
-                `/api/course/postsInfo/${ postId }/content/replies/info/${ commentInfo.commentId }/answer/${ newStatus }`,
+                `/api/course/postsInfo/${ postId }/content/booleanCommentInteraction/${ commentInfo.commentId }/answer/${ newStatus }`,
                 { method: "PUT" })
             backendUpdateSuccessful = resp.ok
             postAnsResAltered = backendUpdateSuccessful && (

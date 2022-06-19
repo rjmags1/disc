@@ -119,7 +119,7 @@ const handleSuccessfulEdit = (editedPostInfo, setContent, content, initialLoadTi
     // and trigger a revalidation of the swr cache key pointing to the edited post
     setContent(specialPost ? editedPostInfo : editedPostInfo.postInfo)
     const { postId, authorId } = editedPostInfo
-    mutate(`/api/course/postsInfo/${ postId }/content/${ authorId }/1/${ initialLoadTime }`)
+    mutate(`/api/course/postsInfo/${ postId }/content/postAndTopLevelComments/${ authorId }/1/${ initialLoadTime }`)
 }
 
 export default PostContentSection

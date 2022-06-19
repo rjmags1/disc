@@ -17,7 +17,7 @@ function CommentLikeButton(props) {
         buttonRef.current.disabled = true
         try {
             const resp = await fetch(
-                `/api/course/postsInfo/${ postId }/content/replies/info/${ commentId }/like/${ newStatus }`,
+                `/api/course/postsInfo/${ postId }/content/booleanCommentInteraction/${ commentId }/like/${ newStatus }`,
                 { method: 'PUT' }
             )
             if (!resp.ok) setLiked(!newStatus)

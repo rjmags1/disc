@@ -15,7 +15,7 @@ function CommentEndorseButton({ postId, commentId, setEndorsed, endorsed }) {
         let backendUpdateSuccessful
         try {
             const resp = await fetch(
-                `/api/course/postsInfo/${ postId }/content/replies/info/${ commentId }/endorse/${ !endorsed }`,
+                `/api/course/postsInfo/${ postId }/content/booleanCommentInteraction/${ commentId }/endorse/${ !endorsed }`,
                 { method: 'PUT' }
             )
             backendUpdateSuccessful = resp.ok
