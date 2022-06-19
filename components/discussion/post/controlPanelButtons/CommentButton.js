@@ -1,4 +1,7 @@
 function CommentButton({ hideCommentBtn }) {
+    // calling hideCommentBtn will result in the new comment button
+    // being hidden, but will also result in a quill editor render
+    // for creating a new comment
 
     return (
         <button className="w-full h-[35px] bg-purple rounded border 

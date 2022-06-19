@@ -106,11 +106,10 @@ test.describe('post control panel', async () => {
             const label = await locator.innerText()
             const preClickUiStatus = !(new RegExp(falseLabels[i]).test(label))
             await dbAssertPostControlPanelBooleanButton(
-                falseLabels[i], preClickUiStatus, 
-                testPostId, TESTUSER_STAFF.userId)
+                falseLabels[i], preClickUiStatus, testPostId, TESTUSER_STAFF.userId)
             const preClickLikes = await uiAssertPostControlPanelBooleanButton(
-                falseLabels[i], preClickUiStatus, 
-                postListingLocator, postTitle, isMobile, page)
+                falseLabels[i], preClickUiStatus, postListingLocator, 
+                postTitle, isMobile, page)
 
             await locator.click()
             await assertOnPostControlPanelButtonLabelChange(
@@ -118,15 +117,14 @@ test.describe('post control panel', async () => {
                         
             await new Promise(res => setTimeout(res, 300))
             const postClickLikes = await uiAssertPostControlPanelBooleanButton(
-                falseLabels[i], !preClickUiStatus, 
-                postListingLocator, postTitle, isMobile, page)
+                falseLabels[i], !preClickUiStatus, postListingLocator, 
+                postTitle, isMobile, page)
             if (falseLabels[i] === 'Like') {
                 const postClickDiff = preClickUiStatus ? -1 : 1
                 expect(postClickLikes - preClickLikes).toBe(postClickDiff)
             }
             await dbAssertPostControlPanelBooleanButton(
-                falseLabels[i], !preClickUiStatus, 
-                testPostId, TESTUSER_STAFF.userId)
+                falseLabels[i], !preClickUiStatus, testPostId, TESTUSER_STAFF.userId)
 
             // reset
             if (falseLabels[i] === 'Delete') await dbUndeletePost(testPostId)

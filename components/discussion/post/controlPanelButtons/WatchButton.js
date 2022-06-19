@@ -1,4 +1,4 @@
-import { useState, useContext, useRef, useEffect } from 'react'
+import { useState, useContext, useRef } from 'react'
 import { PostContext, PostListingsContext } from '../../../../pages/[courseId]/discussion'
 import { syncListingWithBoolInteraction } from '../../../../lib/uiSync'
 
@@ -11,8 +11,12 @@ function WatchButton({ watched }) {
     const [status, setStatus] = useState(watched)
 
     const handleClick = async () => {
+        // update backend when user watches or unwatches the post, and disable
+        // the button while waiting on the request outcome. if the backend
+        // update was successful, update the ui via syncListingWithBoolInteraction
+        // call to reflect the new post watch/unwatch
         const newStatus = !status
-        setStatus(prevStatus => !prevStatus)
+        setStatus(newStatus)
         buttonRef.current.disabled = true
         try {
             const resp = await fetch(
@@ -21,15 +25,17 @@ function WatchButton({ watched }) {
             )
             if (!resp.ok) setStatus(!newStatus)
             else {
-                const listings = currentPost.pinned || currentPost.isAnnouncement ? 
-                    specialListings : postListings
-                const setListings = currentPost.pinned || currentPost.isAnnouncement ?
-                    setSpecialListings : setPostListings
+                const specialPost = currentPost.pinned || currentPost.isAnnouncement
+                const listings = specialPost ? specialListings : postListings
+                const setListings = specialPost ? setSpecialListings : setPostListings
                 syncListingWithBoolInteraction(
                     "watch", listings, setListings, currentPost, newStatus)
             }
         }
-        catch (error) { setStatus(!newStatus) }
+        catch (error) { 
+            console.error(error)
+            setStatus(!newStatus) 
+        }
         finally { buttonRef.current.disabled = false }
     }
     

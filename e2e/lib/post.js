@@ -762,7 +762,7 @@ async (button, newStatus, postId, userId) => {
     let queryText, queryParams
     if (button === 'Endorse' || button === 'Delete') {
         queryText = `
-            SELECT ${ button === 'Endorse' ? 'endorsed'  : 'deleted' } 
+            SELECT ${ button === 'Endorse' ? 'endorsed' : 'deleted' } 
             FROM post WHERE post_id = $1;`
         queryParams = [postId]
     }
@@ -774,9 +774,9 @@ async (button, newStatus, postId, userId) => {
 
     const checkQuery = await query(queryText, queryParams)
     let dbStatus
-    if (button === 'Like' || 
-        button === 'Watch' || 
-        button === 'Star') dbStatus = !!checkQuery.rows.length
+    if (button === 'Like' || button === 'Watch' || button === 'Star') {
+        dbStatus = !!checkQuery.rows.length
+    }
     else dbStatus = checkQuery.rows[0][
         button === 'Endorse' ? 'endorsed' : 'deleted']
 
@@ -799,7 +799,8 @@ exports.dbUndeletePost = async (postId) => {
 
 exports.uiAssertPostControlPanelBooleanButton = (
 async (button, status, postListingLocator, postTitle, isMobile, page) => {
-    const notDeleted = button !== 'Delete' || !status
+
+   const notDeleted = button !== 'Delete' || !status
    if (isMobile && notDeleted) await Promise.all([
         page.locator('[data-testid=post-back-btn]').click(),
         postListingLocator.waitFor()

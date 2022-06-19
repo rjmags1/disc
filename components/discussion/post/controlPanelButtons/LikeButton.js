@@ -1,16 +1,22 @@
 import { useState, useContext, useRef } from 'react'
-import { PostContext, PostListingsContext } from '../../../../pages/[courseId]/discussion'
+import { 
+    PostContext, PostListingsContext 
+} from '../../../../pages/[courseId]/discussion'
 import { syncListingWithBoolInteraction } from '../../../../lib/uiSync'
 
 function LikeButton({ liked }) {
     const buttonRef = useRef(null)
     const { currentPost } = useContext(PostContext)
     const {
-        postListings, setPostListings, specialListings, setSpecialListings 
+        postListings, setPostListings, specialListings, setSpecialListings
     } = useContext(PostListingsContext)
     const [status, setStatus] = useState(liked)
     
     const handleClick = async () => {
+        // update backend when user likes or unlikes the post, and disable
+        // the button while waiting on the request outcome. if the backend
+        // update was successful, update the ui via syncListingWithBoolInteraction
+        // call to reflect the new post like/unlike
         const newStatus = !status
         setStatus(newStatus)
         buttonRef.current.disabled = true
@@ -20,15 +26,17 @@ function LikeButton({ liked }) {
                 { method: 'PUT' })
             if (!resp.ok) setStatus(!newStatus)
             else {
-                const listings = currentPost.pinned || currentPost.isAnnouncement ? 
-                    specialListings : postListings
-                const setListings = currentPost.pinned || currentPost.isAnnouncement ?
-                    setSpecialListings : setPostListings
+                const specialPost = currentPost.pinned || currentPost.isAnnouncement
+                const listings = specialPost ? specialListings : postListings
+                const setListings = specialPost ? setSpecialListings : setPostListings
                 syncListingWithBoolInteraction(
                     "like", listings, setListings, currentPost, newStatus)
             }
         }
-        catch (error) { setStatus(!newStatus) }
+        catch (error) { 
+            console.error(error)
+            setStatus(!newStatus) 
+        }
         finally { buttonRef.current.disabled = false }
     }
 

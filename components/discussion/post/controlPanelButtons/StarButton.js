@@ -1,5 +1,7 @@
-import { useState, useContext, useRef, useEffect } from 'react'
-import { PostContext, PostListingsContext } from '../../../../pages/[courseId]/discussion'
+import { useState, useContext, useRef } from 'react'
+import { 
+    PostContext, PostListingsContext 
+} from '../../../../pages/[courseId]/discussion'
 import { syncListingWithBoolInteraction } from '../../../../lib/uiSync'
 
 function StarButton({ starred }) {
@@ -11,8 +13,12 @@ function StarButton({ starred }) {
     const [status, setStatus] = useState(starred)
 
     const handleClick = async () => {
+        // update backend when user stars or unstars the post, and disable
+        // the button while waiting on the request outcome. if the backend
+        // update was successful, update the ui via syncListingWithBoolInteraction
+        // call to reflect the new post star/unstar
         const newStatus = !status
-        setStatus(prevStatus => !prevStatus)
+        setStatus(newStatus)
         buttonRef.current.disabled = true
         try {
             const resp = await fetch(
@@ -21,15 +27,17 @@ function StarButton({ starred }) {
             )
             if (!resp.ok) setStatus(!newStatus)
             else {
-                const listings = currentPost.pinned || currentPost.isAnnouncement ? 
-                    specialListings : postListings
-                const setListings = currentPost.pinned || currentPost.isAnnouncement ?
-                    setSpecialListings : setPostListings
+                const specialPost = currentPost.pinned || currentPost.isAnnouncement
+                const listings = specialPost ? specialListings : postListings
+                const setListings = specialPost ? setSpecialListings : setPostListings
                 syncListingWithBoolInteraction(
                     "star", listings, setListings, currentPost, newStatus)
             }
         }
-        catch (error) { setStatus(!newStatus) }
+        catch (error) { 
+            console.error(error)
+            setStatus(!newStatus) 
+        }
         finally { buttonRef.current.disabled = false }
     }
 

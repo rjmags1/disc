@@ -1,5 +1,7 @@
-import { useState, useContext, useRef, useEffect } from 'react'
-import { PostContext, PostListingsContext } from '../../../../pages/[courseId]/discussion'
+import { useState, useContext, useRef } from 'react'
+import { 
+    PostContext, PostListingsContext 
+} from '../../../../pages/[courseId]/discussion'
 import { syncListingWithBoolInteraction } from '../../../../lib/uiSync'
 
 
@@ -12,6 +14,10 @@ function EndorseButton({ endorsed }) {
     const [status, setStatus] = useState(endorsed)
 
     const handleClick = async () => {
+        // update backend when user endorses or unendorses the post, and disable
+        // the button while waiting on the request outcome. if the backend
+        // update was successful, update the ui via syncListingWithBoolInteraction
+        // call to reflect the new post endorse/unendorse
         const newStatus = !status
         setStatus(newStatus)
         buttonRef.current.disabled = true
@@ -28,7 +34,10 @@ function EndorseButton({ endorsed }) {
                     "endorse", listings, setListings, currentPost, newStatus)
             }
         }
-        catch (error) { setStatus(!newStatus) }
+        catch (error) { 
+            console.error(error)
+            setStatus(!newStatus) 
+        }
         finally { buttonRef.current.disabled = false }
     }
 
