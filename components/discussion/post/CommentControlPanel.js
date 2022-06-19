@@ -12,7 +12,7 @@ import { useUser } from '../../../lib/hooks'
 
 function CommentControlPanel({ controlPanelProps }) {
     const {
-        setPostResolved, setPostAnswered, setUserDeleted, setEndorsed, endorsed,
+        setPostResolved, setPostAnswered, setDeleted, setEndorsed, endorsed,
         likes, setLikes, setCommentResolving, setCommentIsAnswer,
         replying, setReplying, editing, setEditing, handleEditSubmit,
         handleReplySubmit, info, isAncestor, commentIsAnswer, commentResolving
@@ -29,7 +29,6 @@ function CommentControlPanel({ controlPanelProps }) {
     const canEndorse = user.is_staff || user.is_instructor
     const canMarkAnswer = userIsPostAuthor && info.postIsQuestion
     const canMarkResolving =  userIsPostAuthor && !info.postIsQuestion
-
     return (
         <>
             <div className="mt-2 flex h-[12px] items-center text-xs
@@ -48,7 +47,7 @@ function CommentControlPanel({ controlPanelProps }) {
                 <CommentEditButton setClicked={ () => setEditing(true) } /> }
                 { canDelete && 
                 <CommentDeleteButton postId={ postId } commentId={ info.commentId }
-                    markDeleted={ () => setUserDeleted(true) } /> }
+                    markDeleted={ () => setDeleted(true) } /> }
                 { canEndorse && 
                 <CommentEndorseButton postId={ postId } commentId={ info.commentId }
                     endorsed={ endorsed } setEndorsed={ setEndorsed } /> }

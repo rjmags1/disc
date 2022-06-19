@@ -12,8 +12,8 @@ const {
     lazyLoadAllTopLevelPageComments,
     getAvatarUrlAndName,
     assertOnCommentAvatar,
-    assertOnEndorsedCheckBadges,
-    assertOnTimestampAuthor,
+    assertOnCommentEndorsedCheckBadges,
+    assertOnCommentTimestampAuthor,
     assertOnCommentContent,
     baseAssertOnCommentControlPanel
 } = require('../lib/post')
@@ -79,8 +79,8 @@ test.describe('comment information correctly displayed to user', async () => {
             const commentBox = commentBoxLocator.nth(i)
 
             await assertOnCommentAvatar(dbCommentInfo, dbAuthorInfo, commentBox)
-            await assertOnEndorsedCheckBadges(dbCommentInfo, commentBox)
-            await assertOnTimestampAuthor(dbCommentInfo, dbAuthorInfo, commentBox)
+            await assertOnCommentEndorsedCheckBadges(dbCommentInfo, commentBox)
+            await assertOnCommentTimestampAuthor(dbCommentInfo, dbAuthorInfo, commentBox)
             await assertOnCommentContent(dbCommentInfo, commentBox, browserName)
             await baseAssertOnCommentControlPanel(
                 dbCommentInfo, commentBox, loggedInStudentUserId)
@@ -98,10 +98,18 @@ test.describe('comment information correctly displayed to user', async () => {
         }
         await loadAllPosts(page)
 
-        const questionPostListingLocator = page.locator(
+        let questionPostListingLocator = page.locator(
             '[data-testid=post-info-container]', {
                 has: page.locator('[data-testid=question-icon]'),
                 hasText: TESTUSER_REGISTERED.fullName }).nth(0)
+        let i = 0;
+        while (!(await questionPostListingLocator.locator(
+            '[data-testid=comments-icon]').isVisible())) {
+            questionPostListingLocator = page.locator(
+                '[data-testid=post-info-container]', {
+                    has: page.locator('[data-testid=question-icon]'),
+                    hasText: TESTUSER_REGISTERED.fullName }).nth(++i)
+        }
         const postInfoTitle = await questionPostListingLocator.locator(
             '[data-testid=post-info-title]').innerText()
         await Promise.all([
@@ -130,11 +138,20 @@ test.describe('comment information correctly displayed to user', async () => {
         }
         await loadAllPosts(page)
 
-        const normalPostListingLocator = page.locator(
+        let normalPostListingLocator = page.locator(
             '[data-testid=post-info-container]', {
                 has: page.locator('[data-testid=normal-post-icon]'),
                 hasText: TESTUSER_REGISTERED.fullName
             }).nth(0)
+        let i = 0
+        while (!(await normalPostListingLocator.locator(
+            '[data-testid=comments-icon]').isVisible())) {
+            normalPostListingLocator = page.locator(
+            '[data-testid=post-info-container]', {
+                has: page.locator('[data-testid=normal-post-icon]'),
+                hasText: TESTUSER_REGISTERED.fullName
+            }).nth(++i)
+        }
         const postInfoTitle = await normalPostListingLocator.locator(
             '[data-testid=post-info-title]').innerText()
         await Promise.all([

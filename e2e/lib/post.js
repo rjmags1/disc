@@ -183,7 +183,7 @@ async (dbCommentInfo, dbAuthorInfo, commentBoxLocator) => {
     expect(commentProfPicSrc).toBe(dbAvatar)
 })
 
-exports.assertOnEndorsedCheckBadges = (
+exports.assertOnCommentEndorsedCheckBadges = (
 async (dbCommentInfo, commentBoxLocator) => {
     const {
         deleted, endorsed, is_resolving, is_answer 
@@ -198,7 +198,7 @@ async (dbCommentInfo, commentBoxLocator) => {
     expect(checkIconPresent).toBe(!deleted && (is_resolving || is_answer))
 })
 
-exports.assertOnTimestampAuthor = (
+exports.assertOnCommentTimestampAuthor = (
 async (dbCommentInfo, dbAuthorInfo, commentBoxLocator) => {
     const { deleted, anonymous, created_at } = dbCommentInfo
     const { f_name, l_name } = dbAuthorInfo
