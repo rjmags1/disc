@@ -1,11 +1,12 @@
-const { faker } = require('@faker-js/faker')
-const bcrypt = require('bcrypt')
-const path = require('path')
-require('dotenv').config({
-    path: path.resolve(__dirname, '../.env.local')
-})
-const { Pool } = require("pg")
-const pool = new Pool()
+import { faker } from '@faker-js/faker'
+import { hash } from 'bcrypt'
+import { resolve, dirname } from 'path'
+import dotenv from 'dotenv'
+dotenv.config({ path: resolve(dirname('.'), '../.env.local') })
+import * as pg from 'pg'
+const client = new pg.default.Client()
+await client.connect()
+
 
 const genData = async () => {
     const admin = [ // me
@@ -59,16 +60,14 @@ const genData = async () => {
     ]
 
     const harry = [
-        [
-            "Harry", "Potter",
-            "FALSE", "FALSE", "FALSE",
-            await createHash("harryspassword"),
-            "harry-potter@hogwarts.edu"
-        ]
+        "Harry", "Potter",
+        "FALSE", "FALSE", "FALSE",
+        await createHash("harryspassword"),
+        "harry-potter@hogwarts.edu"
     ]
 
     // special case people first
-    const people = [admin].concat(harry).concat(instructors).concat(staff)
+    const people = [admin, harry, ...instructors, ...staff]
     for (const person of people) {
         associateAlternateEmails(person)
     }
@@ -76,9 +75,15 @@ const genData = async () => {
     // all password hashes are `${f_name}[s]password`, hashed
     // create 1 email to use as primary, later create randrange(0, 3) others
     // per person. primary emails are all @hogwarts.edu, others use faker
-    for (let _ = 0; _ < 400; _++) {
+    const nameSet = new Set()
+    const emailSet = new Set()
+    for (let _ = 0; _ < 500; _++) {
         const first = faker.name.firstName()
         const last = faker.name.lastName()
+        const fullName = `${ first } ${ last }`
+        if (fullName in nameSet) continue
+        nameSet.add(fullName)
+
         const primaryEmail = 
             `${first.toLowerCase()}-${last.toLowerCase()}@hogwarts.edu`
         const password = first[first.length - 1] === 's' ? 
@@ -103,28 +108,35 @@ const genData = async () => {
         ] = person
 
         const emails = [primaryEmail, ...alternateEmails]
+        let queryText = `
+            INSERT INTO email (email, person) VALUES ($1, $2) RETURNING email_id;`
         let primaryEmailId
+        const primaryEmailRegex = /@hogwarts.edu/
         for (const email of emails) {
-            const emailQuery = await query(
-                `INSERT INTO email (email) VALUES ($1) RETURNING email_id;`,
-                [email]
-            )
+            if (emailSet.has(email)) {
+                if (primaryEmailRegex.test(email)) throw new Error()
+                continue
+            }
+            emailSet.add(email)
+
+            const emailQuery = await query(queryText, [email, null]) 
             if (email === primaryEmail) {
                 primaryEmailId = emailQuery.rows[0].email_id
             }
         }
         
-        let queryText = `INSERT INTO person (
-                            f_name, 
-                            l_name,
-                            is_admin,
-                            is_staff,
-                            is_instructor,
-                            password_hash,
-                            primary_email)
-                        VALUES (
-                            $1, $2, $3, $4, $5, $6, $7)
-                        RETURNING user_id;`
+        queryText = `
+            INSERT INTO person (
+                f_name, 
+                l_name,
+                is_admin,
+                is_staff,
+                is_instructor,
+                password_hash,
+                primary_email)
+            VALUES (
+                $1, $2, $3, $4, $5, $6, $7)
+            RETURNING user_id;`
         let queryParams = [
             first,
             last,
@@ -142,19 +154,17 @@ const genData = async () => {
             await query(queryText, [userId, email])
         }
     }
-
-    pool.end(() => {})
 }
 
 const createHash = async function(plaintext) {
     // 8 rounds so the script doesnt take forever
-    // hashing 400 passwords
-    const hashed = await bcrypt.hash(plaintext, 8)
+    // hashing 1000 passwords
+    const hashed = await hash(plaintext, 8)
     return hashed
 }
 
 const associateAlternateEmails = function(person) {
-    const [first, last, ..._] = person
+    const [first, last] = person
     const otherEmails = []
     const numOthers = Math.floor(1 + 4 * Math.random())
     for (let _ = 0; _ < numOthers; _++) {
@@ -169,7 +179,7 @@ const associateAlternateEmails = function(person) {
 
 const query = async function (queryText, queryParams) {
     try {
-        const queryResult = await pool.query(queryText, queryParams)
+        const queryResult = await client.query(queryText, queryParams)
         return queryResult
     }
     catch (error) {
@@ -182,4 +192,15 @@ const query = async function (queryText, queryParams) {
     }
 }
 
-genData()
+
+
+try {
+    await genData()
+}
+catch (error) {
+    console.error(
+        `something went wrong, most likely due to a name collision
+        between faker-generated emails or person first/last names. 
+        run the destroy_db shell script and try again.\n\n`)
+}
+finally { client.end() }

@@ -1,9 +1,9 @@
-const { Pool } = require("pg")
-const path = require("path")
-require('dotenv').config({
-    path: path.resolve(__dirname, '../.env.local')
-})
-const pool = new Pool()
+import { resolve, dirname } from 'path'
+import dotenv from 'dotenv'
+dotenv.config({ path: resolve(dirname('.'), '../.env.local') })
+import * as pg from 'pg'
+const client = new pg.default.Client()
+await client.connect()
 
 const SETTING_TABLES = [
     "comment_reply_email_setting",
@@ -13,23 +13,19 @@ const SETTING_TABLES = [
 ]
 
 const genNotificationSettings = async function() {
-    // get all people
+    // get all people and set up default noti settings for each of them
     const peopleQuery = await query("SELECT user_id FROM person;")
-    const userIds = peopleQuery.rows.map(
-        row => row.user_id
-    )
+    const userIds = peopleQuery.rows.map(row => row.user_id)
     for (const table of SETTING_TABLES) {
         for (const userId of userIds) {
             await query(`INSERT INTO ${table} (person) VALUES ($1);`, [userId])
         }
     }
-
-    pool.end(() => {})
 }
 
 const query = async function (queryText, queryParams) {
     try {
-        const queryResult = await pool.query(queryText, queryParams)
+        const queryResult = await client.query(queryText, queryParams)
         return queryResult
     }
     catch (error) {
@@ -42,4 +38,13 @@ const query = async function (queryText, queryParams) {
     }
 }
 
-genNotificationSettings()
+try {
+    await genNotificationSettings()
+}
+catch (error) {
+    console.error(
+        "something went wrong. run the destroy_db script and try again\n\n")
+}
+finally {
+    await client.end()
+}

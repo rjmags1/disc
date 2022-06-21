@@ -2,7 +2,6 @@ import requests
 from bs4 import BeautifulSoup
 from random import randrange
 
-# dup in non-py genEnrollment script
 YEARS = [2000, 2001, 2002, 2003]
 TERM_NAMES = ['Winter', 'Spring', 'Summer', 'Fall']
 
@@ -31,7 +30,7 @@ def getFirst2Commas(s):
 
 # generate tuples of info for sample course sql file creation
 tuples = []
-getRandomNumSections = lambda: randrange(1, 4)
+getRandomNumSections = lambda: randrange(1, 3)
 for h in sampleCourses:
     for s in h.strings:
         s = str(s)

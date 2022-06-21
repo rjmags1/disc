@@ -1,11 +1,12 @@
-const { Pool } = require("pg")
-const path = require("path")
-require('dotenv').config({
-    path: path.resolve(__dirname, '../.env.local')
-})
-const YEARS = [2000, 2001, 2002, 2003] // dup in non-js gencourseterm script
+import { resolve, dirname } from 'path'
+import dotenv from 'dotenv'
+dotenv.config({ path: resolve(dirname('.'), '../.env.local') })
+import * as pg from 'pg'
+const client = new pg.default.Client()
+await client.connect()
+
+const YEARS = [2000, 2001, 2002, 2003]
 const TERM_NAMES = ['Winter', 'Spring', 'Summer', 'Fall']
-const pool = new Pool()
 
 /* REQUIREMENTS
 4 years, 4 quarters/year -> 16 quarters
@@ -17,7 +18,7 @@ no class can have less than 10 students unless the class has zero enrollments
     (with a few exceptions for ease of impl)
 for fall 2003 (the 'current' quarter) make sure there are 20 students,
     including harry, that are in 'Operating Systems I'. 
-    will use this data to impl discussion page
+    will use this data for impl discussion page and testing
 
 
 --note: data generated in this script (and all the other scripts in the db 
@@ -29,23 +30,25 @@ for fall 2003 (the 'current' quarter) make sure there are 20 students,
 
 const enroll = async function() {
     // gather person.user_id of instructors, staff, and students
-    let queryText = 
-        `SELECT user_id FROM person WHERE
+    let queryText = `
+        SELECT user_id FROM person WHERE
             is_instructor AND NOT is_staff AND NOT is_admin;`
     const instructorQueryResult = await query(queryText)
     const instructorIds = instructorQueryResult.rows.map(row => row.user_id)
+
     queryText = 
         `SELECT user_id FROM person WHERE
             is_staff AND NOT is_instructor AND NOT is_admin;`
     const staffQueryResult = await query(queryText)
     const staffIds = staffQueryResult.rows.map(row => row.user_id)
+
     queryText =
         `SELECT user_id FROM person WHERE
             NOT is_staff AND NOT is_instructor AND NOT is_admin;`
     const studentQueryResult = await query(queryText)
     const studentIds = studentQueryResult.rows.map(row => row.user_id)
 
-    // start enrolling students/ assigning instructors, staff for each term
+    // start enrolling students/assigning instructors, staff for each term
     for (const year of YEARS) {
         for (const term of TERM_NAMES) {
 
@@ -92,21 +95,17 @@ const enroll = async function() {
                 let enrolls = 0
                 for (const courseObj of enrollingIntoObjs) {
                     const { courseId, cap } = courseObj
-                    await enrollStudent(studentId, courseId)
+                    const enrolledSuccess = await enrollStudent(studentId, courseId)
+                    if (!enrolledSuccess) continue
+
                     if (++courseObj.currEnrolled === cap) {
                         cappedCourseObjs.push(courseObj)
                     }
                     if (++enrolls === numCoursesThisQuarter) break
                 }
 
-                const args = [
-                    enrollingInto,
-                    enrollingIntoObjs,
-                    enrolledInto,
-                    cappedCourseObjs,
-                    courseIds
-                ]
-                replaceOverCap(...args)
+                replaceOverCap(enrollingInto, enrollingIntoObjs, 
+                    enrolledInto, cappedCourseObjs, courseIds)
             }
 
             // assign instructors and staff to the resulting enrolled courses.
@@ -202,8 +201,6 @@ const enroll = async function() {
                 TRUE);`
         await query(queryText, queryParams)
     }
-
-    pool.end(() => {})
 }
 
 
@@ -228,12 +225,11 @@ const enrollStudent = async function(studentId, courseId) {
     const queryText = 
         `INSERT INTO person_course (person, course) VALUES ($1, $2);`
     const queryParams = [studentId, courseId]
-    try {
+    try { 
         await query(queryText, queryParams)
+        return true
     }
-    catch (e) {
-        console.error(e)
-    }
+    catch (e) { return false }
 }
 
 const replaceOverCap = function(
@@ -267,17 +263,18 @@ const replaceOverCap = function(
 
 const query = async function (queryText, queryParams) {
     try {
-        const queryResult = await pool.query(queryText, queryParams)
+        const queryResult = await client.query(queryText, queryParams)
         return queryResult
     }
     catch (error) {
-        console.error(`
-            QUERY ERROR: 
-            query: ${queryText}\n
-            error: ${error.stack}
-        `)
         throw new Error("problem executing query", { cause: error })
     }
 }
 
-enroll()
+try {
+    await enroll()
+}
+catch (e) {
+    console.error("something went wrong. run the destroy_db script and try again.")
+}
+finally { await client.end() }

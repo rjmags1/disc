@@ -12,7 +12,7 @@ CREATE TABLE avatar_url (
     avatar_url_id SERIAL PRIMARY KEY,
     avatar_url varchar(2048) NOT NULL
 );
-INSERT INTO avatar_url (avatar_url) VALUES ('/cool-profile-img.jpg');
+INSERT INTO avatar_url (avatar_url) VALUES ('/cool-profile-img.jpg'); --default
 CREATE TABLE person (
     user_id SERIAL PRIMARY KEY,
     avatar_url integer REFERENCES avatar_url (avatar_url_id) DEFAULT 1,
@@ -25,7 +25,7 @@ CREATE TABLE person (
 );
 CREATE TABLE email (
     email_id SERIAL PRIMARY KEY,
-    person integer REFERENCES person (user_id) DEFAULT NULL,
+    person integer REFERENCES person (user_id) DEFAULT NULL, -- nullable for data gen.
     email varchar(320) NOT NULL UNIQUE
 );
 ALTER TABLE person
@@ -98,9 +98,7 @@ CREATE TABLE post (
     deleted boolean DEFAULT FALSE,
     anonymous boolean DEFAULT FALSE,
     CHECK (NOT (resolved = TRUE AND is_question = TRUE)),
-    CHECK (NOT (answered = TRUE AND is_question = FALSE)),
-    CHECK (NOT (endorsed = TRUE AND private = TRUE)),
-    CHECK (NOT (pinned = TRUE AND private = TRUE))
+    CHECK (NOT (answered = TRUE AND is_question = FALSE))
 );
 CREATE INDEX category_lookup_by_course ON post_category (course);
 CREATE INDEX post_lookup_by_post_id ON post (post_id);
@@ -117,8 +115,8 @@ CREATE TABLE comment (
     comment_id SERIAL PRIMARY KEY,
     author integer REFERENCES person (user_id) NOT NULL,
     post integer REFERENCES post (post_id) NOT NULL,
-    ancestor_comment integer REFERENCES comment (comment_id) DEFAULT NULL,
-    thread_id text DEFAULT NULL,
+    ancestor_comment integer REFERENCES comment (comment_id),
+    thread_id text,
     edit_content jsonb NOT NULL,
     display_content text NOT NULL,
     created_at timestamp NOT NULL,
@@ -138,9 +136,9 @@ CREATE INDEX comment_lookup_by_deleted ON comment (deleted);
 
 CREATE TABLE notification (
     notification_id SERIAL PRIMARY KEY,
+    gen_comment integer REFERENCES comment (comment_id),
+    gen_post integer REFERENCES post (post_id),
     person integer REFERENCES person (user_id),
-    gen_comment integer REFERENCES comment (comment_id) DEFAULT NULL,
-    gen_post integer REFERENCES post (post_id) DEFAULT NULL,
     deleted boolean DEFAULT FALSE,
     is_watch_noti boolean DEFAULT FALSE,
     is_user_post_activity_noti boolean DEFAULT FALSE,
@@ -150,7 +148,7 @@ CREATE TABLE notification (
     created_at timestamp NOT NULL,
     UNIQUE (person, gen_comment, gen_post, is_watch_noti, 
         is_user_post_activity_noti, is_user_comment_reply_noti,
-        is_mention_noti, is_announcement_noti)
+        is_mention_noti, is_announcement_noti),
     CHECK ( --can only be one kind of notification
         (is_watch_noti::integer) +
         (is_user_post_activity_noti::integer) + 
@@ -243,9 +241,8 @@ CREATE INDEX post_view_lookup_by_viewer ON post_view (viewer);
 CREATE TABLE mention (
     mention_id SERIAL PRIMARY KEY,
     mentioned integer REFERENCES person (user_id) NOT NULL,
-    comment integer REFERENCES comment (comment_id) DEFAULT NULL,
-    post integer REFERENCES post (post_id) DEFAULT NULL,
-    deleted boolean DEFAULT FALSE,
+    comment integer REFERENCES comment (comment_id),
+    post integer REFERENCES post (post_id),
     UNIQUE (mentioned, comment, post),
     CHECK (
         (comment != NULL OR post != NULL) AND
@@ -253,7 +250,6 @@ CREATE TABLE mention (
     )
 );
 CREATE INDEX mention_lookup_by_mentioned ON mention (mentioned);
-CREATE INDEX mention_lookup_by_deleted ON mention (deleted);
 
 
 
@@ -261,9 +257,8 @@ CREATE INDEX mention_lookup_by_deleted ON mention (deleted);
 
 CREATE TABLE comment_reply_email_setting (
     setting_id SERIAL PRIMARY KEY,
-    person integer REFERENCES person (user_id) NOT NULL,
-    is_on boolean DEFAULT FALSE,
-    UNIQUE(setting_id, person)
+    person integer REFERENCES person (user_id) NOT NULL UNIQUE,
+    is_on boolean DEFAULT FALSE
 );
 CREATE INDEX comment_reply_email_setting_lookup_by_person ON comment_reply_email_setting (person);
 
@@ -273,9 +268,8 @@ CREATE INDEX comment_reply_email_setting_lookup_by_person ON comment_reply_email
 
 CREATE TABLE watch_email_setting (
     setting_id SERIAL PRIMARY KEY,
-    person integer REFERENCES person (user_id) NOT NULL,
-    is_on boolean DEFAULT TRUE,
-    UNIQUE(setting_id, person)
+    person integer REFERENCES person (user_id) NOT NULL UNIQUE,
+    is_on boolean DEFAULT TRUE
 );
 CREATE INDEX watch_email_setting_lookup_by_person ON watch_email_setting (person);
 
@@ -285,9 +279,8 @@ CREATE INDEX watch_email_setting_lookup_by_person ON watch_email_setting (person
 
 CREATE TABLE mention_email_setting (
     setting_id SERIAL PRIMARY KEY,
-    person integer REFERENCES person (user_id) NOT NULL,
-    is_on boolean DEFAULT TRUE,
-    UNIQUE(setting_id, person)
+    person integer REFERENCES person (user_id) NOT NULL UNIQUE,
+    is_on boolean DEFAULT TRUE
 );
 CREATE INDEX mention_email_setting_lookup_by_person ON mention_email_setting (person);
 
@@ -297,8 +290,7 @@ CREATE INDEX mention_email_setting_lookup_by_person ON mention_email_setting (pe
 
 CREATE TABLE post_activity_email_setting (
     setting_id SERIAL PRIMARY KEY,
-    person integer REFERENCES person (user_id) NOT NULL,
-    is_on boolean DEFAULT FALSE,
-    UNIQUE(setting_id, person)
+    person integer REFERENCES person (user_id) NOT NULL UNIQUE,
+    is_on boolean DEFAULT FALSE
 );
 CREATE INDEX post_activity_email_setting_lookup_by_person ON post_activity_email_setting (person);
