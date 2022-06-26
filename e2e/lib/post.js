@@ -10,8 +10,8 @@ const { TEST_COURSE_INFO } = require('./course')
 const ANONYMOUS_AVATAR_URL = "/profile-button-img.png"
 
 exports.TEST_POST_INFO = {
-    id: 94,
-    title: "Iste et explicabo voluptatem doloribus eos sit veniam neque."
+    id: process.env.TEST_POST_ID,
+    title: process.env.TEST_POST_TITLE
 }
 
 exports.getAllDbTopLevelThreadCommentsDisplayOrder = async (postId) => {
@@ -190,11 +190,10 @@ async (dbCommentInfo, commentBoxLocator) => {
     } = dbCommentInfo
 
     const endorsedIconPresent = await commentBoxLocator.locator(
-        'comment-endorsed-icon').isVisible()
+        '[data-testid=comment-endorsed-icon]').isVisible()
     expect(endorsedIconPresent).toBe(!deleted && endorsed)
-
     const checkIconPresent = await commentBoxLocator.locator(
-        'comment-check-icon').isVisible()
+        '[data-testid=comment-check-icon]').isVisible()
     expect(checkIconPresent).toBe(!deleted && (is_resolving || is_answer))
 })
 
@@ -262,8 +261,8 @@ async (dbCommentInfo, commentBoxLocator, userId) => {
         '[data-testid=comment-delete-button]')
     const editPresent = await commentEditButtonLocator.isVisible()
     const deletePresent = await commentDeleteButtonLocator.isVisible()
-    expect(editPresent).toBe(userId === authorId)
-    expect(deletePresent).toBe(userId === authorId)
+    expect(editPresent).toBe(!dbCommentInfo.deleted && userId === authorId)
+    expect(deletePresent).toBe(!dbCommentInfo.deleted && userId === authorId)
 })
 
 exports.getFirstDisplayedPostCommentDbInfo = async (postId) => {
@@ -445,12 +444,12 @@ async (normalPost, expectedBtnStatus) => {
         TEST_COURSE_INFO.courseId)
     let relevantPostDbRow
     for (const row of dbPostsPageOrder) {
-        if (normalPost && !row.is_question && 
+        if (normalPost && !row.is_question && !row.anonymous &&
             TESTUSER_REGISTERED.userId === row.user_id && row.comments > 0) {
             relevantPostDbRow = row
             break
         }
-        if (!normalPost && row.is_question && 
+        if (!normalPost && row.is_question && !row.anonymous &&
             TESTUSER_REGISTERED.userId === row.user_id && row.comments > 0) {
             relevantPostDbRow = row
             break

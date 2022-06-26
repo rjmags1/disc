@@ -20,8 +20,10 @@ test.beforeEach(async ({ page }) => {
         locator('text=/dashboard/i')).toBeVisible()
 
     const { term, code, section, name: testCourseName } = TEST_COURSE_INFO
+    const specialCourseCardLocator = page.locator(
+        '[data-testid=course-card-container]').locator('text=/cs344-1/i').nth(0)
     await Promise.all([
-        page.locator(`text=/^${ testCourseName }$/i`).click(),
+        specialCourseCardLocator.click(),
         page.waitForSelector(`text=/${ testCourseName } - ${ term }/i`)
     ])
     const title = await page.title()
@@ -53,7 +55,8 @@ test.describe('post listings pane text filter', async () => {
             const numPageFiltered = await postInfoLocator.count()
             const testStringRegex = new RegExp(testString)
             const filteredDb = displayedDbRows.filter(
-                row => (testStringRegex.test(`${ row.f_name } ${ row.l_name }`)))
+                row => (!row.anonymous && 
+                    testStringRegex.test(`${ row.f_name } ${ row.l_name }`)))
             if (testString === UNMATCHED_STRING) {
                 expect(numPageFiltered).toBe(0)
                 expect(filteredDb.length).toBe(0)

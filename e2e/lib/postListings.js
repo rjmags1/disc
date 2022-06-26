@@ -78,7 +78,8 @@ const loadAllPosts = async (page) => {
 const getAllNonDeletedDbPostsInPageOrder = async (courseId) => {
     const dbPosts = await getDbCoursePostsRevChronOrder(courseId)
     const pinnedDbRows = getPinnedFromDbRows(dbPosts)
-    const announcementDbRows = getAnnouncementsFromDbRows(dbPosts)
+    const announcementDbRows = getAnnouncementsFromDbRows(dbPosts).filter(
+        row => !row.pinned)
     const regularDbRows = getNonPinnedNonAnnouncementFromDbRows(dbPosts)
     
     return [...pinnedDbRows, ...announcementDbRows, ...regularDbRows].filter(

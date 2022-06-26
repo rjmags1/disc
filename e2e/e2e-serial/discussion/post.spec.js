@@ -33,8 +33,10 @@ test.beforeEach(async ({ page }, { title: testTitle }) => {
         locator('text=/dashboard/i')).toBeVisible()
 
     const { term, code, section, name: testCourseName } = TEST_COURSE_INFO
+    const specialCourseCardLocator = page.locator(
+        '[data-testid=course-card-container]').locator('text=/cs344-1/i').nth(0)
     await Promise.all([
-        page.locator(`text=/^${ testCourseName }$/i`).nth(0).click(),
+        specialCourseCardLocator.click(),
         page.waitForSelector(`text=/${ testCourseName } - ${ term }/i`)
     ])
     const title = await page.title()
@@ -74,7 +76,7 @@ test.describe('post content', async () => {
 })
 
 test.describe('post control panel', async () => {
-    test.slow()
+    test.setTimeout(60000)
 
     test('boolean control panel button fxn', async ({ page, isMobile }) => {
         // all cp buttons in one post

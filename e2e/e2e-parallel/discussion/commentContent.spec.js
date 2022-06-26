@@ -32,8 +32,10 @@ test.beforeEach(async ({ page, isMobile }, { title: testTitle }) => {
         locator('text=/dashboard/i')).toBeVisible()
 
     const { term, code, section, name: testCourseName } = TEST_COURSE_INFO
+    const specialCourseCardLocator = page.locator(
+        '[data-testid=course-card-container]').locator('text=/cs344-1/i').nth(0)
     await Promise.all([
-        page.locator(`text=/^${ testCourseName }$/i`).nth(0).click(),
+        specialCourseCardLocator.click(),
         page.waitForSelector(`text=/${ testCourseName } - ${ term }/i`)
     ])
 
@@ -56,6 +58,7 @@ test.beforeEach(async ({ page, isMobile }, { title: testTitle }) => {
 })
 
 test.describe('comment information correctly displayed to user', async () => {
+    test.slow()
     
     test('non-user authored post; non-admin, non-staff user', 
     async ({ page, browserName }) => {
@@ -105,6 +108,14 @@ test.describe('comment information correctly displayed to user', async () => {
         let i = 0;
         while (!(await questionPostListingLocator.locator(
             '[data-testid=comments-icon]').isVisible())) {
+            if (i > 1000) {
+                console.log(`the randomly generated sample data didn't 
+                    produce a user-authored question post with comments. 
+                    returning prematurely from comment test 
+                    on user authored question post`)
+                return 
+            }
+
             questionPostListingLocator = page.locator(
                 '[data-testid=post-info-container]', {
                     has: page.locator('[data-testid=question-icon]'),
@@ -146,6 +157,14 @@ test.describe('comment information correctly displayed to user', async () => {
         let i = 0
         while (!(await normalPostListingLocator.locator(
             '[data-testid=comments-icon]').isVisible())) {
+            if (i > 1000) {
+                console.log(`the randomly generated sample data didn't 
+                    produce a normal user-authored post with comments. 
+                    returning prematurely from from comment test on 
+                    user authored normal post`)
+                return 
+            }
+
             normalPostListingLocator = page.locator(
             '[data-testid=post-info-container]', {
                 has: page.locator('[data-testid=normal-post-icon]'),
@@ -180,6 +199,7 @@ test.describe('comment information correctly displayed to user', async () => {
     })
 
     test('admin user', async ({ page }) => {
+
         const commentControlPanelLocator = page.locator(
             '[data-testid=comment-control-panel]')
         const numCommentsLoaded = await commentControlPanelLocator.count()

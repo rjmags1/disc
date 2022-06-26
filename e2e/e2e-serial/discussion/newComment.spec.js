@@ -17,8 +17,10 @@ test.beforeEach(async ({ page, isMobile }) => {
         locator('text=/dashboard/i')).toBeVisible()
 
     const { term, code, section, name: testCourseName } = TEST_COURSE_INFO
+    const specialCourseCardLocator = page.locator(
+        '[data-testid=course-card-container]').locator('text=/cs344-1/i').nth(0)
     await Promise.all([
-        page.locator(`text=/^${ testCourseName }$/i`).nth(0).click(),
+        specialCourseCardLocator.click(),
         page.waitForSelector(`text=/${ testCourseName } - ${ term }/i`)
     ])
     const title = await page.title()

@@ -16,7 +16,8 @@ const {
     dbAssertFirstUserAuthoredPostFirstCommentResAnsDelta,
     assertOnCorrectResolveAnswerButtonLabels,
     clickResolveAnswerButtonUiAssert,
-    dbAssertFirstCommentEndorse
+    dbAssertFirstCommentEndorse,
+    lazyLoadAllTopLevelPageComments
 } = require('../../lib/post')
 const { loadAllPosts } = require('../../lib/postListings')
 
@@ -28,8 +29,10 @@ test.beforeEach(async ({ page, isMobile }, { title: testTitle }) => {
         locator('text=/dashboard/i')).toBeVisible()
 
     const { term, code, section, name: testCourseName } = TEST_COURSE_INFO
+    const specialCourseCardLocator = page.locator(
+        '[data-testid=course-card-container]').locator('text=/cs344-1/i').nth(0)
     await Promise.all([
-        page.locator(`text=/^${ testCourseName }$/i`).nth(0).click(),
+        specialCourseCardLocator.click(),
         page.waitForSelector(`text=/${ testCourseName } - ${ term }/i`)
     ])
     const title = await page.title()
@@ -103,6 +106,8 @@ test.describe('comment edit and delete buttons', async () => {
     test.setTimeout(10000)
 
     test('edit button', async ({ page }) => {
+        await lazyLoadAllTopLevelPageComments(page)
+
         const firstUserAuthoredCommentBoxLocator = page.locator(
             '[data-testid=comment-box-container]', {
                 hasText: TESTUSER_REGISTERED.fullName }).nth(0)
@@ -121,6 +126,8 @@ test.describe('comment edit and delete buttons', async () => {
     })
 
     test('delete button', async ({ page }) => {
+        await lazyLoadAllTopLevelPageComments(page)
+
         const firstUserAuthoredCommentThread = page.locator(
             '[data-testid=thread-container]', {
                 hasText: TESTUSER_REGISTERED.fullName })
@@ -158,6 +165,13 @@ test.describe('mark resolving btn, mark answer btn, endorse btn', async () => {
         let i = 0
         while (!(await firstUserAuthoredNormalPostListingLocator.locator(
             '[data-testid=comments-icon]').isVisible())) {
+            if (i > 1000) {
+                console.log(`the generated sample data doesnt contain
+                    a user authored question post. returning prematurely from testing
+                    the comment mark resolving button`)
+                return
+            } 
+
             firstUserAuthoredNormalPostListingLocator = page.locator(
                 '[data-testid=post-info-container]', {
                     hasText: TESTUSER_REGISTERED.fullName,
@@ -211,6 +225,13 @@ test.describe('mark resolving btn, mark answer btn, endorse btn', async () => {
         let i = 0
         while (!(await firstUserAuthoredQuestionPostListingLocator.locator(
             '[data-testid=comments-icon]').isVisible())) {
+            if (i > 1000) {
+                console.log(`the generated sample data doesnt contain
+                    a user authored question post. returning prematurely from testing
+                    the comment mark answer button`)
+                return
+            } 
+
             firstUserAuthoredQuestionPostListingLocator = page.locator(
                 '[data-testid=post-info-container]', {
                     hasText: TESTUSER_REGISTERED.fullName,

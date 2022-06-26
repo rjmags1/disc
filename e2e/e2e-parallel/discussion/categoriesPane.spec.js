@@ -23,7 +23,7 @@ test.beforeEach(async ({ page }) => {
 
     const { term, code, section, name: testCourseName } = TEST_COURSE_INFO
     await Promise.all([
-        page.locator(`text=/^${ testCourseName }$/i`).click(),
+        page.locator(`text=/^${ testCourseName }$/i`).nth(0).click(),
         page.waitForSelector(`text=/${ testCourseName } - ${ term }/i`)
     ])
 
