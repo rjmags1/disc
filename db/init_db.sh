@@ -31,3 +31,8 @@ node posts.mjs
 
 echo "generating ~200k comment records... this will take a few minutes"
 node comment.mjs
+
+echo "generating post interactions..."
+node postInteractions.mjs
+
+echo "db init and sample data gen complete."

@@ -89,6 +89,8 @@ const genCoursePosts = async function(courseId, termName) {
     const staffInstructorQuery = await query(queryText, queryParams)
     const staffInstructorIds = staffInstructorQuery.rows.map(row => [
         row.user_id, { isStaff: row.is_staff, isInstructor: row.is_instructor }])
+    if (staffInstructorIds.filter(
+        ([_, statusObj]) => statusObj.isInstructor).length === 0) console.log(staffInstructorIds, courseId, posterIds)
     const instructorId = staffInstructorIds.filter(
         ([_, statusObj]) => statusObj.isInstructor)[0][0]
     const staffInfos = staffInstructorIds.filter(

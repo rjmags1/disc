@@ -185,8 +185,11 @@ const enroll = async function() {
                     is_instructor AND NOT is_admin LIMIT 1),
                 $1,
                 TRUE);`
-        await query(queryText, queryParams)
+        await query(queryText, [3])
     }
+    else await query(`
+        UPDATE person_course SET person = $1 WHERE course = $2 
+        AND is_instructor;`, [3, specialCourseId])
 
     // make sure there is staff for specialCourseId
     queryText = `SELECT enrollment_id FROM person_course WHERE 
@@ -199,7 +202,16 @@ const enroll = async function() {
                     is_staff AND NOT is_admin LIMIT 1),
                 $1,
                 TRUE);`
-        await query(queryText, queryParams)
+        await query(queryText, [7])
+    }
+
+    // make sure admin has access to all enrolled classes
+    const allEnrolledCoursesQuery = await query(`
+        SELECT course FROM person_course GROUP BY course;`)
+    for (const { course: enrolledCourseId } of allEnrolledCoursesQuery.rows) {
+        await query(
+            `INSERT INTO person_course (person, course) VALUES ($1, $2)`,
+            [1, enrolledCourseId])
     }
 }
 
@@ -275,6 +287,7 @@ try {
     await enroll()
 }
 catch (e) {
+    console.error(e)
     console.error("something went wrong. run the destroy_db script and try again.")
 }
 finally { await client.end() }

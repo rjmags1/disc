@@ -15,6 +15,7 @@ await client.connect()
 import { faker } from '@faker-js/faker'
 import Delta from 'quill-delta' // delta constructor
 import { fixNodePgUTCTimeInterpretation } from '../e2e/lib/time.js'
+import { appendFileSync } from 'fs'
 
 const YEARS = [2000, 2001, 2002, 2003]
 const TERM_NAMES = ['Winter', 'Spring', 'Summer', 'Fall']
@@ -78,7 +79,7 @@ const genCourseComments = async function(courseId, termEnd) {
 
     // get posts generated in sample post generation script
     queryText = `
-        SELECT post_id, resolved, private, answered, endorsed, created_at 
+        SELECT post_id, resolved, private, answered, endorsed, created_at, title 
         FROM ((SELECT category_id FROM post_category WHERE course = $1) 
         AS cats
         LEFT JOIN post ON category_id = post.category);`
@@ -285,12 +286,12 @@ const genCourseComments = async function(courseId, termEnd) {
     // comment 50 times on latest post that isnt private, 0-50 nested replies per,
     // if we are creating comments for special course thats used for testing
     const latestPostInfo = postsQuery.rows.filter(row => !row.private).map(
-        row => [row.post_id, row.created_at]).sort((a, b) => {
+        row => [row.post_id, row.created_at, row.title]).sort((a, b) => {
             const [_, aCreatedAt] = a
             const [__, bCreatedAt] = b
             return Date.parse(bCreatedAt) - Date.parse(aCreatedAt)
         })[0]
-    const [latestPost, latestPostCreationTime] = latestPostInfo
+    const [latestPost, latestPostCreationTime, latestPostTitle] = latestPostInfo
     queryText = `
         INSERT INTO comment
             (author,
@@ -334,6 +335,8 @@ const genCourseComments = async function(courseId, termEnd) {
             nestedReplies, commenterIds, latestPost, 
             createAfter, queryText, commentId, termEnd)
     }
+
+    appendFileSync('../.env.local', `\nTEST_POST_ID=${ latestPost }\nTEST_POST_TITLE=${ latestPostTitle }`)
 }
 
 const genNestedComments = (
