@@ -1,10 +1,3 @@
-/*
-paginated for higher level comments
-use client to fetch post display content and edit content conditional on session uid,
-then get first 10: (top level comments, their first 2 replies, and whether there are more replies), 
-then just next 10 above tuples thereafter
-*/
-
 import { sessionOptions } from "../../../../../../../lib/session"
 import { withIronSessionApiRoute } from "iron-session/next"
 import { fixNodePgUTCTimeInterpretation } from "../../../../../../../lib/time"
@@ -44,13 +37,16 @@ export default withIronSessionApiRoute(async function(req, resp) {
         return
     }
 
+
     let postContentQuery, ancestorCommentQuery, descendantCommentQuery, dbClient
     let transactionFailed = false
     try {
-        //checkout client, perform queries, release client
+        // checkout client, may need to perform multiple queries
         dbClient = await getClientFromPool()
 
-        if (pageNumber === 1) {
+        if (pageNumber === 1) { // also need to fetch post content
+
+            // retrieval of edit information cond. on if user is post author
             const postContentQueryText = (userId === authorId ?
                 postContentQueryTextWithEC : postContentQueryTextNoEC)
             postContentQuery = (await clientQuery(
@@ -59,11 +55,13 @@ export default withIronSessionApiRoute(async function(req, resp) {
         else postContentQuery = null
         
         
+        // always retrieve the requested page of ancestor comments
+        // and their first two descendants
         ancestorCommentQuery = (await clientQuery(
             dbClient, ancestorCommentQueryText(pageNumber),
                 [postId, new Date(parsedTimeCutoff), userId]))
         const ancestorCommentIds = ancestorCommentQuery.rows.map(
-            row => row.comment_id).slice(0, 20)
+            row => row.comment_id).slice(0, TOP_LEVEL_COMMENTS_PER_PAGE)
         
         if (ancestorCommentIds.length > 0) {
             const descendantCommentQueryText = (
@@ -87,7 +85,8 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
 
 
-    // process query results
+    // process query results. we ask for an extra row of ancestor comments
+    // to determine if there is another page to load 
     const nextPage = (
         ancestorCommentQuery.rows.length > TOP_LEVEL_COMMENTS_PER_PAGE ?
             pageNumber + 1 : null)
@@ -100,9 +99,11 @@ export default withIronSessionApiRoute(async function(req, resp) {
     }
     
     const ancestorRows = ancestorCommentQuery.rows
-    const ancestorInfo = processAncestorCommentRows(ancestorRows.length === 21 ? 
+    const ancestorInfo = processAncestorCommentRows(
+        ancestorRows.length === TOP_LEVEL_COMMENTS_PER_PAGE + 1 ? 
         ancestorRows.slice(0, ancestorRows.length - 1) : ancestorRows, userId)
-    const descendantInfo = processDescendantCommentRows(descendantCommentQuery.rows, userId)
+    const descendantInfo = processDescendantCommentRows(
+        descendantCommentQuery.rows, userId)
 
 
 
@@ -110,6 +111,8 @@ export default withIronSessionApiRoute(async function(req, resp) {
     resp.status(200).json({ nextPage, postInfo, ancestorInfo, descendantInfo, })
 
 }, sessionOptions)
+
+
 
 const processDescendantCommentRows = (rows, userId) => {
     if (rows.length === 0) return null
@@ -137,6 +140,7 @@ const processDescendantCommentRows = (rows, userId) => {
         })
     }
 
+    // map descendant comments to their ancestor
     const ancestorToDesc = {}
     processed.forEach((desc) => {
         const { ancestorComment } = desc
@@ -154,6 +158,7 @@ const processDescendantCommentRows = (rows, userId) => {
     }
     return ancestorToDesc
 }
+
 
 const processAncestorCommentRows = (rows, userId) => rows.map(
     row => ({
@@ -176,10 +181,17 @@ const processAncestorCommentRows = (rows, userId) => rows.map(
     })
 )
 
+
 const descendantQueryTextFromAncestors = (ancestorComments) => {
+    // dynamically generate query for descendant comments of multiple ancestor
+    // comments, based on the number of ancestor comments and their ids
+
     const tokens = [`SELECT 
         comment_id, user_id, f_name, l_name, avatar_url, edit_content, display_content, created_at,
         is_resolving, is_answer, endorsed, deleted, anonymous, thread_id, ancestor_comment, likes, user_like FROM (`]
+    
+    // get the first two descendant comments in a thread, plus a third to tell
+    // if there are anymore descendant comments to load for a particular thread
     for (let i = 0; i < ancestorComments; i++) {
         tokens.push(`(
             SELECT comment_id FROM comment 
@@ -222,6 +234,7 @@ const descendantQueryTextFromAncestors = (ancestorComments) => {
     return tokens.join("")
 }
 
+
 const postContentQueryTextWithEC = `
     SELECT display_content, edit_content, avatar_url, views 
     FROM (
@@ -245,6 +258,7 @@ const postContentQueryTextWithEC = `
         AS post_views
         ON post_id = viewed_post;`
 
+
 const postContentQueryTextNoEC = `
     SELECT display_content, avatar_url, views
     FROM (
@@ -267,6 +281,7 @@ const postContentQueryTextNoEC = `
         GROUP BY viewed_post)
     AS post_views
     ON post_id = viewed_post;`
+
 
 const ancestorCommentQueryText = (pageNumber) => `
     SELECT 

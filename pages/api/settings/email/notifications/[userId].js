@@ -15,11 +15,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
     }
     const parsed = parseInt(req.query.userId, 10)
     if (parsed !== req.session.user.user_id) {
-        // userId in query will always come from
-        // session cookie via useUser hook in normal app usage. if not, 
-        // and the session cookie user_id doesnt match userId in query,
-        // someone may be trying to maliciously view someone elses information
-        resp.status(400).json({ message: "dont be malicious" })
+        resp.status(400).json({ message: "bad url param" })
         return
     }
 
@@ -56,7 +52,6 @@ export default withIronSessionApiRoute(async function(req, resp) {
         settingsQueryResult = await query(settingsQueryText, settingsQueryParams)
     }
     catch (error) {
-        console.error(error)
         resp.status(500).json({ message: "internal server error" })
         return
     }

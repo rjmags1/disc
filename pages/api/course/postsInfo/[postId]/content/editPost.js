@@ -7,7 +7,10 @@ import {
     parseForMentionTokens, genMentionNotifsInDb 
 } from "../../../../../../lib/mention"
 
+
+
 export default withIronSessionApiRoute(async function(req, resp) {
+    // req guard
     if (req.method !== 'PUT') {
         resp.status(405).json({ message: "invalid method" })
         return
@@ -22,6 +25,10 @@ export default withIronSessionApiRoute(async function(req, resp) {
         return
     }
 
+
+
+    // update the relevant post record in the db and parse for any mentions,
+    // generating mention notifs in the db if necessary
     let editPostQuery, editFailure, client
     try {
         client = await getClientFromPool()
@@ -42,15 +49,14 @@ export default withIronSessionApiRoute(async function(req, resp) {
     }
     catch (error) {
         editFailure = true
-        console.error(error)
+        resp.status(500).json({ message: "internal server error" })
     }
     finally {
         await releaseClient(client)
     }
-    if (editFailure) {
-        resp.status(500).json({ message: "internal server error" })
-        return
-    }
+    if (editFailure) return
+
+
 
     const editedRow = editPostQuery.rows[0]
     const editedPostInfo = {

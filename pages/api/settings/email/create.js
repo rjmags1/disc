@@ -2,6 +2,8 @@ import { query } from '../../../../db/index'
 import { sessionOptions } from '../../../../lib/session'
 import { withIronSessionApiRoute } from 'iron-session/next'
 
+
+
 export default withIronSessionApiRoute(async function(req, resp) {
     // req guard
     if (req.method !== 'POST') {
@@ -28,7 +30,6 @@ export default withIronSessionApiRoute(async function(req, resp) {
         await query(createEmailQueryText, createEmailQueryParams)
     }
     catch (error) {
-        console.error(error)
         resp.status(500).json({ message: "internal server error" })
         return
     }

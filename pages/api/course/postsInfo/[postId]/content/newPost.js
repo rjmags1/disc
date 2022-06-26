@@ -7,7 +7,10 @@ import {
     genMentionNotifsInDb, parseForMentionTokens 
 } from "../../../../../../lib/mention"
 
+
+
 export default withIronSessionApiRoute(async function(req, resp) {
+    // req guard
     if (req.method !== 'POST') {
         resp.status(405).json({ message: "invalid method" })
         return
@@ -20,6 +23,9 @@ export default withIronSessionApiRoute(async function(req, resp) {
         resp.status(400).json({ message: "suppled params invalid" })
         return
     }
+
+
+
     const { 
         title, category, isQuestion, isAnnouncement, displayContent,
         isPrivate, isPinned, isAnonymous, createdAt, editContent, courseId
@@ -28,6 +34,9 @@ export default withIronSessionApiRoute(async function(req, resp) {
         user_id: userId, f_name: firstName, l_name: lastName,
         is_staff: isStaff, is_instructor: isInstructor
     } = req.session.user
+    
+    // insert the post into the db, and then generate the relevant notifs
+    // in the db on successful post insert
     let insertPostQuery, insertFailure, client
     try {
         client = await getClientFromPool()
@@ -75,15 +84,14 @@ export default withIronSessionApiRoute(async function(req, resp) {
     }
     catch (error) {
         insertFailure = true
-        console.error(error)
+        resp.status(500).json({ message: "internal server error"} )
     }
     finally {
         await releaseClient(client)
     }
-    if (insertFailure) {
-        resp.status(500).json({ message: "internal server error"} )
-        return
-    }
+    if (insertFailure) return
+
+
 
     const row = insertPostQuery.rows[0]
     const newPostInfo = {
@@ -113,6 +121,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
 }, sessionOptions)
 
+
 const invalidParams = (reqBody) => {
     const { 
         title, category, isQuestion, isAnnouncement, displayContent,
@@ -127,6 +136,7 @@ const invalidParams = (reqBody) => {
     if (typeof(editContent) !== 'object') return true
     if (typeof(courseId) !== 'number') return true
 }
+
 
 const genAnnouncementNotifsInDb = (
 async (client, courseId, posterId, annId, createdAt) => {

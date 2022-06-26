@@ -3,7 +3,9 @@ import { sessionOptions } from '../../../../../lib/session'
 import { withIronSessionApiRoute } from 'iron-session/next'
 import { fixNodePgUTCTimeInterpretation } from '../../../../../lib/time'
 
+
 const POSTS_PER_PAGE = 25
+
 
 export default withIronSessionApiRoute(async function(req, resp) {
     // req guard
@@ -18,20 +20,19 @@ export default withIronSessionApiRoute(async function(req, resp) {
     const [courseId, page, onlyLoadBefore, 
             ...shouldBeEmpty] = req.query.courseIdPageSlug
     if (shouldBeEmpty.length > 0 || !courseId || !page || !onlyLoadBefore) {
-        resp.status(400).json({ message: "invalid number of url params" })
+        resp.status(400).json({ message: "bad url params" })
         return
     }
     const parsedCourseId = parseInt(courseId, 10)
     const parsedPage = parseInt(page, 10)
     const parsedTimeCutoff = parseInt(onlyLoadBefore, 10)
     if (![parsedCourseId, parsedPage, parsedTimeCutoff].every(
-        parsedQueryParam => Number.isInteger(parsedQueryParam)
-    )) {
-        resp.status(400).json({ message: "bad url - non numeric params" })
+        parsedQueryParam => Number.isInteger(parsedQueryParam))) {
+        resp.status(400).json({ message: "bad url params" })
         return
     }
     if (parsedPage < 1 || parsedCourseId < 1) {
-        resp.status(400).json({ message: "bad url - invalid numeric params" })
+        resp.status(400).json({ message: "bad url params" })
         return
     }
     const { user_id: userId } = req.session.user
@@ -39,7 +40,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
 
 
-    // retrieve info about pageth-25 most recent posts from db
+    // retrieve info about page-th 25 most recent posts from db
     let paginatedPostsInfoQuery
     try {
         const cutoffTimestamp = new Date(parsedTimeCutoff)
@@ -53,8 +54,8 @@ export default withIronSessionApiRoute(async function(req, resp) {
             bigPaginatedCourseInfoQueryText, paginatedPostsInfoQueryParams)
     }
     catch (error) {
-        console.error(error)
         resp.status(500).json({ message: "internal server error" })
+        return
     }
     
 
@@ -71,6 +72,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
     // send processed post infos to client along with next api page
     resp.status(200).json({ nextPage, posts })
+
 }, sessionOptions)
 
 

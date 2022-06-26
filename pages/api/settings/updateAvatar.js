@@ -27,7 +27,6 @@ export default withIronSessionApiRoute(async function(req, resp) {
         await query(newAvatarQueryText, newAvatarQueryParams)
     }
     catch (error) {
-        console.error(error)
         resp.status(500).json({ message: "internal server error" })
         return
     }
@@ -42,7 +41,6 @@ export default withIronSessionApiRoute(async function(req, resp) {
         await req.session.save()
     }
     catch (error) {
-        console.error(error)
         resp.status(500).json({ message: "internal server error" })
         return
     }

@@ -7,9 +7,12 @@ import {
     genMentionNotifsInDb, parseForMentionTokens 
 } from "../../../../../../lib/mention"
 
+
 const THREAD_ID_TOKEN_LENGTH = 5
 
+
 export default withIronSessionApiRoute(async function(req, resp) {
+    // req guard
     if (req.method !== 'POST') {
         resp.status(405).json({ message: "invalid method" })
         return
@@ -22,11 +25,17 @@ export default withIronSessionApiRoute(async function(req, resp) {
         resp.status(400).json({ message: "supplied params invalid" })
         return
     }
+
+
     const {
         post, ancestorComment, threadId, editContent,
         displayContent, createdAt, anonymous
     } = req.body
     const userId = req.session.user.user_id
+
+
+    // insert the new comment into the db, generating relevant notifications
+    // on successful comment insert
     let insertCommentQuery, insertFailure, client
     try {
         client = await getClientFromPool()
@@ -60,16 +69,15 @@ export default withIronSessionApiRoute(async function(req, resp) {
         }
     }
     catch (error) {
-        console.error(error)
         insertFailure = true
+        resp.status(500).json({ message: "internal server error" })
     }
     finally {
         await releaseClient(client)
     }
-    if (insertFailure) {
-        resp.status(500).json({ message: "internal server error" })
-        return
-    }
+    if (insertFailure) return
+
+
 
     const row = insertCommentQuery.rows[0]
     const { 
@@ -89,6 +97,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
     resp.status(200).json({ newCommentInfo })
 
 }, sessionOptions)
+
 
 const invalidParams = (reqBody) => {
     const {
@@ -115,6 +124,7 @@ const invalidParams = (reqBody) => {
     if (typeof(anonymous) !== 'boolean') return true
 }
 
+
 const genWatchNotifsQueryArgs = (watchers, genCommentId, createdAt) => {
     const tokens = [
         `INSERT INTO notification 
@@ -129,7 +139,8 @@ const genWatchNotifsQueryArgs = (watchers, genCommentId, createdAt) => {
     return [tokens.join(''), params]
 }
 
-    const genWatchNotifsInDb = async (client, postId, commentId, createdAt) => {
+
+const genWatchNotifsInDb = async (client, postId, commentId, createdAt) => {
     const getWatchNotifPeopleQueryText = `
         SELECT watcher FROM post_watch WHERE post = $1;`
     const watchersQuery = await clientQuery(
@@ -139,6 +150,7 @@ const genWatchNotifsQueryArgs = (watchers, genCommentId, createdAt) => {
 
     await clientQuery(client, ...genWatchNotifsQueryArgs(watcherIds, commentId, createdAt))
 }
+
 
 const genUserPostActivityNotifInDb = (
 async (client, commentId, postId, createdAt) => {
@@ -152,6 +164,7 @@ async (client, commentId, postId, createdAt) => {
     await clientQuery(client, genNotifQueryText, 
         [postAuthorId, true, commentId, createdAt])
 })
+
 
 const genCommentReplyNotifInDb = (
 async (client, ancestorCommentId, replyThreadId, genCommentId, createdAt) => {

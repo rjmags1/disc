@@ -15,6 +15,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
 
 
+    // retrieve course information from the database
     const { courseId } = req.query
     let courseQueryResult
     try {
@@ -50,6 +51,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
 
 
+    // ensure post categories for the course have correct format
     const { 
         course_id, year, term_name, name, code, section, categories 
     } = courseQueryResult.rows[0]

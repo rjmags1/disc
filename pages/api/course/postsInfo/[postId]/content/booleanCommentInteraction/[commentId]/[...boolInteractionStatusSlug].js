@@ -6,10 +6,11 @@ import { withIronSessionApiRoute } from 'iron-session/next'
 
 const BOOLEAN_COMMENT_INTERACTIONS = [
     "like", "delete", "endorse", "answer", "resolve"]
-
 const STATUSES = ["true", "false"]
 
+
 export default withIronSessionApiRoute(async function(req, resp) {
+    // req guard
     if (req.method !== 'PUT') {
         resp.status(405).json({ message: "invalid method" })
         return
@@ -33,6 +34,10 @@ export default withIronSessionApiRoute(async function(req, resp) {
         resp.status(400).json({ message: "bad url params" })
         return
     }
+
+
+
+    // determine which queries to user based on interaction type
     let checkQueryText, insertQueryText, deleteQueryText
     let updateQueryText, postUpdateQueryText 
     let checkUnresolvePostQueryText, checkUnanswerPostQueryText
@@ -73,11 +78,11 @@ export default withIronSessionApiRoute(async function(req, resp) {
 
     let client, queryFailure, shouldUpdatePost
     try {
+        // checkout a client because we may need to perform multiple queries
         client = await getClientFromPool()
         const needCheck = !!checkQueryText
-        if (needCheck) { 
-            // we are dealing w/ tables where row presence represent 
-            // interaction on status (ie, a liked post has a row with
+        if (needCheck) { // we are dealing w/ tables where row presence 
+            // represent interaction on status (ie, a liked post has a row with
             // liker and post in post_like db relation)
             const checkResult = await clientQuery(client, checkQueryText, params)
             const rowAlreadyPresent = checkResult.rows.length > 0
@@ -92,9 +97,16 @@ export default withIronSessionApiRoute(async function(req, resp) {
             }
         }
         else { // interaction status represented by boolean col in post table
-            const mayAffectPostInfo = (
+
+            // always update the relevant comment table
+            await clientQuery(client, updateQueryText, params) 
+
+            const mayAffectPostInfo = ( // may need to mark post as resolved
+                // or answered if this is the first comment on the post
+                // which the author has marked as resolving or answered, 
+                // or if this was the only comment that was resolving/an answer
+                // and the user unmarked it as such
                 boolInteraction === "resolve" || boolInteraction === "answer")
-            await clientQuery(client, updateQueryText, params)
             if (mayAffectPostInfo) {
                 shouldUpdatePost = true
                 const shouldUpdatePostQuery = (boolInteraction === "resolve" ?

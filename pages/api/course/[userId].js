@@ -2,6 +2,15 @@ import { query } from '../../../db/index'
 import { sessionOptions } from '../../../lib/session'
 import { withIronSessionApiRoute } from 'iron-session/next'
 
+const SEASON_DISPLAY_ORDER = {
+    "Fall": 1,
+    "Summer": 2,
+    "Spring": 3,
+    "Winter": 4
+} 
+
+
+
 export default withIronSessionApiRoute(async function(req, resp) {
     // req guard
     if (req.method !== 'GET') {
@@ -14,11 +23,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
     }
     const parsed = parseInt(req.query.userId, 10)
     if (parsed !== req.session.user.user_id) {
-        // userId in query should always come from 
-        // session cookie via useUser hook in normal app usage. if not, 
-        // ie the session cookie user_id doesnt match userId in body,
-        // someone may be trying to maliciously view someone elses info
-        resp.status(400).json({ message: "dont be malicious" })
+        resp.status(400).json({ message: "bad url param" })
         return
     }
 
@@ -51,7 +56,6 @@ export default withIronSessionApiRoute(async function(req, resp) {
         coursesQueryResult = await query(coursesQueryText, coursesQueryParams)
     }
     catch (error) {
-        console.error(error)
         resp.status(500).json({ message: "internal server error" })
         return
     }
@@ -85,25 +89,6 @@ export default withIronSessionApiRoute(async function(req, resp) {
     // year w/ tie break on term.name (aka season) alphabetical order,
     // we're not done yet. need to tie break on desc season order!
     // ie, want client to get the most recent term at the top of their response
-    const seasonPriority = {
-        "Fall": 1,
-        "Summer": 2,
-        "Spring": 3,
-        "Winter": 4
-    }
-    const termCompare = (term1, term2) => {
-        term1 = Object.keys(term1)[0], term2 = Object.keys(term2)[0]
-        if (term1 === term2) return 0 // js sort expects 0 to preserve order
-
-        let [season1, year1] = term1.split(' ')
-        let [season2, year2] = term2.split(' ')
-        year1 = parseInt(year1), year2 = parseInt(year2)
-
-        if (year1 === year2) {
-            return seasonPriority[season1] - seasonPriority[season2]
-        }
-        return year2 - year1
-    }
     terms.sort(termCompare)
 
 
@@ -112,3 +97,18 @@ export default withIronSessionApiRoute(async function(req, resp) {
     resp.status(200).json({ terms })
 
 }, sessionOptions)
+
+
+const termCompare = (term1, term2) => {
+    term1 = Object.keys(term1)[0], term2 = Object.keys(term2)[0]
+    if (term1 === term2) return 0 // js sort expects 0 to preserve order
+
+    let [season1, year1] = term1.split(' ')
+    let [season2, year2] = term2.split(' ')
+    year1 = parseInt(year1), year2 = parseInt(year2)
+
+    if (year1 === year2) {
+        return SEASON_DISPLAY_ORDER[season1] - SEASON_DISPLAY_ORDER[season2]
+    }
+    return year2 - year1
+}

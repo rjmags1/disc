@@ -2,7 +2,6 @@ import { unsealData } from 'iron-session'
 import { withIronSessionApiRoute } from 'iron-session/next'
 import { sessionOptions } from '../../../lib/session'
 import { query } from '../../../db/index'
-import { responseSymbol } from 'next/dist/server/web/spec-compliant/fetch-event'
 
 export default withIronSessionApiRoute(async function(req, resp) {
     // req guard

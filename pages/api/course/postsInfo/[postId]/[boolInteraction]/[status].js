@@ -9,7 +9,9 @@ const BOOLEAN_POST_INTERACTIONS = [
 
 const STATUSES = ["true", "false"]
 
+
 export default withIronSessionApiRoute(async function(req, resp) {
+    // req guard
     if (req.method !== 'PUT') {
         resp.status(405).json({ message: "invalid method" })
         return
@@ -28,6 +30,7 @@ export default withIronSessionApiRoute(async function(req, resp) {
     }
 
 
+    // determine which query/ies to use based on interaction type
     let checkQueryText, insertQueryText, deleteQueryText, updateQueryText
     let params = [parsedPostId, userId]
     if (boolInteraction === "like") {
@@ -57,13 +60,14 @@ export default withIronSessionApiRoute(async function(req, resp) {
         params = [postId]
     }
 
+
     let client, queryFailure
     try {
+        // checkout a client from the pool in case we need to do multiple queries
         client = await getClientFromPool()
         const needCheck = !!checkQueryText
-        if (needCheck) { 
-            // we are dealing w/ tables where row presence represent 
-            // interaction on status (ie, a liked post has a row with
+        if (needCheck) { // we are dealing w/ tables where row presence 
+            // represent interaction on status (ie, a liked post has a row with
             // liker and post in post_like db relation)
             const checkResult = await clientQuery(client, checkQueryText, params)
             const rowAlreadyPresent = checkResult.rows.length > 0

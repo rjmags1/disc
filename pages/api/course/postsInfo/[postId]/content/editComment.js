@@ -7,7 +7,10 @@ import {
     parseForMentionTokens, genMentionNotifsInDb 
 } from "../../../../../../lib/mention"
 
+
+
 export default withIronSessionApiRoute(async function(req, resp) {
+    // req guard
     if (req.method !== 'PUT') {
         resp.status(405).json({ message: "invalid method" })
         return
@@ -22,9 +25,14 @@ export default withIronSessionApiRoute(async function(req, resp) {
         return
     }
 
+    
+    // update the relevant comment record in the db and search
+    // for any mentions, generating mention notifs if any mentions found
     let editCommentQuery, editFailure, client
     try {
+        // checkout a client, may need to perform multiple queries
         client = await getClientFromPool()
+
         const editCommentQueryText = `
             UPDATE comment 
             SET edit_content = $1, display_content = $2
@@ -42,17 +50,14 @@ export default withIronSessionApiRoute(async function(req, resp) {
     }
     catch (error) {
         editFailure = true
-        console.error(error)
+        resp.status(500).json({ message: "internal server error" })
     }
     finally {
         await releaseClient(client)
     }
-    if (editFailure) {
-        resp.status(500).json({ message: "internal server error" })
-        return
-    }
+    if (editFailure) return
 
-    console.log(editFailure)
+    
     const editedRow = editCommentQuery.rows[0]
     const editedCommentInfo = { 
         commentId: editedRow.comment_id, 

@@ -3,7 +3,9 @@ import { withIronSessionApiRoute } from "iron-session/next"
 import { fixNodePgUTCTimeInterpretation } from "../../../../../../../lib/time"
 import { query } from '../../../../../../../db/index'
 
+
 const COMMENTS_PER_PAGE = 50
+
 
 export default withIronSessionApiRoute(async function(req, resp) {
     // req guard
@@ -22,13 +24,13 @@ export default withIronSessionApiRoute(async function(req, resp) {
         return
     }
     const [ancestorId, page, threadOffset] = slug
-    console.log(ancestorId, page, threadOffset)
-
     const parsedAncestorId = parseInt(ancestorId, 10)
     const parsedPage = parseInt(page, 10)
     const splitThreadOffset = threadOffset.split(".")
     if ([parsedAncestorId, parsedPage].some(param => !param || param < 1)
         || !splitThreadOffset.length || splitThreadOffset.some(
+            // all threadId tokens should be period delimited and represent
+            // a zero padded integer of length 5
             token => !parseInt(token, 10) || !(token.length === 5))) {
 
         resp.status(400).json({ message: "bad url params" })
@@ -36,6 +38,8 @@ export default withIronSessionApiRoute(async function(req, resp) {
     }
 
 
+    // fetch the requested page of replies to the ancestor comment in question
+    // ancestor comments are top level, direct replies to a post
     let replyQuery
     try {
         replyQuery = await query(
@@ -48,6 +52,8 @@ export default withIronSessionApiRoute(async function(req, resp) {
     }
 
 
+    // query asks for one extra row than needed to determine if there
+    // is another page to load after this one
     const nextPage = (
         replyQuery.rows.length > COMMENTS_PER_PAGE ? parsedPage + 1 : null)
     if (!!nextPage) replyQuery.rows.pop()
@@ -57,6 +63,8 @@ export default withIronSessionApiRoute(async function(req, resp) {
     resp.status(200).json({ replies, nextPage })
 
 }, sessionOptions)
+
+
 
 const processRows = (rows, userId) => rows.map(row => ({
     commentId: row.comment_id,

@@ -4,7 +4,10 @@ import {
 import { sessionOptions } from '../../../lib/session'
 import { withIronSessionApiRoute } from 'iron-session/next'
 
+
+
 export default withIronSessionApiRoute(async function(req, resp) {
+    // req guard
     if (req.method !== 'GET') {
         resp.status(405).json({ message: "invalid method" })
         return
@@ -21,8 +24,12 @@ export default withIronSessionApiRoute(async function(req, resp) {
             message: "invalid after timestamp in request url" })
         return
     }
-    const afterDate = new Date(parsedAfterTimestamp)
+    
 
+
+    // retrieve notifications after the requested timestamp and get any
+    // relevant info about that notification from post, comment, etc. tables
+    const afterDate = new Date(parsedAfterTimestamp)
     let client, notifs = []
     let queryFailure = false
     try {
@@ -46,6 +53,9 @@ export default withIronSessionApiRoute(async function(req, resp) {
         return
     }
 
+
+    // don't respond with notifications where user is author of post or
+    // comment that generated the notification
     const filteredNotifs = notifs.filter(n => n.notifGenAuthor !== userId)
     resp.status(200).json({ notifications: filteredNotifs })
 
