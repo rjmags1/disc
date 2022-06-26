@@ -114,10 +114,9 @@ const handleSuccessfulEdit = (editedPostInfo, setContent, content, initialLoadTi
         editContent: newEditContent,
         displayContent: newDisplayContent
     }
-    const specialPost = editedPostInfo.isAnnouncement || editedPostInfo.pinned
     // update the content (update the actual edited post content) displayed to user
     // and trigger a revalidation of the swr cache key pointing to the edited post
-    setContent(specialPost ? editedPostInfo : editedPostInfo.postInfo)
+    setContent(editedPostInfo)
     const { postId, authorId } = editedPostInfo
     mutate(`/api/course/postsInfo/${ postId }/content/postAndTopLevelComments/${ authorId }/1/${ initialLoadTime }`)
 }
