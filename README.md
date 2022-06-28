@@ -27,16 +27,18 @@ If you are familiar with Docker you may prefer to setup a Postgres instance in a
 
 4. Setup the .env.local file for running disc on your localhost. It should
 look something like this:
-> PGHOST=localhost
-> PGUSER=postgres
-> PGDATABASE=disc
-> PGPASSWORD=postgres
-> PGPORT=5432
-> SECRET_COOKIE_PASSWORD=(random 32 char string)
-> DOMAIN_URL=http://localhost:3000
-> ADMIN_F_NAME=(your first name)
-> ADMIN_L_NAME=(your last name)
-> ADMIN_EMAIL=(your email)
+```
+PGHOST=localhost
+PGUSER=postgres
+PGDATABASE=disc
+PGPASSWORD=postgres
+PGPORT=5432
+SECRET_COOKIE_PASSWORD=(random 32 char string)
+DOMAIN_URL=http://localhost:3000
+ADMIN_F_NAME=(your first name)
+ADMIN_L_NAME=(your last name)
+ADMIN_EMAIL=(your email)
+```
 To use any of the email functionality in disc, you will need to
 add any relevant smtp provider environment variables here as well, and alter
 transporter details in the sendEmail function in lib/email.js. It will probably
@@ -49,14 +51,14 @@ and running the init script:
 cd db
 ./init_db.sh
 ```
-Note that I use zsh, if you are using bash or another shell you may need to 
-change the shebang at the top of the init_db script. You can remove all sample
-data by running the destroy_db script. This is useful in case any unforeseen
-errors occur while attempting to get the project running and sample data gen
-fails before completing. 
+    Note that I use zsh, if you are using bash or another shell you may need to 
+    change the shebang at the top of the init_db script. You can remove all sample
+    data by running the destroy_db script. This is useful in case any unforeseen
+    errors occur while attempting to get the project running and sample data gen
+    fails before completing. 
 
-If you are on Windows, you will need to manually run the Windows equivalent of
-all of the commands in the init_db script to populate the database.
+    If you are on Windows, you will need to manually run the Windows equivalent of
+    all of the commands in the init_db script to populate the database.
 
 6. If all previous steps went ok, you're ready to fire up the localhost server. Navigate to the root of the project on the command line and run
 ```npm run dev```
