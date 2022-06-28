@@ -46,30 +46,28 @@ help to consult the nodemailer docs (https://nodemailer.com/smtp/).
 
 5. If you are on Linux or MacOS, you can fill the empty database you created
 with sample data by navigating to the db folder from the root of the project 
-and running the init script:
+and running the init script. Note that I use zsh, if you are using bash or another shell you may need to 
+change the shebang at the top of the init_db script. You can remove all sample
+data by running the destroy_db script. This is useful in case any unforeseen
+errors occur while attempting to get the project running and sample data gen
+fails before completing. If you are on Windows, you will need to manually run the Windows equivalent of
+all of the commands in the init_db script to populate the database.
 ```
 cd db
 ./init_db.sh
 ```
-    Note that I use zsh, if you are using bash or another shell you may need to 
-    change the shebang at the top of the init_db script. You can remove all sample
-    data by running the destroy_db script. This is useful in case any unforeseen
-    errors occur while attempting to get the project running and sample data gen
-    fails before completing. 
 
-    If you are on Windows, you will need to manually run the Windows equivalent of
-    all of the commands in the init_db script to populate the database.
 
 6. If all previous steps went ok, you're ready to fire up the localhost server. Navigate to the root of the project on the command line and run
 ```npm run dev```
 Visit http://localhost:3000 in your browser and you'll be redirected to the login
 page, where you can sign in with the following credentials:
-- Organization: Hogwarts
-- Email: harry-potter@hogwarts.edu
-- Password: harryspassword
-All other accounts, including 'yours' (the admin account) can be used to sign in
-as well, using the same organization but different emails and passwords. All student emails have the format {firstName}-{lastName}@hogwarts.edu and passwords
-are {firstName}spassword. Instructor emails are just firstName@hogwarts.edu.
-For certain accounts you may need to capitalize the first letter of the password.
-You can take a look at the genPersonEmail script in the db folder if you want
-to see exactly how sample user credentials get created.
+    - Organization: Hogwarts
+    - Email: harry-potter@hogwarts.edu
+    - Password: harryspassword
+    All other accounts, including 'yours' (the admin account) can be used to sign in
+    as well, using the same organization but different emails and passwords. All student emails have the format {firstName}-{lastName}@hogwarts.edu and passwords
+    are {firstName}spassword. Instructor emails are just firstName@hogwarts.edu.
+    For certain accounts you may need to capitalize the first letter of the password.
+    You can take a look at the genPersonEmail script in the db folder if you want
+    to see exactly how sample user credentials get created.
