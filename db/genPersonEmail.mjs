@@ -12,7 +12,7 @@ const genData = async () => {
     const admin = [ // me
         `${process.env.ADMIN_F_NAME}`, `${process.env.ADMIN_L_NAME}`,
         "TRUE", "TRUE", "TRUE",
-        await createHash("rjspassword"),
+        await createHash(`${process.env.ADMIN_F_NAME}spassword`),
         `${process.env.ADMIN_EMAIL}`
     ]
 
