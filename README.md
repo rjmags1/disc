@@ -39,10 +39,10 @@ ADMIN_F_NAME=(your first name)
 ADMIN_L_NAME=(your last name)
 ADMIN_EMAIL=(your email)
 ```
-    - To use any of the email functionality in disc, you will need to
-    add any relevant smtp provider environment variables here as well, and alter
-    transporter details in the sendEmail function in lib/email.js. It will probably
-    help to consult the nodemailer docs (https://nodemailer.com/smtp/).
+- To use any of the email functionality in disc, you will need to
+add any relevant smtp provider environment variables here as well, and alter
+transporter details in the sendEmail function in lib/email.js. It will probably
+help to consult the nodemailer docs (https://nodemailer.com/smtp/).
 
 5. If you are on Linux or MacOS, you can fill the empty database you created
 with sample data by navigating to the db folder from the root of the project 
