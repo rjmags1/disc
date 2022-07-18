@@ -6,7 +6,7 @@ database schema.
 
 
 ## Video demo
-https://youtu.be/FXNdLwrywCc
+https://youtu.be/wQ6hk__xTK0
 
 
 
