@@ -57,14 +57,12 @@ export default withIronSessionApiRoute(async function(req, resp) {
                 person.is_admin,
                 person.is_staff,
                 person.is_instructor,
-                person.avatar_url,
+                avatar_url.avatar_url,
                 person.password_hash,
                 email.email as primary_email
-            FROM person JOIN email ON person.user_id = email.person
-            WHERE (
-                SELECT primary_email FROM person 
-                WHERE person.user_id = $1
-            ) = email.email_id;`
+            FROM (SELECT * FROM person WHERE user_id = $1) as person
+            JOIN email ON person.user_id = email.person
+            JOIN avatar_url ON person.avatar_url = avatar_url.avatar_url_id;`
         const params = [userId]
         userQueryResult = await query(queryText, params)
     }
