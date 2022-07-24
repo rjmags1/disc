@@ -11,9 +11,16 @@ https://youtu.be/wQ6hk__xTK0
 
 
 ## Run it locally
-1. Clone the project onto your machine using:
-```git clone https://github.com/rjmags1/disc.git``` . 
+1. Setup the project on your machine.
 
+    -Clone the project onto your machine using:
+    ```
+    git clone https://github.com/rjmags1/disc.git
+    ``` 
+    -Install project dependencies in package.json:
+    ```
+    npm i
+    ```
 
 
 2. Make sure you have Node, PostgresQL and the psql client installed on your 
@@ -57,6 +64,8 @@ help to consult the nodemailer docs (https://nodemailer.com/smtp/).
 5. If you are on Linux or MacOS, you can fill the empty database you created
 with sample data by navigating to the db folder from the root of the project 
 and running the init script.
+NOTE: Before running the init script for the first time, be sure to uncomment
+the python script. 
 ```
 cd db
 ./init_db.sh
