@@ -13,11 +13,11 @@ https://youtu.be/wQ6hk__xTK0
 ## Run it locally
 1. Setup the project on your machine.
 
-    -Clone the project onto your machine using:
+    - Clone the project onto your machine using:
     ```
     git clone https://github.com/rjmags1/disc.git
     ``` 
-    -Install project dependencies in package.json:
+    - Install project dependencies in package.json:
     ```
     npm i
     ```
