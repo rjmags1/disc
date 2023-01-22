@@ -70,8 +70,7 @@ the python script.
 cd db
 ./init_db.sh
 ```
-- Note that I use zsh, if you are using bash or another shell you may need to 
-change the shebang at the top of the init_db script. You can remove all sample
+- You can remove all sample
 data by running the destroy_db script. This is useful in case any unforeseen
 errors occur while attempting to get the project running and sample data gen
 fails before completing. If you are on Windows, you will need to manually run the Windows equivalent of
